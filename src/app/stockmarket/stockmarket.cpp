@@ -135,13 +135,6 @@ static void stockmarket_process(AppController *sys,
     delay(300);
 }
 
-static void stockmarket_background_task(AppController *sys,
-                                        const ImuAction *act_info)
-{
-    // 本函数为后台任务，主控制器会间隔一分钟调用此函数
-    // 本函数尽量只调用"常驻数据",其他变量可能会因为生命周期的缘故已经释放
-}
-
 static int stockmarket_exit_callback(void *param)
 {
     stockmarket_gui_del();
@@ -288,5 +281,5 @@ static void stockmarket_message_handle(const char *from, const char *to,
 }
 
 APP_OBJ stockmarket_app = {STOCK_APP_NAME, &app_stockmarket, "", stockmarket_init,
-                           stockmarket_process, stockmarket_background_task,
+                           stockmarket_process,
                            stockmarket_exit_callback, stockmarket_message_handle};

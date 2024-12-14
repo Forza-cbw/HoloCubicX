@@ -44,10 +44,7 @@ public:
     // 将APP注册到app_controller中
     int app_install(APP_OBJ *app,
                     APP_TYPE app_type = APP_TYPE_REAL_TIME);
-    // 将APP从app_controller中卸载（删除）
-    int app_uninstall(const APP_OBJ *app);
-    // 将APP的后台任务从任务队列中移除(自能通过APP退出的时候，移除自身的后台任务)
-    int remove_backgroud_task(void);
+
     int main_process(ImuAction *act_info);
     void app_exit(void); // 提供给app退出的系统调用
     // 消息发送
@@ -80,7 +77,7 @@ private:
     boolean m_wifi_status;            // 表示是wifi状态 true开启 false关闭
     unsigned long m_preWifiReqMillis; // 保存上一回请求的时间戳
     unsigned int app_num;
-    boolean app_exit_flag; // 表示是否退出APP应用
+    boolean app_running_flag; // 表示APP应用是否在运行
     int cur_app_index;     // 当前运行的APP下标
     int pre_app_index;     // 上一次运行的APP下标
 

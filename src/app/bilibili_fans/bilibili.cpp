@@ -149,13 +149,6 @@ static void bilibili_process(AppController *sys,
     delay(300);
 }
 
-static void bilibili_background_task(AppController *sys,
-                                     const ImuAction *act_info)
-{
-    // 本函数为后台任务，主控制器会间隔一分钟调用此函数
-    // 本函数尽量只调用"常驻数据",其他变量可能会因为生命周期的缘故已经释放
-}
-
 static int bilibili_exit_callback(void *param)
 {
     bilibili_gui_del();
@@ -262,5 +255,5 @@ static void bilibili_message_handle(const char *from, const char *to,
 }
 
 APP_OBJ bilibili_app = {BILI_APP_NAME, &app_bilibili, "", bilibili_init,
-                        bilibili_process, bilibili_background_task,
+                        bilibili_process,
                         bilibili_exit_callback, bilibili_message_handle};

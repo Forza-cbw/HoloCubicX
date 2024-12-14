@@ -107,13 +107,6 @@ static void LHLXW_process(AppController *sys,const ImuAction *action){
 
 }
 
-static void LHLXW_background_task(AppController *sys,
-                                 const ImuAction *act_info)
-{
-    // 本函数为后台任务，主控制器会间隔一分钟调用此函数
-    // 本函数尽量只调用"常驻数据",其他变量可能会因为生命周期的缘故已经释放
-}
-
 static int LHLXW_exit_callback(void *param)
 {
     log_d("LHLXW_exit_callback  out!");
@@ -132,5 +125,5 @@ static void LHLXW_message_handle(const char *from, const char *to,
 
 
 APP_OBJ LHLXW_app = {APP_NAME, &LHLXW_ico, "", LHLXW_init,
-                    LHLXW_process, LHLXW_background_task, LHLXW_exit_callback,
+                    LHLXW_process, LHLXW_exit_callback,
                     LHLXW_message_handle};

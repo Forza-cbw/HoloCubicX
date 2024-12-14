@@ -206,8 +206,8 @@ void showBoard(int *map)
 {
     for (int i = 0; i < SCALE_SIZE * SCALE_SIZE; i++)
     {
-        lv_img_set_src(img[i], getN(map[i]));
-        lv_obj_align(img[i], LV_ALIGN_TOP_LEFT, 8 + i % 4 * 58, 8 + i / 4 * 58);
+        lv_img_set_src(img[i], getN(map[i])); // 设置图片像素
+        lv_obj_align(img[i], LV_ALIGN_TOP_LEFT, 8 + i % 4 * 58, 8 + i / 4 * 58); // 设置图片位置
     }
 }
 

@@ -340,13 +340,6 @@ static void weather_process(AppController *sys,
     delay(300);
 }
 
-static void weather_background_task(AppController *sys,
-                                    const ImuAction *act_info)
-{
-    // 本函数为后台任务，主控制器会间隔一分钟调用此函数
-    // 本函数尽量只调用"常驻数据",其他变量可能会因为生命周期的缘故已经释放
-}
-
 static int weather_exit_callback(void *param)
 {
     weather_old_gui_del();
@@ -466,5 +459,5 @@ static void weather_message_handle(const char *from, const char *to,
 }
 
 APP_OBJ weather_old_app = {WEATHER_OLD_APP_NAME, &app_weather_old, "",
-                           weather_init, weather_process, weather_background_task,
+                           weather_init, weather_process,
                            weather_exit_callback, weather_message_handle};

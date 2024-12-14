@@ -15,10 +15,9 @@ void taskOne(void *parameter)
         //  lv_tick_inc(5); // todo
         delay(5);
     }
-    log_i("Ending task 1");
-    vTaskDelete(NULL);
 }
 
+// 自动刷新屏幕
 void taskTwo(void *parameter)
 {
     while (1)
@@ -27,18 +26,13 @@ void taskTwo(void *parameter)
         AIO_LVGL_OPERATE_LOCK(lv_task_handler();)
         vTaskDelay(5 / portTICK_PERIOD_MS);
     }
-    log_i("Ending lv_task_handler");
-    vTaskDelete(NULL);
 }
 
 GAME2048 game;
 
 struct Game2048AppRunData
 {
-    int Normal = 0;       // 记录移动的方向
-    int BornLocation = 0; // 记录新棋子的位置
-    int *pBoard;
-    int *moveRecord;
+//    int Normal = 0;       // 记录移动的方向
     BaseType_t xReturned_task_one = pdFALSE;
     TaskHandle_t xHandle_task_one = NULL;
     BaseType_t xReturned_task_two = pdFALSE;
@@ -56,8 +50,6 @@ static int game_2048_init(AppController *sys)
     // 初始化运行时参数
     run_data = (Game2048AppRunData *)calloc(1, sizeof(Game2048AppRunData));
     game.init();
-    run_data->pBoard = game.getBoard();
-    run_data->moveRecord = game.getMoveRecord();
 
     // run_data->xReturned_task_one = xTaskCreate(
     //     taskOne,                      /*任务函数*/
@@ -78,7 +70,7 @@ static int game_2048_init(AppController *sys)
     // 刷新棋盘显示
     int new1 = game.addRandom();
     int new2 = game.addRandom();
-    AIO_LVGL_OPERATE_LOCK(showBoard(run_data->pBoard);)
+    AIO_LVGL_OPERATE_LOCK(showBoard(game.getBoard());)
     // 棋子出生动画
     AIO_LVGL_OPERATE_LOCK(born(new1);)
     AIO_LVGL_OPERATE_LOCK(born(new2);)
@@ -102,9 +94,9 @@ static void game_2048_process(AppController *sys,
         game.moveRight();
         if (game.comparePre() == 0)
         {
-            AIO_LVGL_OPERATE_LOCK(showAnim(run_data->moveRecord, 4);)
+            AIO_LVGL_OPERATE_LOCK(showAnim(game.getMoveRecord(), 4);)
             delay(700);
-            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), run_data->pBoard);)
+            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), game.getBoard());)
         }
     }
     else if (TURN_LEFT == act_info->active)
@@ -112,9 +104,9 @@ static void game_2048_process(AppController *sys,
         game.moveLeft();
         if (game.comparePre() == 0)
         {
-            AIO_LVGL_OPERATE_LOCK(showAnim(run_data->moveRecord, 3);)
+            AIO_LVGL_OPERATE_LOCK(showAnim(game.getMoveRecord(), 3);)
             delay(700);
-            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), run_data->pBoard);)
+            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), game.getBoard());)
         }
     }
     else if (UP == act_info->active)
@@ -122,9 +114,9 @@ static void game_2048_process(AppController *sys,
         game.moveUp();
         if (game.comparePre() == 0)
         {
-            AIO_LVGL_OPERATE_LOCK(showAnim(run_data->moveRecord, 1);)
+            AIO_LVGL_OPERATE_LOCK(showAnim(game.getMoveRecord(), 1);)
             delay(700);
-            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), run_data->pBoard);)
+            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), game.getBoard());)
         }
     }
     else if (DOWN == act_info->active)
@@ -132,9 +124,9 @@ static void game_2048_process(AppController *sys,
         game.moveDown();
         if (game.comparePre() == 0)
         {
-            AIO_LVGL_OPERATE_LOCK(showAnim(run_data->moveRecord, 2);)
+            AIO_LVGL_OPERATE_LOCK(showAnim(game.getMoveRecord(), 2);)
             delay(700);
-            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), run_data->pBoard);)
+            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), game.getBoard());)
         }
     }
 
@@ -153,21 +145,14 @@ static void game_2048_process(AppController *sys,
     delay(300);
 }
 
-static void game_2048_background_task(AppController *sys,
-                                      const ImuAction *act_info)
-{
-    // 本函数为后台任务，主控制器会间隔一分钟调用此函数
-    // 本函数尽量只调用"常驻数据",其他变量可能会因为生命周期的缘故已经释放
-}
-
 static int game_2048_exit_callback(void *param)
 {
     // 查杀任务
-    if (run_data->xReturned_task_one == pdPASS)
+    if (pdPASS == run_data->xReturned_task_one)
     {
         vTaskDelete(run_data->xHandle_task_one);
     }
-    if (run_data->xReturned_task_two == pdPASS)
+    if (pdPASS == run_data->xReturned_task_two)
     {
         vTaskDelete(run_data->xHandle_task_two);
     }
@@ -213,5 +198,5 @@ static void game_2048_message_handle(const char *from, const char *to,
 }
 
 APP_OBJ game_2048_app = {G2048_APP_NAME, &app_game_2048, "",
-                         game_2048_init, game_2048_process, game_2048_background_task,
+                         game_2048_init, game_2048_process,
                          game_2048_exit_callback, game_2048_message_handle};

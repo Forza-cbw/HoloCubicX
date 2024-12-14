@@ -12,7 +12,7 @@
 // 在开发新的app时，可以先把其他所有APP关闭，这样烧录速度也比较快
 
 // 范例APP 默认不开启
-#define APP_EXAMPLE_USE 1
+#define APP_EXAMPLE_USE 0
 #if APP_EXAMPLE_USE
 #include "app/example/example.h"
 #endif
@@ -30,7 +30,7 @@
 #endif
 
 // 文件管理器APP
-#define APP_FILE_MANAGER_USE 0
+#define APP_FILE_MANAGER_USE 1
 #if APP_FILE_MANAGER_USE
 #include "app/file_manager/file_manager.h"
 #endif
@@ -97,17 +97,9 @@
 #endif
 
 // 天气APP
-// 如flash空间不够，首选配置天气app二选一，腾出大量flash空间
 #define APP_WEATHER_USE 1
 #if APP_WEATHER_USE
 #include "app/weather/weather.h"
-#endif
-
-// 天气(旧)APP
-// 如flash空间不够，首选配置天气app二选一，腾出大量flash空间
-#define APP_WEATHER_OLD_USE 1
-#if APP_WEATHER_OLD_USE
-#include "app/weather_old/weather_old.h"
 #endif
 
 // 番茄时钟2.0 APP

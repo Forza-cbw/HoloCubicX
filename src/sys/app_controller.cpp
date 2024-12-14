@@ -27,7 +27,7 @@ AppController::AppController(const char *name)
 {
     strncpy(this->name, name, APP_CONTROLLER_NAME_LEN);
     app_num = 0;
-    app_exit_flag = 0;
+    app_running_flag = 0;
     cur_app_index = 0;
     pre_app_index = 0;
     // appList = new APP_OBJ[APP_MAX_NUM];
@@ -105,33 +105,17 @@ int AppController::app_install(APP_OBJ *app, APP_TYPE app_type)
     return 0; // 安装成功
 }
 
-// 将APP的后台任务从任务队列中移除(自能通过APP退出的时候，移除自身的后台任务)
-int AppController::remove_backgroud_task(void)
-{
-    return 0; // 安装成功
-}
-
-// 将APP从app_controller中卸载（删除）
-int AppController::app_uninstall(const APP_OBJ *app)
-{
-    // todo
-    return 0;
-}
-
 int AppController::app_auto_start()
 {
     // APP自启动
     int index = this->getAppIdxByName(sys_cfg.auto_start_app.c_str());
-    // int index = this->getAppIdxByName("Weather");
-    // int index = this->getAppIdxByName("WebServer");
-    // int index = this->getAppIdxByName("Media");
     if (index < 0)
     {
         // 没找到相关的APP
         return 0;
     }
     // 进入自启动的APP
-    app_exit_flag = 1; // 进入app, 如果已经在
+    app_running_flag = 1; // 进入app, 如果已经在
     cur_app_index = index;
     (*(appList[cur_app_index]->app_init))(this); // 执行APP初始化
     return 0;
@@ -157,7 +141,7 @@ int AppController::main_process(ImuAction *act_info)
         send_to(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_DISCONN, 0, NULL);
     }
 
-    if (0 == app_exit_flag)
+    if (0 == app_running_flag)
     {
         // 当前没有进入任何app
         lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
@@ -179,13 +163,14 @@ int AppController::main_process(ImuAction *act_info)
         }
         else if (ACTIVE_TYPE::GO_FORWORD == act_info->active)
         {
-            app_exit_flag = 1; // 进入app
+            app_running_flag = 1;
             if (NULL != appList[cur_app_index]->app_init)
             {
                 (*(appList[cur_app_index]->app_init))(this); // 执行APP初始化
             }
         }
 
+        // 如果是左右移动，则切换菜单显示的图标
         if (ACTIVE_TYPE::GO_FORWORD != act_info->active) // && UNKNOWN != act_info->active
         {
             app_control_display_scr(appList[cur_app_index]->app_image,
@@ -196,12 +181,14 @@ int AppController::main_process(ImuAction *act_info)
     }
     else
     {
-        app_control_display_scr(appList[cur_app_index]->app_image,
-                                appList[cur_app_index]->app_name,
-                                LV_SCR_LOAD_ANIM_NONE, false);
-        // 运行APP进程 等效于把控制权交给当前APP
+//        app_control_display_scr(appList[cur_app_index]->app_image,
+//                                appList[cur_app_index]->app_name,
+//                                LV_SCR_LOAD_ANIM_NONE, false);
+
+        // 运行APP主进程一次（主进程中不可以无限循环，主循环在HoloCubic_AIO.cpp中）
         (*(appList[cur_app_index]->main_process))(this, act_info);
     }
+    // 姿态值清空
     act_info->active = ACTIVE_TYPE::UNKNOWN;
     act_info->isValid = 0;
     return 0;
@@ -376,14 +363,14 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
     case APP_MESSAGE_MQTT_DATA:
     {
         log_i("APP_MESSAGE_MQTT_DATA");
-        if (app_exit_flag == 1 && cur_app_index != getAppIdxByName("Heartbeat")) // 在其他app中
+        if (app_running_flag == 1 && cur_app_index != getAppIdxByName("Heartbeat")) // 在其他app中
         {
-            app_exit_flag = 0;
+            app_running_flag = 0;
             (*(appList[cur_app_index]->exit_callback))(NULL); // 退出当前app
         }
-        if (app_exit_flag == 0)
+        if (app_running_flag == 0)
         {
-            app_exit_flag = 1; // 进入app, 如果已经在
+            app_running_flag = 1; // 进入app, 如果已经在
             cur_app_index = getAppIdxByName("Heartbeat");
             (*(getAppByName("Heartbeat")->app_init))(this); // 执行APP初始化
         }
@@ -398,7 +385,7 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
 
 void AppController::app_exit()
 {
-    app_exit_flag = 0; // 退出APP
+    app_running_flag = 0; // 退出APP
 
     // 清空该对象的所有请求
     for (std::list<EVENT_OBJ>::iterator event = eventList.begin(); event != eventList.end();)

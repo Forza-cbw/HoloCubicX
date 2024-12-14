@@ -23,9 +23,6 @@
 #include <esp32-hal-timer.h>
 
 
-
-static const char* TAG = "MyModule";
-
 bool isCheckAction = false;
 
 /*** Component objects **7*/
@@ -53,7 +50,7 @@ void actionCheckHandle(TimerHandle_t xTimer)
 
 void my_print(const char *buf)
 {
-    log_i("%s", buf);
+    Serial.printf("%s", buf);
     Serial.flush();
 }
 
@@ -61,37 +58,24 @@ void setup()
 {
     Serial.begin(115200);
 
-    log_i("\nAIO (All in one) version " AIO_VERSION "\n");
+    Serial.println(F("\nAIO (All in one) version " AIO_VERSION "\n"));
     Serial.flush();
     // MAC ID可用作芯片唯一标识
-    log_i("ChipID(EfuseMac): ");
-    log_i("%lld",ESP.getEfuseMac());
-    // flash运行模式
-    // log_i(F("FlashChipMode: "));
-    // log_i(ESP.getFlashChipMode());
-    // log_i(F("FlashChipMode value: FM_QIO = 0, FM_QOUT = 1, FM_DIO = 2, FM_DOUT = 3, FM_FAST_READ = 4, FM_SLOW_READ = 5, FM_UNKNOWN = 255"));
+    Serial.print(F("ChipID(EfuseMac): "));
+    Serial.println(ESP.getEfuseMac());
+    // 打印flash运行模式
+    // Serial.print(F("FlashChipMode: "));
+    // Serial.println(ESP.getFlashChipMode());
+    // Serial.println(F("FlashChipMode value: FM_QIO = 0, FM_QOUT = 1, FM_DIO = 2, FM_DOUT = 3, FM_FAST_READ = 4, FM_SLOW_READ = 5, FM_UNKNOWN = 255"));
 
     app_controller = new AppController(); // APP控制器
 
-    // 需要放在Setup里初始化
+    // 需要放在Setup里初始化SPIFFS（闪存文件系统）
     if (!SPIFFS.begin(true))
     {
-        log_i("SPIFFS Mount Failed");
+        Serial.println("SPIFFS Mount Failed");
         return;
     }
-
-#ifdef PEAK
-    pinMode(CONFIG_BAT_CHG_DET_PIN, INPUT);
-    pinMode(CONFIG_ENCODER_PUSH_PIN, INPUT_PULLUP);
-    /*电源使能保持*/
-    log_i("Power: Waiting...");
-    pinMode(CONFIG_POWER_EN_PIN, OUTPUT);
-    digitalWrite(CONFIG_POWER_EN_PIN, LOW);
-    digitalWrite(CONFIG_POWER_EN_PIN, HIGH);
-    log_i("Power: ON");
-    log_e("Power: ON");
-#endif
-    
 
     // config_read(NULL, &g_cfg);   // 旧的配置文件读取方式
     app_controller->read_config(&app_controller->sys_cfg);
@@ -106,34 +90,22 @@ void setup()
     rgb.init();
     rgb.setBrightness(0.05).setRGB(0, 64, 64);
 
-
     /*** Init ambient-light sensor ***/
     ambLight.init(ONE_TIME_H_RESOLUTION_MODE);
 
     /*** Init micro SD-Card ***/
     tf.init();
+
     lv_fs_fatfs_init();
 
-    
-
-    
-
+    // 某些app可能希望自己控制屏幕刷新（如2048），因此不能用后台刷新
     // Update display in parallel thread.
-    // BaseType_t taskLvglReturned = xTaskCreate(
-    //     TaskLvglUpdate,
-    //     "LvglThread",
-    //     8 * 1024,
-    //     nullptr,
-    //     TASK_LVGL_PRIORITY,
-    //     &handleTaskLvgl);
-    // if (taskLvglReturned != pdPASS)
-    // {
-    //     log_i("taskLvglReturned != pdPASS");
-    // }
-    // else
-    // {
-    //     log_i("taskLvglReturned == pdPASS");
-    // }
+//     BaseType_t taskLvglReturned = xTaskCreate(TaskLvglUpdate,
+//         "LvglThread",8 * 1024,
+//         nullptr,TASK_LVGL_PRIORITY,&handleTaskLvgl);
+//     if (taskLvglReturned != pdPASS) Serial.println("taskLvglReturned != pdPASS");
+//     else Serial.println("taskLvglReturned == pdPASS");
+
 
 #if LV_USE_LOG
     lv_log_register_print_cb(my_print);
@@ -141,12 +113,12 @@ void setup()
 
     app_controller->init();
 
-    // 将APP"安装"到controller里
+// 将APP"安装"到controller里
 #if APP_WEATHER_USE
     app_controller->app_install(&weather_app);
 #endif
-#if APP_WEATHER_OLD_USE
-    app_controller->app_install(&weather_old_app);
+#if APP_TOMATO_USE
+    app_controller->app_install(&tomato_app);
 #endif
 #if APP_PICTURE_USE
     app_controller->app_install(&picture_app);
@@ -175,6 +147,9 @@ void setup()
 #if APP_GAME_2048_USE
     app_controller->app_install(&game_2048_app);
 #endif
+#if APP_GAME_SNAKE_USE
+    app_controller->app_install(&game_snake_app);
+#endif
 #if APP_ANNIVERSARY_USE
     app_controller->app_install(&anniversary_app);
 #endif
@@ -187,15 +162,6 @@ void setup()
 #if APP_PC_RESOURCE_USE
     app_controller->app_install(&pc_resource_app);
 #endif
-
-#if APP_TOMATO_USE
-    app_controller->app_install(&tomato_app);
-#endif
-
-#if APP_GAME_SNAKE_USE
-    app_controller->app_install(&game_snake_app);
-#endif
-
 #if APP_LHLXW_USE
     app_controller->app_install(&LHLXW_app);
 #endif
@@ -212,7 +178,6 @@ void setup()
              app_controller->sys_cfg.auto_calibration_mpu,
              &app_controller->mpu_cfg); // 初始化比较耗时
 
-    
     /*** 以此作为MPU6050初始化完成的标志 ***/
     RgbConfig *rgb_cfg = &app_controller->rgb_cfg;
     // 初始化RGB灯 HSV色彩模式
@@ -222,47 +187,31 @@ void setup()
                             rgb_cfg->step_0, rgb_cfg->step_1, rgb_cfg->step_2,
                             rgb_cfg->min_brightness, rgb_cfg->max_brightness,
                             rgb_cfg->brightness_step, rgb_cfg->time};
-    // // 运行RGB任务
+    // 运行RGB任务
     set_rgb_and_run(&rgb_setting, RUN_MODE_TASK);
 
     // 先初始化一次动作数据 防空指针
     act_info = mpu.getAction();
-    // 定义一个mpu6050的动作检测定时器
+    // 定义一个mpu6050的动作检测定时器（每200ms将isCheckAction置为true）
     xTimerAction = xTimerCreate("Action Check",
                                 200 / portTICK_PERIOD_MS,
                                 pdTRUE, (void *)0, actionCheckHandle);
     xTimerStart(xTimerAction, 0);
-
-    
 }
 
+// 在cores/esp32/main.cpp 中启动为FreeRTOS task，优先级为1（最低）。
+// FreeRTOSConfig.h中宏configUSE_PREEMPTION为1，是抢占式调度器。同优先级时间片轮转，高优先级抢占。
+// ESP32-pico 双核
 void loop()
 {
+    screen.routine(); // 手动刷新屏幕
 
-    screen.routine();
-    
-
-    // ESP_LOGI(TAG, "out") ;
-
-#ifdef PEAK
-    if (!mpu.Encoder_GetIsPush())
-    {
-        log_i("mpu.Encoder_GetIsPush()1");
-        delay(1000);
-        if (!mpu.Encoder_GetIsPush())
-        {
-            log_i("mpu.Encoder_GetIsPush()2");
-            // 适配Peak的关机功能
-            digitalWrite(CONFIG_POWER_EN_PIN, LOW);
-        }
-    }
-#endif
     if (isCheckAction)
     {
         isCheckAction = false;
-        act_info = mpu.getAction();
+        act_info = mpu.getAction(); // 更新姿态
     }
     app_controller->main_process(act_info); // 运行当前进程
-    // log_i(ambLight.getLux() / 50.0);
+    // Serial.println(ambLight.getLux() / 50.0);
     // rgb.setBrightness(ambLight.getLux() / 500.0);
 }

@@ -228,14 +228,6 @@ static void pc_resource_process(AppController *sys, const ImuAction *act_info)
 }
 
 /**
- * @brief app后台任务
- */
-static void pc_resource_background_task(AppController *sys, const ImuAction *act_info)
-{
-    // null
-}
-
-/**
  * @brief app退出回调函数
  */
 static int pc_resource_exit_callback(void *param)
@@ -327,5 +319,5 @@ static void pc_resource_message_handle(const char *from, const char *to,
 }
 
 APP_OBJ pc_resource_app = {PC_RESOURCE_APP_NAME, &app_pc_resource, "",
-                           pc_resource_init, pc_resource_process, pc_resource_background_task,
+                           pc_resource_init, pc_resource_process,
                            pc_resource_exit_callback, pc_resource_message_handle};

@@ -88,23 +88,6 @@ static void game_snake_process(AppController *sys, const ImuAction *act_info)
     delay(SNAKE_SPEED);
 }
 
-static void game_snake_background_task(AppController *sys,
-                                       const ImuAction *act_info)
-{
-    // 本函数为后台任务，主控制器会间隔一分钟调用此函数
-    // 本函数尽量只调用"常驻数据",其他变量可能会因为生命周期的缘故已经释放
-
-    // 发送请求。如果是wifi相关的消息，当请求完成后自动会调用 game_snake_message_handle 函数
-    // sys->send_to(EXAMPLE_APP_NAME, CTRL_NAME,
-    //              APP_MESSAGE_WIFI_CONN, (void *)run_data->val1, NULL);
-
-    // 也可以移除自身的后台任务，放在本APP可控的地方最合适
-    // sys->remove_backgroud_task();
-
-    // 程序需要时可以适当加延时
-    // delay(300);
-}
-
 static int game_snake_exit_callback(void *param)
 {
     // 查杀任务
@@ -164,5 +147,5 @@ static void game_snake_message_handle(const char *from, const char *to,
 }
 
 APP_OBJ game_snake_app = {GAME_APP_NAME, &app_game_snake, "",
-                          game_snake_init, game_snake_process, game_snake_background_task,
+                          game_snake_init, game_snake_process,
                           game_snake_exit_callback, game_snake_message_handle};

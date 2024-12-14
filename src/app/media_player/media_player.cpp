@@ -267,13 +267,6 @@ static void media_player_process(AppController *sys,
     }
 }
 
-static void media_player_background_task(AppController *sys,
-                                         const ImuAction *act_info)
-{
-    // 本函数为后台任务，主控制器会间隔一分钟调用此函数
-    // 本函数尽量只调用"常驻数据",其他变量可能会因为生命周期的缘故已经释放
-}
-
 static int media_player_exit_callback(void *param)
 {
     // 结束播放
@@ -346,5 +339,5 @@ static void media_player_message_handle(const char *from, const char *to,
 }
 
 APP_OBJ media_app = {MEDIA_PLAYER_APP_NAME, &app_movie, "",
-                     media_player_init, media_player_process, media_player_background_task,
+                     media_player_init, media_player_process,
                      media_player_exit_callback, media_player_message_handle};

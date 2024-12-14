@@ -87,6 +87,7 @@ void display_app_scr_init(const void *src_img_path, const char *app_name)
     lv_scr_load_anim(app_scr, LV_SCR_LOAD_ANIM_NONE, 300, 300, false);
 }
 
+// 切换显示屏幕上的应用图标和名称，并使用 LVGL 动画实现屏幕切换的过渡效果
 void app_control_display_scr(const void *src_img, const char *app_name, lv_scr_load_anim_t anim_type, bool force)
 {
     // force为是否强制刷新页面 true为强制刷新

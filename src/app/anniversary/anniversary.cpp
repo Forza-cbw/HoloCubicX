@@ -300,13 +300,6 @@ static void anniversary_process(AppController *sys,
     delay(300);
 }
 
-static void anniversary_background_task(AppController *sys,
-                                        const ImuAction *act_info)
-{
-    // 本函数为后台任务，主控制器会间隔一分钟调用此函数
-    // 本函数尽量只调用"常驻数据",其他变量可能会因为生命周期的缘故已经释放
-}
-
 static int anniversary_exit_callback(void *param)
 {
     // 释放资源
@@ -407,5 +400,5 @@ static void anniversary_message_handle(const char *from, const char *to,
 }
 
 APP_OBJ anniversary_app = {ANNIVERSARY_APP_NAME, &app_anniversary, "Author Hu Qianjiang\nVersion 0.0.1\n",
-                           anniversary_init, anniversary_process, anniversary_background_task,
+                           anniversary_init, anniversary_process,
                            anniversary_exit_callback, anniversary_message_handle};
