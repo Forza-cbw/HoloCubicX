@@ -13,12 +13,8 @@
 #include <NTPClient.h>
 
 #define WEATHER_APP_NAME "Weather"
-#define WEATHER_NOW_API "https://www.yiketianqi.com/free/day?appid=%s&appsecret=%s&unescape=1&city=%s"
-// v1.yiketianqi.com/api?unescape=1&version=v61
 // 更新使用高德地图
 #define WEATHER_NOW_API_UPDATE "http://restapi.amap.com/v3/weather/weatherInfo?key=%s&city=%s&extensions=base"
-// String url = "http://restapi.amap.com/v3/weather/weatherInfo?key=" + apikey + "&city=" + citycode + "&extensions=base";
-// #define WEATHER_DALIY_API "https://www.yiketianqi.com/free/week?unescape=1&appid=%s&appsecret=%s&city=%s"
 #define WEATHER_DALIY_API "http://restapi.amap.com/v3/weather/weatherInfo?key=%s&city=%s&extensions=all"
 #define TIME_API "http://api.m.taobao.com/rest/api3.do?api=mtop.common.gettimestamp"
 #define WEATHER_PAGE_SIZE 2
@@ -34,7 +30,6 @@ const int   daylightOffset_sec = 0;       // 无需夏令时偏移
 WiFiUDP ntpUDP;
 // 创建NTP客户端
 NTPClient timeClient(ntpUDP, ntpServer, gmtOffset_sec, 60000); // 60秒同步一次
-#define USE_NTP //开启NTP时间获取
 bool isUdpInit = false;
 
 // 天气的持久化配置
@@ -77,10 +72,7 @@ static void read_config(WT_Config *cfg)
     if (size == 0)
     {
         // 默认值
-        // cfg->tianqi_url = "v1.yiketianqi.com/api?unescape=1&version=v61";
-        // cfg->tianqi_addr = "";
         cfg->CITY_CODE = "410305";
-        //cfg->WEATHER_API_KEY = "1da1fb77aa7e8edb38c0d15f8f6a7936";
         cfg->weatherUpdataInterval = 900000; // 天气更新的时间间隔900000(900s)
         cfg->timeUpdataInterval = 900000;    // 日期时钟更新的时间间隔900000(900s)
         write_config(cfg);
@@ -126,80 +118,6 @@ enum wea_event_Id
     UPDATE_NTP,
     UPDATE_DAILY
 };
-
-/*
-高德天气接口提供的天气
-https://lbs.amap.com/api/webservice/guide/tools/weather-code
-晴
-少云
-晴间多云
-多云
-阴
-有风
-平静
-微风
-和风
-清风
-强风/劲风
-疾风
-大风
-烈风
-风暴
-狂爆风
-飓风
-热带风暴
-霾
-中度霾
-重度霾
-严重霾
-阵雨
-雷阵雨
-雷阵雨并伴有冰雹
-小雨
-中雨
-大雨
-暴雨
-大暴雨
-特大暴雨
-强阵雨
-强雷阵雨
-极端降雨
-毛毛雨/细雨
-雨
-小雨-中雨
-中雨-大雨
-大雨-暴雨
-暴雨-大暴雨
-大暴雨-特大暴雨
-雨雪天气
-雨夹雪
-阵雨夹雪
-冻雨
-雪
-阵雪
-小雪
-中雪
-大雪
-暴雪
-小雪-中雪
-中雪-大雪
-大雪-暴雪
-浮尘
-扬沙
-沙尘暴
-强沙尘暴
-龙卷风
-雾
-浓雾
-强浓雾
-轻雾
-大雾
-特强浓雾
-热
-冷
-未知
-*/
-// std::map<String, int> weatherMap = {{"qin", 0}, {"yin", 1}, {"yu", 2}, {"yun", 3}, {"bingbao", 4}, {"wu", 5}, {"shachen", 6}, {"lei", 7}, {"xue", 8}};
 
 std::map<String, int> weatherMap = {
     {"晴", 0},
@@ -273,21 +191,6 @@ std::map<String, int> weatherMap = {
 
 };
 
-static void task_update(void *parameter); // 异步更新任务
-
-static int windLevelAnalyse(String str)
-{
-    int ret = 0;
-    for (char ch : str)
-    {
-        if (ch >= '0' && ch <= '9')
-        {
-            ret = ret * 10 + (ch - '0');
-        }
-    }
-    return ret;
-}
-
 static void get_weather(void)
 {
     if (WL_CONNECTED != WiFi.status())
@@ -303,8 +206,7 @@ static void get_weather(void)
     snprintf(api, 128, WEATHER_NOW_API_UPDATE,
              cfg_data.WEATHER_API_KEY.c_str(),
              cfg_data.CITY_CODE.c_str());
-    Serial.print("API = ");
-    Serial.println(api);
+    log_i("API = %s", api);
     http.begin(api);
 
     int httpCode = http.GET();
@@ -313,58 +215,9 @@ static void get_weather(void)
     deserializeJson(doc, payload);
     if (httpCode > 0)
     {
-        // // file found at server
-        // if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
-        // {
-        //     String payload = http.getString();
-        //     Serial.println(payload);
-        //     DynamicJsonDocument doc(1024);
-        //     deserializeJson(doc, payload);
-        //     JsonObject sk = doc.as<JsonObject>();
-        //     strcpy(run_data->wea.cityname, sk["city"].as<String>().c_str());
-        //     run_data->wea.weather_code = weatherMap[sk["wea_img"].as<String>()];
-        //     run_data->wea.temperature = sk["tem"].as<int>();
-
-        //     // 获取湿度
-        //     run_data->wea.humidity = 50;
-        //     char humidity[8] = {0};
-        //     strncpy(humidity, sk["humidity"].as<String>().c_str(), 8);
-        //     humidity[strlen(humidity) - 1] = 0; // 去除尾部的 % 号
-        //     run_data->wea.humidity = atoi(humidity);
-
-        //     run_data->wea.maxTemp = sk["tem1"].as<int>();
-        //     run_data->wea.minTemp = sk["tem2"].as<int>();
-        //     strcpy(run_data->wea.windDir, sk["win"].as<String>().c_str());
-        //     run_data->wea.windLevel = windLevelAnalyse(sk["win_speed"].as<String>());
-        //     run_data->wea.airQulity = airQulityLevel(sk["air"].as<int>());
-        // }
-
-        Serial.println(payload);
+        log_i("%s", payload.c_str());
         if (doc.containsKey("lives"))
         {
-            /*
-            {
-            "status": "1",
-            "count": "1",
-            "info": "OK",
-            "infocode": "10000",
-            "lives": [
-                {
-                    "province": "河南",
-                    "city": "涧西区",
-                    "adcode": "410305",
-                    "weather": "晴",
-                    "temperature": "19",
-                    "winddirection": "东北",
-                    "windpower": "≤3",
-                    "humidity": "38",
-                    "reporttime": "2024-03-21 18:30:05",
-                    "temperature_float": "19.0",
-                    "humidity_float": "38.0"
-                }
-            ]
-        }
-            */
             JsonObject weather_live = doc["lives"][0];
             // 获取城市区域中文
             strcpy(run_data->wea.cityname, weather_live["city"].as<String>().c_str());
@@ -374,39 +227,29 @@ static void get_weather(void)
             run_data->wea.humidity = weather_live["humidity"].as<int>();
             //天气情况
             run_data->wea.weather_code = weatherMap[weather_live["weather"].as<String>()];
-            //Serial.printf("wea.weather_code = %d", run_data->wea.weather_code);
+            //log_i("wea.weather_code = %d", run_data->wea.weather_code);
             strcpy(run_data->wea.weather, weather_live["weather"].as<String>().c_str());
             //风速
             strcpy(run_data->wea.windDir, weather_live["winddirection"].as<String>().c_str());
             strcpy(run_data->wea.windpower , weather_live["windpower"].as<String>().c_str());
-            Serial.printf("wea.windpower  = %s", run_data->wea.windpower);
+            log_i("wea.windpower  = %s", run_data->wea.windpower);
 
             //空气质量没有这个参数，只能用风速来粗略替换了
             run_data->wea.airQulity = airQulityLevel(run_data->wea.windpower);
 
-            // weather_info.city = weather_live["city"].as<String>();
-            // weather_info.weather = weather_live["weather"].as<String>();
-            // weather_info.winddirection = weather_live["winddirection"].as<String>();
-            // weather_info.windpower = weather_live["windpower"].as<String>();
-            // weather_info.temperature = weather_live["temperature"].as<String>();
-            // weather_info.humidity = weather_live["humidity"].as<String>();
-            // weather_info.animIndex = get_weather_anim(weather_info.weather, getDateTime().hour());
-            // weather_info.lastUpdate = millis();
-
-            Serial.println(" Get weather info OK\n");
+            log_i(" Get weather info OK");
         }
         else
         {
             // 返回值错误，记录
-            Serial.println("[APP] Get weather error,info");
+            log_i("[APP] Get weather error,info");
             String err_info = doc["info"];
-            Serial.print(err_info);
-            Serial.println("");
+            log_i("%s", err_info.c_str());
         }
     }
     else
     {
-        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+        log_e("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
     }
     http.end();
 }
@@ -421,7 +264,6 @@ static long long get_timestamp()
 
 static long long get_timestamp(String url)
 {
-#ifdef USE_NTP     //用ntp服务器获取时间
     if (WL_CONNECTED != WiFi.status())
         return 0;
 
@@ -429,75 +271,30 @@ static long long get_timestamp(String url)
     {
         // 初始化 NTP 客户端
         timeClient.begin();
-        Serial.println("timeClient.begin();");
+        log_i("timeClient.begin();");
     }
 
-    // while(1)
-    // {
-        // 更新 NTP 时间
-        timeClient.update();
-        // 获取当前时间戳
-        unsigned long long epochTime = timeClient.getEpochTime();
+    // 更新 NTP 时间
+    timeClient.update();
+    // 获取当前时间戳
+    unsigned long long epochTime = timeClient.getEpochTime();
 
-         // 将时间戳转换为本地时间（加上时区偏移）
-        unsigned long long localTime = epochTime + gmtOffset_sec;
-        Serial.print("本地时间戳 (UTC+8): ");
-        Serial.println(localTime);
+     // 将时间戳转换为本地时间（加上时区偏移）
+    unsigned long long localTime = epochTime + gmtOffset_sec;
+    log_i("本地时间戳 (UTC+8): %llu", localTime);
 
-        // 将本地时间转换为日期时间格式
-        time_t rawTime = localTime;
-        struct tm* timeinfo = localtime(&rawTime);
-        char buffer[80];
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
-        Serial.print("本地时间: ");
-        Serial.println(buffer);
+    // 将本地时间转换为日期时间格式
+    time_t rawTime = localTime;
+    struct tm* timeinfo = localtime(&rawTime);
+    char buffer[80];
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+    log_i("本地时间: %s", buffer);
 
-
-        run_data->preNetTimestamp = epochTime*1000 + run_data->errorNetTimestamp;   //秒的时间戳变ms的
-        run_data->preLocalTimestamp = GET_SYS_MILLIS();
-        Serial.print("run_data->preNetTimestamp=");
-        Serial.println(run_data->preNetTimestamp);
-
-    //     delay(1000);
-    // }
-    
+    run_data->preNetTimestamp = epochTime*1000 + run_data->errorNetTimestamp;   //秒的时间戳变ms的
+    run_data->preLocalTimestamp = GET_SYS_MILLIS();
+    log_i("run_data->preNetTimestamp=%lld", run_data->preNetTimestamp);
 
     return run_data->preNetTimestamp;
-#else       //用淘宝接口
-    if (WL_CONNECTED != WiFi.status())
-        return 0;
-
-    String time = "";
-    HTTPClient http;
-    http.setTimeout(1000);
-    http.begin(url);
-
-    int httpCode = http.GET();
-    if (httpCode > 0)
-    {
-        if (httpCode == HTTP_CODE_OK)
-        {
-            String payload = http.getString();
-            Serial.println(payload);
-            int time_index = (payload.indexOf("data")) + 12;
-            time = payload.substring(time_index, payload.length() - 3);
-            // 以网络时间戳为准
-            run_data->preNetTimestamp = atoll(time.c_str()) + run_data->errorNetTimestamp + TIMEZERO_OFFSIZE;
-            run_data->preLocalTimestamp = GET_SYS_MILLIS();
-        }
-    }
-    else
-    {
-        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
-        // 得不到网络时间戳时
-        run_data->preNetTimestamp = run_data->preNetTimestamp + (GET_SYS_MILLIS() - run_data->preLocalTimestamp);
-        run_data->preLocalTimestamp = GET_SYS_MILLIS();
-    }
-    http.end();
-
-    return run_data->preNetTimestamp;
-
-#endif
 }
 
 static void get_daliyWeather(short maxT[], short minT[])
@@ -511,8 +308,7 @@ static void get_daliyWeather(short maxT[], short minT[])
     snprintf(api, 128, WEATHER_DALIY_API,
              cfg_data.WEATHER_API_KEY.c_str(),
              cfg_data.CITY_CODE.c_str());
-    Serial.print("API = ");
-    Serial.println(api);
+    log_i("API = %s", api);
     http.begin(api);
 
     int httpCode = http.GET();
@@ -522,34 +318,25 @@ static void get_daliyWeather(short maxT[], short minT[])
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
         {
             String payload = http.getString();
-            Serial.println(payload);
+            log_i("%s", payload.c_str());
             DynamicJsonDocument doc2(4096);
             deserializeJson(doc2, payload);
-            // JsonObject sk = doc2.as<JsonObject>();
-            // for (int gDW_i = 0; gDW_i < 7; ++gDW_i)
-            // {
-            //     maxT[gDW_i] = sk["data"][gDW_i]["tem_day"].as<int>();
-            //     minT[gDW_i] = sk["data"][gDW_i]["tem_night"].as<int>();
-            // }
 
             if (doc2.containsKey("forecasts"))
             {
                 JsonObject weather_forecast = doc2["forecasts"][0];
                 for (int i = 0; i < 4; i++)
                 {
-                    // String weather = weather_forecast["casts"][i]["dayweather"].as<String>();
-                    // weather_cast[i].weather = get_weather_icon(weather);
-                    // weather_cast[i].date = weather_forecast["casts"][i]["date"].as<String>().substring(5);
                     maxT[i] = weather_forecast["casts"][i]["daytemp"].as<int>();
                     minT[i] = weather_forecast["casts"][i]["nighttemp"].as<int>();
                 }
-                Serial.println("Get weather cast OK\n");
+                log_i("Get weather cast OK");
             }
         }
     }
     else
     {
-        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+        log_e("[HTTP] GET... failed, error: %s", http.errorToString(httpCode).c_str());
     }
     http.end();
 }
@@ -564,7 +351,7 @@ static void UpdateTime_RTC(long long timestamp)
     t.minute = run_data->g_rtc.getMinute();
     t.second = run_data->g_rtc.getSecond();
     t.weekday = run_data->g_rtc.getDayofWeek();
-    // Serial.printf("time : %d-%d-%d\n",t.hour, t.minute, t.second);
+    // log_i("time : %d-%d-%d\n",t.hour, t.minute, t.second);
     display_time(t, LV_SCR_LOAD_ANIM_NONE);
 }
 
@@ -587,16 +374,6 @@ static int weather_init(AppController *sys)
     // 强制更新
     run_data->coactusUpdateFlag = 0x01;
     run_data->update_type = 0x00; // 表示什么也不需要更新
-
-    // 目前更新数据的任务栈大小5000够用，4000不够用
-    // 为了后期迭代新功能 当前设置为8000
-    // run_data->xReturned_task_task_update = xTaskCreate(
-    //     task_update,                          /*任务函数*/
-    //     "Task_update",                        /*带任务名称的字符串*/
-    //     8000,                                /*堆栈大小，单位为字节*/
-    //     NULL,                                 /*作为任务输入传递的参数*/
-    //     1,                                    /*任务的优先级*/
-    //     &run_data->xHandle_task_task_update); /*任务句柄*/
 
     return 0;
 }
@@ -683,42 +460,6 @@ static int weather_exit_callback(void *param)
     return 0;
 }
 
-// static void task_update(void *parameter)
-// {
-//     // 数据更新任务
-//     while (1)
-//     {
-//         if (run_data->update_type & UPDATE_WEATHER)
-//         {
-//             get_weather();
-//             if (run_data->clock_page == 0)
-//             {
-//                 display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
-//             }
-//             run_data->update_type &= (~UPDATE_WEATHER);
-//         }
-//         if (run_data->update_type & UPDATE_TIME)
-//         {
-//             long long timestamp = get_timestamp(TIME_API); // nowapi时间API
-//             if (run_data->clock_page == 0)
-//             {
-//                 UpdateTime_RTC(timestamp);
-//             }
-//             run_data->update_type &= (~UPDATE_TIME);
-//         }
-//         if (run_data->update_type & UPDATE_DALIY_WEATHER)
-//         {
-//             get_daliyWeather(run_data->wea.daily_max, run_data->wea.daily_min);
-//             if (run_data->clock_page == 1)
-//             {
-//                 display_curve(run_data->wea.daily_max, run_data->wea.daily_min, LV_SCR_LOAD_ANIM_NONE);
-//             }
-//             run_data->update_type &= (~UPDATE_DALIY_WEATHER);
-//         }
-//         vTaskDelay(2000 / portTICK_PERIOD_MS);
-//     }
-// }
-
 static void weather_message_handle(const char *from, const char *to,
                                    APP_MESSAGE_TYPE type, void *message,
                                    void *ext_info)
@@ -727,13 +468,13 @@ static void weather_message_handle(const char *from, const char *to,
     {
     case APP_MESSAGE_WIFI_CONN:
     {
-        Serial.println(F("----->weather_event_notification"));
+        log_i("----->weather_event_notification");
         int event_id = (int)message;
         switch (event_id)
         {
         case UPDATE_NOW:
         {
-            Serial.print(F("weather update.\n"));
+            log_i("weather update.");
             run_data->update_type |= UPDATE_WEATHER;
 
             get_weather();
@@ -745,7 +486,7 @@ static void weather_message_handle(const char *from, const char *to,
         break;
         case UPDATE_NTP:
         {
-            Serial.print(F("ntp update.\n"));
+            log_i("ntp update.");
             run_data->update_type |= UPDATE_TIME;
 
             long long timestamp = get_timestamp(TIME_API); // nowapi时间API
@@ -757,7 +498,7 @@ static void weather_message_handle(const char *from, const char *to,
         break;
         case UPDATE_DAILY:
         {
-            Serial.print(F("daliy update.\n"));
+            log_i("daliy update.");
             run_data->update_type |= UPDATE_DALIY_WEATHER;
 
             get_daliyWeather(run_data->wea.daily_max, run_data->wea.daily_min);

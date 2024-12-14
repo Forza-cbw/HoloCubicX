@@ -50,7 +50,7 @@ void actionCheckHandle(TimerHandle_t xTimer)
 
 void my_print(const char *buf)
 {
-    Serial.printf("%s", buf);
+    log_i("%s", buf);
     Serial.flush();
 }
 
@@ -58,22 +58,22 @@ void setup()
 {
     Serial.begin(115200);
 
-    Serial.println(F("\nAIO (All in one) version " AIO_VERSION "\n"));
+    log_i("\nAIO (All in one) version " AIO_VERSION "\n");
     Serial.flush();
     // MAC ID可用作芯片唯一标识
-    Serial.print(F("ChipID(EfuseMac): "));
-    Serial.println(ESP.getEfuseMac());
-    // 打印flash运行模式
-    // Serial.print(F("FlashChipMode: "));
-    // Serial.println(ESP.getFlashChipMode());
-    // Serial.println(F("FlashChipMode value: FM_QIO = 0, FM_QOUT = 1, FM_DIO = 2, FM_DOUT = 3, FM_FAST_READ = 4, FM_SLOW_READ = 5, FM_UNKNOWN = 255"));
+    log_i("ChipID(EfuseMac): ");
+    log_i("%lld",ESP.getEfuseMac());
+    // flash运行模式
+    // log_i(F("FlashChipMode: "));
+    // log_i(ESP.getFlashChipMode());
+    // log_i(F("FlashChipMode value: FM_QIO = 0, FM_QOUT = 1, FM_DIO = 2, FM_DOUT = 3, FM_FAST_READ = 4, FM_SLOW_READ = 5, FM_UNKNOWN = 255"));
 
     app_controller = new AppController(); // APP控制器
 
     // 需要放在Setup里初始化SPIFFS（闪存文件系统）
     if (!SPIFFS.begin(true))
     {
-        Serial.println("SPIFFS Mount Failed");
+        log_i("SPIFFS Mount Failed");
         return;
     }
 
@@ -90,12 +90,12 @@ void setup()
     rgb.init();
     rgb.setBrightness(0.05).setRGB(0, 64, 64);
 
+
     /*** Init ambient-light sensor ***/
     ambLight.init(ONE_TIME_H_RESOLUTION_MODE);
 
     /*** Init micro SD-Card ***/
     tf.init();
-
     lv_fs_fatfs_init();
 
     // 某些app可能希望自己控制屏幕刷新（如2048），因此不能用后台刷新
@@ -126,9 +126,6 @@ void setup()
 #if APP_MEDIA_PLAYER_USE
     app_controller->app_install(&media_app);
 #endif
-#if APP_SCREEN_SHARE_USE
-    app_controller->app_install(&screen_share_app);
-#endif
 #if APP_FILE_MANAGER_USE
     app_controller->app_install(&file_manager_app);
 #endif
@@ -137,9 +134,6 @@ void setup()
 
 #if APP_IDEA_ANIM_USE
     app_controller->app_install(&idea_app);
-#endif
-#if APP_BILIBILI_FANS_USE
-    app_controller->app_install(&bilibili_app);
 #endif
 #if APP_SETTING_USE
     app_controller->app_install(&settings_app);
@@ -155,9 +149,6 @@ void setup()
 #endif
 #if APP_HEARTBEAT_USE
     app_controller->app_install(&heartbeat_app, APP_TYPE_BACKGROUND);
-#endif
-#if APP_STOCK_MARKET_USE
-    app_controller->app_install(&stockmarket_app);
 #endif
 #if APP_PC_RESOURCE_USE
     app_controller->app_install(&pc_resource_app);
@@ -212,6 +203,6 @@ void loop()
         act_info = mpu.getAction(); // 更新姿态
     }
     app_controller->main_process(act_info); // 运行当前进程
-    // Serial.println(ambLight.getLux() / 50.0);
+    // log_i(ambLight.getLux() / 50.0);
     // rgb.setBrightness(ambLight.getLux() / 500.0);
 }

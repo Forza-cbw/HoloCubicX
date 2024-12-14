@@ -23,12 +23,6 @@
 #include "app/anniversary/anniversary.h"
 #endif
 
-// bilibili粉丝APP
-#define APP_BILIBILI_FANS_USE 1
-#if APP_BILIBILI_FANS_USE
-#include "app/bilibili_fans/bilibili.h"
-#endif
-
 // 文件管理器APP
 #define APP_FILE_MANAGER_USE 1
 #if APP_FILE_MANAGER_USE
@@ -71,12 +65,6 @@
 #include "app/pc_resource/pc_resource.h"
 #endif
 
-// 屏幕分享/投屏APP
-#define APP_SCREEN_SHARE_USE 1
-#if APP_SCREEN_SHARE_USE
-#include "app/screen_share/screen_share.h"
-#endif
-
 // 网页配置服务APP
 // 此项用于配置小电视，为必选项，此处仅为了说明有这个app，此宏无作用
 #define APP_WEB_SERVER_USE 1
@@ -88,12 +76,6 @@
 #define APP_SETTING_USE 1
 #if APP_SETTING_USE
 #include "app/settings/settings.h"
-#endif
-
-// 股票行情查看APP
-#define APP_STOCK_MARKET_USE 1
-#if APP_STOCK_MARKET_USE
-#include "app/stockmarket/stockmarket.h"
 #endif
 
 // 天气APP
