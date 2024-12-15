@@ -25,6 +25,7 @@ int GAME2048::addRandom(void)
         if (this->board[rand / 4][rand % 4] == 0)
         {
             this->board[rand / 4][rand % 4] = 2;
+            log_i("rand: %d,%d", rand/4, rand%4);
             break;
         }
     }

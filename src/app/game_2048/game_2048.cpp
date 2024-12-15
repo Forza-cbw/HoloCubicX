@@ -24,7 +24,7 @@ void taskTwo(void *parameter)
     {
         // LVGL任务主函数
         AIO_LVGL_OPERATE_LOCK(lv_task_handler();)
-        vTaskDelay(5 / portTICK_PERIOD_MS);
+        vTaskDelay((TickType_t)(1000.0 / 60 / portTICK_PERIOD_MS));
     }
 }
 
@@ -74,14 +74,14 @@ static int game_2048_init(AppController *sys)
     // 棋子出生动画
     AIO_LVGL_OPERATE_LOCK(born(new1);)
     AIO_LVGL_OPERATE_LOCK(born(new2);)
-    // 防止进入游戏时，误触发了向上
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+
     return 0;
 }
 
 static void game_2048_process(AppController *sys,
                               const ImuAction *act_info)
 {
+    int direction = -1;
     if (DOWN_MORE == act_info->active)
     {
         sys->app_exit(); // 退出APP
@@ -92,42 +92,30 @@ static void game_2048_process(AppController *sys,
     if (TURN_RIGHT == act_info->active)
     {
         game.moveRight();
-        if (game.comparePre() == 0)
-        {
-            AIO_LVGL_OPERATE_LOCK(showAnim(game.getMoveRecord(), 4);)
-            delay(700);
-            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), game.getBoard());)
-        }
+        direction = 4;
     }
     else if (TURN_LEFT == act_info->active)
     {
         game.moveLeft();
-        if (game.comparePre() == 0)
-        {
-            AIO_LVGL_OPERATE_LOCK(showAnim(game.getMoveRecord(), 3);)
-            delay(700);
-            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), game.getBoard());)
-        }
+        direction = 3;
     }
     else if (UP == act_info->active)
     {
         game.moveUp();
-        if (game.comparePre() == 0)
-        {
-            AIO_LVGL_OPERATE_LOCK(showAnim(game.getMoveRecord(), 1);)
-            delay(700);
-            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), game.getBoard());)
-        }
+        direction = 1;
     }
     else if (DOWN == act_info->active)
     {
         game.moveDown();
-        if (game.comparePre() == 0)
-        {
-            AIO_LVGL_OPERATE_LOCK(showAnim(game.getMoveRecord(), 2);)
-            delay(700);
-            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), game.getBoard());)
-        }
+        direction = 2;
+    }
+    // 渲染动画
+    if (UNKNOWN != act_info->active && game.comparePre() == 0)
+    {
+        AIO_LVGL_OPERATE_LOCK(showAnim(game.getMoveRecord(), direction);)
+        while (lv_anim_count_running() > 0) delay(100);
+        AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), game.getBoard()));
+        while (lv_anim_count_running() > 0) delay(100);
     }
 
     if (game.judge() == 1)

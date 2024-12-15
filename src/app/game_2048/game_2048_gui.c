@@ -2,6 +2,7 @@
 #include "element_images.h"
 
 #include "lvgl.h"
+#include "esp32-hal-log.h"
 
 #define SCALE_SIZE 4
 
@@ -254,7 +255,8 @@ void showNewBorn(int newborn, int *map)
 {
     //展示新棋盘
     showBoard(map);
-
+    for (int i=0; i<4; i++)
+        log_i("%d %d %d %d", map[i*4], map[i*4 + 1], map[i*4 +2], map[i*4 +3]);
     //出现
     born(newborn);
 }

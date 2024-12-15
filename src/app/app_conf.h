@@ -66,8 +66,7 @@
 #endif
 
 // 网页配置服务APP
-// 此项用于配置小电视，为必选项，此处仅为了说明有这个app，此宏无作用
-#define APP_WEB_SERVER_USE 1
+#define APP_WEB_SERVER_USE 0
 #if APP_WEB_SERVER_USE
 #include "app/server/server.h"
 #endif

@@ -138,7 +138,7 @@ void IMU::getVirtureMotion6(ImuAction *action_info)
     action_info->v_gy = gyro[1];
     action_info->v_gz = gyro[2];
 
-    log_i("a=%d,%d,%d,g=%d,%d,%d",action_info->v_ax,action_info->v_ay,action_info->v_az,action_info->v_gx,action_info->v_gy,action_info->v_gz);
+    log_d("a=%d,%d,%d,g=%d,%d,%d",action_info->v_ax,action_info->v_ay,action_info->v_az,action_info->v_gx,action_info->v_gy,action_info->v_gz);
 
     if (order & X_DIR_TYPE)
     {
