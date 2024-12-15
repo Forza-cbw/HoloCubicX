@@ -50,7 +50,7 @@ static int LHLXW_init(AppController *sys){
 
 static void LHLXW_process(AppController *sys,const ImuAction *action){
 
-    if (RETURN == act_info->active)
+    if (SHAKE == act_info->active)
     {
         sys->app_exit(); // 退出APP
         return;
@@ -102,7 +102,7 @@ static void LHLXW_process(AppController *sys,const ImuAction *action){
     //             cyber_pros(lhlxw_run->LV_LHLXW_GUI_OBJ);
     //     } 
     //     act_info->active = ACTIVE_TYPE::UNKNOWN;
-    //     act_info->isValid = 0;
+    //     act_info->block = 0;
     // }
 
 }

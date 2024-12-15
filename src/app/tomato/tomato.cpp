@@ -224,7 +224,7 @@ static void tomato_process(AppController *sys, const ImuAction *act_info)
         run_data->time_start = millis();
         hadOpened = true;
     }
-    if (RETURN == act_info->active)
+    if (SHAKE == act_info->active)
     {
         count = 0;
         count_down_reset = ON;
@@ -233,7 +233,8 @@ static void tomato_process(AppController *sys, const ImuAction *act_info)
         return;
     }
 
-    if (GO_FORWORD == act_info->active)
+    //if (GO_FORWORD == act_info->active)
+    if (UP == act_info->active) // todo GO_FORWORD改成UP会不会有问题？
     {
         unsigned long currentTime = millis();
         unsigned long elapsedTime = currentTime - run_data->time_start;

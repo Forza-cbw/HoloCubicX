@@ -383,12 +383,13 @@ static void weather_process(AppController *sys,
 {
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
 
-    if (RETURN == act_info->active)
+    if (SHAKE == act_info->active)
     {
         sys->app_exit();
         return;
     }
-    else if (GO_FORWORD == act_info->active)
+    //else if (GO_FORWORD == act_info->active)
+    else if (UP == act_info->active) // todo 改成UP有没有问题
     {
         // 间接强制更新
         run_data->coactusUpdateFlag = 0x01;

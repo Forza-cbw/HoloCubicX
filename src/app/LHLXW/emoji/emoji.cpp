@@ -81,7 +81,6 @@ void emoji_process(lv_obj_t *ym)
     unsigned long *timCont = (unsigned long*)malloc(4);
     emoji_init();
     act_info->active = ACTIVE_TYPE::UNKNOWN;
-    act_info->isValid = 0;
     while(1){
         /* 表情选择时才刷新lvgl */
         if(emj_run->emoji_mode)lv_timer_handler();
@@ -108,7 +107,7 @@ void emoji_process(lv_obj_t *ym)
         }
 
         /* MPU6050动作响应 */
-        if (RETURN == act_info->active){
+        if (SHAKE == act_info->active){
             /* 表情选择时，后仰退出app */
             if(emj_run->emoji_mode){
                 EMOJI_GUI_DeInit(ym);//退出APP时有LVGL动画，故要等动画结束才能调用系统退出函数，所以UI退出不能放在LHLXW_exit_callback中
@@ -171,7 +170,6 @@ void emoji_process(lv_obj_t *ym)
             }
         } 
         act_info->active = ACTIVE_TYPE::UNKNOWN;
-        act_info->isValid = 0;
     }
     free(timCont);
 }

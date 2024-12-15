@@ -134,7 +134,7 @@ static void picture_process(AppController *sys,
 {
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_FADE_ON;
 
-    if (RETURN == act_info->active)
+    if (SHAKE == act_info->active)
     {
         sys->app_exit();
         return;

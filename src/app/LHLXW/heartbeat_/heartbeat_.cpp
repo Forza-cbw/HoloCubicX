@@ -216,8 +216,7 @@ void heartbeat_process(lv_obj_t *ym){
             accYinc = 80;
         }
         act_info->active = ACTIVE_TYPE::UNKNOWN;
-        act_info->isValid = 0;
-        heartbeatBuf_clear(0x0000);//清屏，以黑色作为背景 
+        heartbeatBuf_clear(0x0000);//清屏，以黑色作为背景
         heartbeatBuf_update(accXinc,accYinc); // ui更新//最终所有的特效调用都在这里面
         tft->pushImage(0, 0, 240, 240, heartbeatBuf);//显示图像
         delay(2);    

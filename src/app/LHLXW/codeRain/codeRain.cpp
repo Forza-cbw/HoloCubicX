@@ -38,7 +38,7 @@ void codeRain_process(lv_obj_t * ym){
     }
 
     /* MPU6050动作响应 */
-    if (RETURN == act_info->active){
+    if (SHAKE == act_info->active){
         lv_scr_load_anim(ym, LV_SCR_LOAD_ANIM_OUT_TOP, 573, 0, false);//调用系统退出函数之前，一定要等待动画结束否则会导致系统重启
         lv_obj_invalidate(lv_scr_act());//哪怕缓存没变，也让lvgl下次更新全部屏幕
         /* 延时999ms，防止同时退出app */
@@ -66,7 +66,6 @@ void codeRain_process(lv_obj_t * ym){
         
     } 
     act_info->active = ACTIVE_TYPE::UNKNOWN;
-    act_info->isValid = 0;
   }
 }
 

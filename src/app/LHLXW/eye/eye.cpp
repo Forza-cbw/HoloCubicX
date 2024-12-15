@@ -61,7 +61,7 @@ bool eye_loop(void){
         act_info = mpu.getAction();
 
         /* MPU6050动作响应 */
-        if (RETURN == act_info->active){
+        if (SHAKE == act_info->active){
             tft->fillRect(0, 0, 240, 240, 0);
             e_run->eye_flg = false;
             return true;//退出此功能
@@ -96,7 +96,6 @@ bool eye_loop(void){
             
         } 
         act_info->active = ACTIVE_TYPE::UNKNOWN;
-        act_info->isValid = 0;
     }
     return false;
 }

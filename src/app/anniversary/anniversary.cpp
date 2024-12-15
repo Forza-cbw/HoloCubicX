@@ -213,7 +213,7 @@ static long long get_timestamp(String url)
         if (httpCode == HTTP_CODE_OK)
         {
             String payload = http.getString();
-            log_i("%s",payload);
+            log_i("%s",payload.c_str());
             int time_index = (payload.indexOf("data")) + 12;
             time = payload.substring(time_index, payload.length() - 3);
             // 以网络时间戳为准
@@ -255,7 +255,7 @@ static void anniversary_process(AppController *sys,
                                 const ImuAction *act_info)
 {
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
-    if (RETURN == act_info->active)
+    if (SHAKE == act_info->active)
     {
         sys->app_exit(); // 退出APP
         return;

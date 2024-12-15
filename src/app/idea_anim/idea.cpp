@@ -77,7 +77,7 @@ static void idea_process(AppController *sys,
 {
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
 
-    if (RETURN == action->active)
+    if (SHAKE == action->active)
     {
         sys->app_exit();
         return;

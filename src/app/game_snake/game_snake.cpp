@@ -54,7 +54,7 @@ static int game_snake_init(AppController *sys)
 
 static void game_snake_process(AppController *sys, const ImuAction *act_info)
 {
-    if (RETURN == act_info->active)
+    if (SHAKE == act_info->active)
     {
         run_data->gameStatus = -1;
         sys->app_exit(); // 退出APP

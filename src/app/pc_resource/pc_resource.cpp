@@ -210,7 +210,7 @@ static int pc_resource_init(AppController *sys)
  */
 static void pc_resource_process(AppController *sys, const ImuAction *act_info)
 {
-    if (RETURN == act_info->active)
+    if (SHAKE == act_info->active)
     {
         sys->app_exit();
         return;

@@ -226,14 +226,13 @@ void cyber_pros(lv_obj_t *ym){
         if(cy_r->dynamic)
             drawImg();  
         act_info->active = ACTIVE_TYPE::UNKNOWN;
-        act_info->isValid = 0;
         /* MPU6050数据获取 */
         if (isCheckAction){
             isCheckAction = false;
             act_info = mpu.getAction();
         }
         /* MPU6050动作响应 */
-        if (RETURN == act_info->active){
+        if (SHAKE == act_info->active){
             break;
         }else if(TURN_RIGHT == act_info->active){
             cy_r->str=!cy_r->str;
@@ -247,7 +246,7 @@ void cyber_pros(lv_obj_t *ym){
                 for(uint8_t i=0;i<29;i++)
                     drawImg();  
             else delay(700);                
-        } 
+        } // todo DOWN动作的反馈
     }
 
     lv_scr_load_anim(ym, LV_SCR_LOAD_ANIM_OUT_TOP, 599, 0, false);//调用系统退出函数之前，一定要等待动画结束否则会导致系统重启

@@ -18,49 +18,49 @@
 #endif
 
 // 纪念日APP
-#define APP_ANNIVERSARY_USE 1
+#define APP_ANNIVERSARY_USE 0
 #if APP_ANNIVERSARY_USE
 #include "app/anniversary/anniversary.h"
 #endif
 
 // 文件管理器APP
-#define APP_FILE_MANAGER_USE 1
+#define APP_FILE_MANAGER_USE 0
 #if APP_FILE_MANAGER_USE
 #include "app/file_manager/file_manager.h"
 #endif
 
 // 2048游戏APP
-#define APP_GAME_2048_USE 1
+#define APP_GAME_2048_USE 0
 #if APP_GAME_2048_USE
 #include "app/game_2048/game_2048.h"
 #endif
 
 // 心跳APP
-#define APP_HEARTBEAT_USE 1
+#define APP_HEARTBEAT_USE 0
 #if APP_HEARTBEAT_USE
 #include "app/heartbeat/heartbeat.h"
 #endif
 
 // 特效动画APP
-#define APP_IDEA_ANIM_USE 1
+#define APP_IDEA_ANIM_USE 0
 #if APP_IDEA_ANIM_USE
 #include "app/idea_anim/idea.h"
 #endif
 
 // 视频播放器APP
-#define APP_MEDIA_PLAYER_USE 1
+#define APP_MEDIA_PLAYER_USE 0
 #if APP_MEDIA_PLAYER_USE
 #include "app/media_player/media_player.h"
 #endif
 
 // 相册APP
-#define APP_PICTURE_USE 1
+#define APP_PICTURE_USE 0
 #if APP_PICTURE_USE
 #include "app/picture/picture.h"
 #endif
 
 // 遥感器APP
-#define APP_PC_RESOURCE_USE 1
+#define APP_PC_RESOURCE_USE 0
 #if APP_PC_RESOURCE_USE
 #include "app/pc_resource/pc_resource.h"
 #endif
@@ -79,24 +79,24 @@
 #endif
 
 // 天气APP
-#define APP_WEATHER_USE 1
+#define APP_WEATHER_USE 0
 #if APP_WEATHER_USE
 #include "app/weather/weather.h"
 #endif
 
 // 番茄时钟2.0 APP
-#define APP_TOMATO_USE 1
+#define APP_TOMATO_USE 0
 #if APP_TOMATO_USE
 #include "app/tomato/tomato.h"
 #endif
 
 // 贪吃蛇游戏APP
-#define APP_GAME_SNAKE_USE 1
+#define APP_GAME_SNAKE_USE 0
 #if APP_GAME_SNAKE_USE
 #include "app/game_snake/game_snake.h"
 #endif
 
-#define APP_LHLXW_USE 1
+#define APP_LHLXW_USE 0
 #if APP_LHLXW_USE
 #include "app/LHLXW/LHLXW.h"
 #endif
