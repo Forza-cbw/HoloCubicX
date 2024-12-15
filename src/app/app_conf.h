@@ -30,13 +30,13 @@
 #endif
 
 // 2048游戏APP
-#define APP_GAME_2048_USE 0
+#define APP_GAME_2048_USE 1
 #if APP_GAME_2048_USE
 #include "app/game_2048/game_2048.h"
 #endif
 
 // 心跳APP
-#define APP_HEARTBEAT_USE 0
+#define APP_HEARTBEAT_USE 1
 #if APP_HEARTBEAT_USE
 #include "app/heartbeat/heartbeat.h"
 #endif
@@ -73,7 +73,7 @@
 #endif
 
 // 设置APP
-#define APP_SETTING_USE 1
+#define APP_SETTING_USE 0
 #if APP_SETTING_USE
 #include "app/settings/settings.h"
 #endif
@@ -85,7 +85,7 @@
 #endif
 
 // 番茄时钟2.0 APP
-#define APP_TOMATO_USE 0
+#define APP_TOMATO_USE 1
 #if APP_TOMATO_USE
 #include "app/tomato/tomato.h"
 #endif

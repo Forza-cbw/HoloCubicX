@@ -161,7 +161,7 @@ int AppController::main_process(ImuAction *act_info)
             cur_app_index = (cur_app_index - 1 + app_num) % app_num; // 此处的3与p_processList的长度一致
             log_i("Current App: %s" , appList[cur_app_index]->app_name);
         }
-        else if (ACTIVE_TYPE::SHAKE == act_info->active)
+        else if (ACTIVE_TYPE::DOWN_MORE == act_info->active)
         {
             app_running_flag = 1;
             if (NULL != appList[cur_app_index]->app_init)
@@ -171,7 +171,7 @@ int AppController::main_process(ImuAction *act_info)
         }
 
         // 如果不是甩动，则切换菜单显示的图标
-        if (ACTIVE_TYPE::SHAKE != act_info->active) // && UNKNOWN != act_info->active
+        if (ACTIVE_TYPE::DOWN_MORE != act_info->active) // && UNKNOWN != act_info->active
         {
             app_control_display_scr(appList[cur_app_index]->app_image,
                                     appList[cur_app_index]->app_name,

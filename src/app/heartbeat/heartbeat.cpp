@@ -248,12 +248,12 @@ static void heartbeat_process(AppController *sys,
                               const ImuAction *act_info)
 {
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
-    if (SHAKE == act_info->active)
+    if (DOWN_MORE == act_info->active)
     {
         sys->app_exit(); // 退出APP
         return;
     }
-    else if (SHAKE == act_info->active) // 向前按发送一条消息
+    else if (DOWN_MORE == act_info->active) // 向前按发送一条消息
     {
         anim_type = LV_SCR_LOAD_ANIM_MOVE_TOP;
         run_data->send_cnt += 1;

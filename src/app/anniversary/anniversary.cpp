@@ -255,7 +255,7 @@ static void anniversary_process(AppController *sys,
                                 const ImuAction *act_info)
 {
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
-    if (SHAKE == act_info->active)
+    if (DOWN_MORE == act_info->active)
     {
         sys->app_exit(); // 退出APP
         return;

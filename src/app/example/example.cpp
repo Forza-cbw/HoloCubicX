@@ -54,7 +54,7 @@ static int example_init(AppController *sys)
 static void example_process(AppController *sys,
                             const ImuAction *act_info)
 {
-    if (SHAKE == act_info->active)
+    if (DOWN_MORE == act_info->active)
     {
         sys->app_exit(); // 退出APP
         return;

@@ -224,7 +224,7 @@ static void tomato_process(AppController *sys, const ImuAction *act_info)
         run_data->time_start = millis();
         hadOpened = true;
     }
-    if (SHAKE == act_info->active)
+    if (DOWN_MORE == act_info->active)
     {
         count = 0;
         count_down_reset = ON;

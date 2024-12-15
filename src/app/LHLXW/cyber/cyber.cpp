@@ -232,7 +232,7 @@ void cyber_pros(lv_obj_t *ym){
             act_info = mpu.getAction();
         }
         /* MPU6050动作响应 */
-        if (SHAKE == act_info->active){
+        if (DOWN_MORE == act_info->active){
             break;
         }else if(TURN_RIGHT == act_info->active){
             cy_r->str=!cy_r->str;

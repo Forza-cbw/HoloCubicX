@@ -383,7 +383,7 @@ static void weather_process(AppController *sys,
 {
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
 
-    if (SHAKE == act_info->active)
+    if (DOWN_MORE == act_info->active)
     {
         sys->app_exit();
         return;

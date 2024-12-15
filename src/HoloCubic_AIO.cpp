@@ -192,7 +192,7 @@ void setup()
 
 // 在cores/esp32/main.cpp 中启动为FreeRTOS task，优先级为1（最低）。
 // FreeRTOSConfig.h中宏configUSE_PREEMPTION为1，是抢占式调度器。同优先级时间片轮转，高优先级抢占。
-// ESP32-pico 双核
+// ESP32-s3 双核
 void loop()
 {
     screen.routine(); // 手动刷新屏幕

@@ -18,7 +18,7 @@ enum ACTIVE_TYPE
     TURN_LEFT,
     UP,
     DOWN,
-    SHAKE,
+    DOWN_MORE,
     UNKNOWN
 };
 
@@ -46,7 +46,7 @@ struct SysMpuConfig
 struct ImuAction
 {
     volatile ACTIVE_TYPE active;
-    boolean isBlocked;
+    boolean isDownMored; // 表示上一次是否是 DOWN_MORE
     boolean long_time;
     int16_t v_ax; // v表示虚拟参数（用于调整6050的初始方位）
     int16_t v_ay;

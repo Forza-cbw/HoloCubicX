@@ -3,13 +3,13 @@
 
 const char *active_type_info[] = {"TURN_RIGHT","TURN_LEFT",
                                   "UP","DOWN",
-                                  "SHAKE", "UNKNOWN"};
+                                  "DOWN_MORE", "UNKNOWN"};
 
 IMU::IMU()
 {
     action_info.active = ACTIVE_TYPE::UNKNOWN;
     action_info.long_time = true;
-    action_info.isBlocked = false;
+    action_info.isDownMored = false;
     this->order = 0; // 表示方位
 }
 
@@ -86,42 +86,39 @@ ImuAction *IMU::getAction(void)
     ImuAction tmp_info;
     getVirtureMotion6(&tmp_info);
 
-    // log_i("gx = %d\tgy = %d\tgz = %d", tmp_info.v_gx, tmp_info.v_gy, tmp_info.v_gz);
-    // log_i("\tax = %d\tay = %d\taz = %d\n", tmp_info.v_ax, tmp_info.v_ay, tmp_info.v_az);
-
     tmp_info.active = ACTIVE_TYPE::UNKNOWN;
-
-    // 原先判断的只是加速度，现在要加上陀螺仪
-    if (!action_info.isBlocked)
+    // todo 原先判断的只是加速度，现在要加上陀螺仪
+    // 优先判定大幅down动作
+    if (tmp_info.v_ax < -600) {
+        tmp_info.active = ACTIVE_TYPE::DOWN_MORE;
+    }
+    // 左右倾斜
+    else if (tmp_info.v_ay < - 200)
     {
-        // 优先判定甩动
-        if (tmp_info.v_gx > 400 || tmp_info.v_gx < -400)
-        {
-            tmp_info.active = ACTIVE_TYPE::SHAKE;
-            action_info.isBlocked = true; // 防止重复检测shake
-        }
-        // 左右倾斜
-        else if (tmp_info.v_ay < - 500)
-        {
-            tmp_info.active = ACTIVE_TYPE::TURN_LEFT;
-        }
-        else if (tmp_info.v_ay > 500)
-        {
-            tmp_info.active = ACTIVE_TYPE::TURN_RIGHT;
-        }
-        // 前后倾斜
-        else if (tmp_info.v_ax > 500)
-        {
-            tmp_info.active = ACTIVE_TYPE::UP;
-        }
-        else if (tmp_info.v_ax < -500)
-        {
-            tmp_info.active = ACTIVE_TYPE::DOWN;
-        }
-    } else {
-        action_info.isBlocked = false;
+        tmp_info.active = ACTIVE_TYPE::TURN_LEFT;
+    }
+    else if (tmp_info.v_ay > 200)
+    {
+        tmp_info.active = ACTIVE_TYPE::TURN_RIGHT;
+    }
+    // 前后倾斜
+    else if (tmp_info.v_ax > 500)
+    {
+        tmp_info.active = ACTIVE_TYPE::UP;
+    }
+    else if (tmp_info.v_ax < 100)
+    {
+        tmp_info.active = ACTIVE_TYPE::DOWN;
     }
 
+    // 防止重复检测DOWN_MORE
+    if (ACTIVE_TYPE::DOWN_MORE != tmp_info.active) {
+        action_info.isDownMored = false;
+    }
+    else {
+        if (action_info.isDownMored) tmp_info.active = ACTIVE_TYPE::UNKNOWN;
+        action_info.isDownMored = true;
+    }
     action_info.active = tmp_info.active;
 
     return &action_info;

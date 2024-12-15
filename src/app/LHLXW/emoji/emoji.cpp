@@ -107,7 +107,7 @@ void emoji_process(lv_obj_t *ym)
         }
 
         /* MPU6050动作响应 */
-        if (SHAKE == act_info->active){
+        if (DOWN_MORE == act_info->active){
             /* 表情选择时，后仰退出app */
             if(emj_run->emoji_mode){
                 EMOJI_GUI_DeInit(ym);//退出APP时有LVGL动画，故要等动画结束才能调用系统退出函数，所以UI退出不能放在LHLXW_exit_callback中

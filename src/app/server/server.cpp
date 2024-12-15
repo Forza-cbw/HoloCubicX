@@ -137,7 +137,7 @@ static void server_process(AppController *sys,
 {
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
 
-    if (SHAKE == action->active)
+    if (DOWN_MORE == action->active)
     {
         stop_web_config();
         sys->app_exit();
