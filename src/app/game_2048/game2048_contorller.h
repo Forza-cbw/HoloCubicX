@@ -31,13 +31,13 @@ public:
         // addRandom();
     };
     int addRandom(void);
-    void moveUp(void);
-    void moveDown(void);
-    void moveLeft(void);
-    void moveRight(void);
     int judge(void);
-    void recordLocation(int direction);
+    void initLocation(int direction);
     void countMoveRecord(int direction);
+
+    void mergeOnce(int i, int j, int di, int dj);
+    void moveOnce(int i, int j, int di, int dj);
+    void moveAndMerge(int direction);
 
     void recordBoard()
     {

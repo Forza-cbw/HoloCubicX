@@ -89,33 +89,22 @@ static void game_2048_process(AppController *sys,
     }
 
     // 具体操作
-    if (TURN_RIGHT == act_info->active)
-    {
-        game.moveRight();
-        direction = 4;
+    switch (act_info->active) {
+        case UP: direction = 1; break;
+        case DOWN: direction = 2; break;
+        case TURN_LEFT: direction = 3; break;
+        case TURN_RIGHT: direction = 4; break;
     }
-    else if (TURN_LEFT == act_info->active)
-    {
-        game.moveLeft();
-        direction = 3;
-    }
-    else if (UP == act_info->active)
-    {
-        game.moveUp();
-        direction = 1;
-    }
-    else if (DOWN == act_info->active)
-    {
-        game.moveDown();
-        direction = 2;
-    }
-    // 渲染动画
-    if (UNKNOWN != act_info->active && game.comparePre() == 0)
-    {
-        AIO_LVGL_OPERATE_LOCK(showAnim(game.getMoveRecord(), direction);)
-        while (lv_anim_count_running() > 0) delay(100);
-        AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), game.getBoard()));
-        while (lv_anim_count_running() > 0) delay(100);
+
+    if (UNKNOWN != act_info->active) {
+        game.moveAndMerge(direction);//移动且合并
+        // 渲染动画
+        if (game.comparePre() == 0) { // 棋盘布局改变
+            AIO_LVGL_OPERATE_LOCK(showAnim(game.getMoveRecord(), direction);)
+            while (lv_anim_count_running() > 0) delay(200);
+            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), game.getBoard()));
+            while (lv_anim_count_running() > 0) delay(200);
+        }
     }
 
     if (game.judge() == 1)
