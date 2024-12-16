@@ -10,7 +10,7 @@ struct Weather
     
     
     int windLevel;
-    int airQulity;
+//    int airQulity;
 
     //高德天气API用到
     int weather_code; // 天气现象代码

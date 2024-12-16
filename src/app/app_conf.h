@@ -66,7 +66,7 @@
 #endif
 
 // 网页配置服务APP
-#define APP_WEB_SERVER_USE 0
+#define APP_WEB_SERVER_USE 1
 #if APP_WEB_SERVER_USE
 #include "app/server/server.h"
 #endif
@@ -78,7 +78,7 @@
 #endif
 
 // 天气APP
-#define APP_WEATHER_USE 0
+#define APP_WEATHER_USE 1
 #if APP_WEATHER_USE
 #include "app/weather/weather.h"
 #endif
@@ -90,12 +90,12 @@
 #endif
 
 // 贪吃蛇游戏APP
-#define APP_GAME_SNAKE_USE 0
+#define APP_GAME_SNAKE_USE 1
 #if APP_GAME_SNAKE_USE
 #include "app/game_snake/game_snake.h"
 #endif
 
-#define APP_LHLXW_USE 0
+#define APP_LHLXW_USE 1
 #if APP_LHLXW_USE
 #include "app/LHLXW/LHLXW.h"
 #endif

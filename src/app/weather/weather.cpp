@@ -235,7 +235,7 @@ static void get_weather(void)
             log_i("wea.windpower  = %s", run_data->wea.windpower);
 
             //空气质量没有这个参数，只能用风速来粗略替换了
-            run_data->wea.airQulity = airQulityLevel(run_data->wea.windpower);
+//            run_data->wea.airQulity = airQulityLevel(run_data->wea.windpower);
 
             log_i(" Get weather info OK");
         }
@@ -393,7 +393,7 @@ static void weather_process(AppController *sys,
     {
         // 间接强制更新
         run_data->coactusUpdateFlag = 0x01;
-        delay(500); // 以防间接强制更新后，生产很多请求 使显示卡顿
+        delay(1000); // 以防间接强制更新后，生产很多请求 使显示卡顿
     }
     else if (TURN_RIGHT == act_info->active)
     {
@@ -438,7 +438,7 @@ static void weather_process(AppController *sys,
     {
         // 仅在切换界面时获取一次未来天气
         display_curve(run_data->wea.daily_max, run_data->wea.daily_min, anim_type);
-        delay(300);
+        delay(500);
     }
 }
 
