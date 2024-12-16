@@ -9,7 +9,7 @@
 * HoloCubic_AIO的链接 https://github.com/ClimbSnail/HoloCubic_AIO
 * 本项目链接 https://gitlab.forza0310.cn/root/holocubicx
 
-
+<img src="https://gitlab.forza0310.cn/root/holocubicx/-/raw/main/src/resource/%E6%95%88%E6%9E%9C%E5%9B%BE.jpg?ref_type=heads" width="200" />
 
 ### 主要特点
 1. 以本人对软件工程的粗浅理解，对原项目代码进行重构。
