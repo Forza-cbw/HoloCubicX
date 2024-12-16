@@ -13,7 +13,7 @@
 #include <Arduino.h>
 
 /*
- * 随机刷新一个2或4
+ * 随机刷新一个2
  * 返回刷新的位置
  */
 int GAME2048::addRandom(void)
@@ -173,29 +173,26 @@ void GAME2048::moveUp(void)
 {
     recordLocation(1); //记录位置
     recordBoard();     //记录数值
-    //移动两次
-    for (int x = 0; x < 2; x++)
+    //移动
+    for (int i = 0; i <= SCALE_SIZE - 2; i++)
     {
-        for (int i = 0; i < SCALE_SIZE - 1; i++)
+        for (int j = 0; j <= SCALE_SIZE - 1; j++)
         {
-            for (int j = 0; j < SCALE_SIZE; j++)
+            if (board[i][j] == 0)
             {
-                if (board[i][j] == 0)
-                {
-                    board[i][j] = board[i + 1][j];
-                    board[i + 1][j] = 0;
-                    //动画轨迹记录
-                    Location[i][j] = Location[i + 1][j];
-                    Location[i + 1][j] = "";
-                }
+                board[i][j] = board[i + 1][j];
+                board[i + 1][j] = 0;
+                //动画轨迹记录
+                Location[i][j] = Location[i + 1][j];
+                Location[i + 1][j] = "";
             }
         }
     }
 
     //相加
-    for (int i = 0; i < SCALE_SIZE - 1; i++)
+    for (int i = 0; i <= SCALE_SIZE - 2; i++)
     {
-        for (int j = 0; j < SCALE_SIZE; j++)
+        for (int j = 0; j <= SCALE_SIZE - 1; j++)
         {
             if (board[i][j] == board[i + 1][j])
             {
@@ -209,9 +206,9 @@ void GAME2048::moveUp(void)
     }
 
     //移动
-    for (int i = 0; i < SCALE_SIZE - 1; i++)
+    for (int i = 0; i <= SCALE_SIZE - 2; i++)
     {
-        for (int j = 0; j < SCALE_SIZE; j++)
+        for (int j = 0; j <= SCALE_SIZE - 1; j++)
         {
             if (board[i][j] == 0)
             {
@@ -231,28 +228,26 @@ void GAME2048::moveDown(void)
     recordLocation(2); //记录位置
     recordBoard();
     //移动
-    for (int x = 0; x < 2; x++)
+    for (int i = SCALE_SIZE - 1; i >= 1; i--)
     {
-        for (int i = SCALE_SIZE - 1; i > 0; i--)
+        for (int j = 0; j <= SCALE_SIZE - 1; j++)
         {
-            for (int j = SCALE_SIZE - 1; j >= 0; j--)
+            if (board[i][j] == 0)
             {
-                if (board[i][j] == 0)
-                {
-                    board[i][j] = board[i - 1][j];
-                    board[i - 1][j] = 0;
-                    //动画移动轨迹记录
-                    Location[i][j] = Location[i - 1][j];
-                    Location[i - 1][j] = "";
-                }
+                board[i][j] = board[i - 1][j];
+                board[i - 1][j] = 0;
+                //动画移动轨迹记录
+                Location[i][j] = Location[i - 1][j];
+                Location[i - 1][j] = "";
             }
         }
     }
 
+
     //相加
-    for (int i = SCALE_SIZE - 1; i > 0; i--)
+    for (int i = SCALE_SIZE - 1; i >= 1; i--)
     {
-        for (int j = SCALE_SIZE - 1; j >= 0; j--)
+        for (int j = 0; j <= SCALE_SIZE - 1; j++)
         {
             if (board[i][j] == board[i - 1][j])
             {
@@ -266,9 +261,9 @@ void GAME2048::moveDown(void)
     }
 
     //移动
-    for (int i = SCALE_SIZE - 1; i > 0; i--)
+    for (int i = SCALE_SIZE - 1; i >= 1; i--)
     {
-        for (int j = SCALE_SIZE - 1; j >= 0; j--)
+        for (int j = 0; j <= SCALE_SIZE - 1; j++)
         {
             if (board[i][j] == 0)
             {
@@ -288,27 +283,24 @@ void GAME2048::moveLeft(void)
     recordLocation(3); //记录位置
     recordBoard();
     //移动
-    for (int x = 0; x < 2; x++)
+    for (int i = 0; i <= SCALE_SIZE - 1; i++)
     {
-        for (int i = 0; i < SCALE_SIZE; i++)
+        for (int j = 0; j <= SCALE_SIZE - 2; j++)
         {
-            for (int j = 0; j < SCALE_SIZE - 1; j++)
+            if (board[i][j] == 0)
             {
-                if (board[i][j] == 0)
-                {
-                    board[i][j] = board[i][j + 1];
-                    board[i][j + 1] = 0;
-                    //动画移动轨迹记录
-                    Location[i][j] = Location[i][j + 1];
-                    Location[i][j + 1] = "";
-                }
+                board[i][j] = board[i][j + 1];
+                board[i][j + 1] = 0;
+                //动画移动轨迹记录
+                Location[i][j] = Location[i][j + 1];
+                Location[i][j + 1] = "";
             }
         }
     }
     //相加
-    for (int i = 0; i < SCALE_SIZE; i++)
+    for (int i = 0; i <= SCALE_SIZE - 1; i++)
     {
-        for (int j = 0; j < SCALE_SIZE - 1; j++)
+        for (int j = 0; j <= SCALE_SIZE - 2; j++)
         {
             if (board[i][j] == board[i][j + 1])
             {
@@ -321,9 +313,9 @@ void GAME2048::moveLeft(void)
         }
     }
     //移动
-    for (int i = 0; i < SCALE_SIZE; i++)
+    for (int i = 0; i <= SCALE_SIZE - 1; i++)
     {
-        for (int j = 0; j < SCALE_SIZE - 1; j++)
+        for (int j = 0; j <= SCALE_SIZE - 2; j++)
         {
             if (board[i][j] == 0)
             {
@@ -341,29 +333,26 @@ void GAME2048::moveRight(void)
 {
     recordLocation(4); //记录位置
     recordBoard();
-    //移动两次
-    for (int x = 0; x < 2; x++)
+    //移动
+    for (int i = 0; i <= SCALE_SIZE - 1; i++)
     {
-        for (int i = SCALE_SIZE - 1; i >= 0; i--)
+        for (int j = SCALE_SIZE - 1; j >= 1; j--)
         {
-            for (int j = SCALE_SIZE - 1; j > 0; j--)
+            if (board[i][j] == 0)
             {
-                if (board[i][j] == 0)
-                {
-                    board[i][j] = board[i][j - 1];
-                    board[i][j - 1] = 0;
-                    //动画移动轨迹记录
-                    Location[i][j] = Location[i][j - 1];
-                    Location[i][j - 1] = "";
-                }
+                board[i][j] = board[i][j - 1];
+                board[i][j - 1] = 0;
+                //动画移动轨迹记录
+                Location[i][j] = Location[i][j - 1];
+                Location[i][j - 1] = "";
             }
         }
     }
 
     //相加
-    for (int i = SCALE_SIZE - 1; i >= 0; i--)
+    for (int i = 0; i <= SCALE_SIZE - 1; i++)
     {
-        for (int j = SCALE_SIZE - 1; j > 0; j--)
+        for (int j = SCALE_SIZE - 1; j >= 1; j--)
         {
             if (board[i][j] == board[i][j - 1])
             {
@@ -377,9 +366,9 @@ void GAME2048::moveRight(void)
     }
 
     //移动
-    for (int i = SCALE_SIZE - 1; i >= 0; i--)
+    for (int i = 0; i <= SCALE_SIZE - 1; i++)
     {
-        for (int j = SCALE_SIZE - 1; j > 0; j--)
+        for (int j = SCALE_SIZE - 1; j >= 1; j--)
         {
             if (board[i][j] == 0)
             {
