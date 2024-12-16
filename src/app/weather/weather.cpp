@@ -99,7 +99,6 @@ struct WeatherAppRunData
     long long errorNetTimestamp;    // 网络到显示过程中的时间误差
     long long preLocalTimestamp;    // 上一次的本地机器时间戳
     unsigned int coactusUpdateFlag; // 强制更新标志
-    int clock_page;
     unsigned int update_type; // 更新类型的标志位
 
     BaseType_t xReturned_task_task_update; // 更新数据的异步任务
@@ -116,7 +115,6 @@ enum wea_event_Id
 {
     UPDATE_NOW,
     UPDATE_NTP,
-    UPDATE_DAILY
 };
 
 std::map<String, int> weatherMap = {
@@ -297,50 +295,6 @@ static long long get_timestamp(String url)
     return run_data->preNetTimestamp;
 }
 
-static void get_daliyWeather(short maxT[], short minT[])
-{
-    if (WL_CONNECTED != WiFi.status())
-        return;
-
-    HTTPClient http;
-    http.setTimeout(1000);
-    char api[128] = {0};
-    snprintf(api, 128, WEATHER_DALIY_API,
-             cfg_data.WEATHER_API_KEY.c_str(),
-             cfg_data.CITY_CODE.c_str());
-    log_i("API = %s", api);
-    http.begin(api);
-
-    int httpCode = http.GET();
-    if (httpCode > 0)
-    {
-        // file found at server
-        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
-        {
-            String payload = http.getString();
-            log_i("%s", payload.c_str());
-            DynamicJsonDocument doc2(4096);
-            deserializeJson(doc2, payload);
-
-            if (doc2.containsKey("forecasts"))
-            {
-                JsonObject weather_forecast = doc2["forecasts"][0];
-                for (int i = 0; i < 4; i++)
-                {
-                    maxT[i] = weather_forecast["casts"][i]["daytemp"].as<int>();
-                    minT[i] = weather_forecast["casts"][i]["nighttemp"].as<int>();
-                }
-                log_i("Get weather cast OK");
-            }
-        }
-    }
-    else
-    {
-        log_e("[HTTP] GET... failed, error: %s", http.errorToString(httpCode).c_str());
-    }
-    http.end();
-}
-
 static void UpdateTime_RTC(long long timestamp)
 {
     struct TimeStr t;
@@ -368,7 +322,6 @@ static int weather_init(AppController *sys)
     run_data->preNetTimestamp = 1577808000000; // 上一次的网络时间戳 初始化为2020-01-01 00:00:00
     run_data->errorNetTimestamp = 2;
     run_data->preLocalTimestamp = GET_SYS_MILLIS(); // 上一次的本地机器时间戳
-    run_data->clock_page = 0;
     run_data->preWeatherMillis = 0;
     run_data->preTimeMillis = 0;
     // 强制更新
@@ -395,51 +348,30 @@ static void weather_process(AppController *sys,
         run_data->coactusUpdateFlag = 0x01;
         delay(1000); // 以防间接强制更新后，生产很多请求 使显示卡顿
     }
-    else if (TURN_RIGHT == act_info->active)
-    {
-        anim_type = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
-        run_data->clock_page = (run_data->clock_page + 1) % WEATHER_PAGE_SIZE;
-    }
-    else if (TURN_LEFT == act_info->active)
-    {
-        anim_type = LV_SCR_LOAD_ANIM_MOVE_LEFT;
-        // 以下等效与 clock_page = (clock_page + WEATHER_PAGE_SIZE - 1) % WEATHER_PAGE_SIZE;
-        // +3为了不让数据溢出成负数，而导致取模逻辑错误
-        run_data->clock_page = (run_data->clock_page + WEATHER_PAGE_SIZE - 1) % WEATHER_PAGE_SIZE;
-    }
+
 
     // 界面刷新
-    if (run_data->clock_page == 0)
+    display_weather(run_data->wea, anim_type);
+    if (0x01 == run_data->coactusUpdateFlag || doDelayMillisTime(cfg_data.weatherUpdataInterval, &run_data->preWeatherMillis, false))
     {
-        display_weather(run_data->wea, anim_type);
-        if (0x01 == run_data->coactusUpdateFlag || doDelayMillisTime(cfg_data.weatherUpdataInterval, &run_data->preWeatherMillis, false))
-        {
-            sys->send_to(WEATHER_APP_NAME, CTRL_NAME,
-                         APP_MESSAGE_WIFI_CONN, (void *)UPDATE_NOW, NULL);
-            sys->send_to(WEATHER_APP_NAME, CTRL_NAME,
-                         APP_MESSAGE_WIFI_CONN, (void *)UPDATE_DAILY, NULL);
-        }
+        sys->send_to(WEATHER_APP_NAME, CTRL_NAME,
+                     APP_MESSAGE_WIFI_CONN, (void *)UPDATE_NOW, NULL);
+    }
 
-        if (0x01 == run_data->coactusUpdateFlag || doDelayMillisTime(cfg_data.timeUpdataInterval, &run_data->preTimeMillis, false))
-        {
-            // 尝试同步网络上的时钟
-            sys->send_to(WEATHER_APP_NAME, CTRL_NAME,
-                         APP_MESSAGE_WIFI_CONN, (void *)UPDATE_NTP, NULL);
-        }
-        else if (GET_SYS_MILLIS() - run_data->preLocalTimestamp > 400)
-        {
-            UpdateTime_RTC(get_timestamp());
-        }
-        run_data->coactusUpdateFlag = 0x00; // 取消强制更新标志
-        display_space();
-        delay(30);
-    }
-    else if (run_data->clock_page == 1)
+    if (0x01 == run_data->coactusUpdateFlag || doDelayMillisTime(cfg_data.timeUpdataInterval, &run_data->preTimeMillis, false))
     {
-        // 仅在切换界面时获取一次未来天气
-        display_curve(run_data->wea.daily_max, run_data->wea.daily_min, anim_type);
-        delay(500);
+        // 尝试同步网络上的时钟
+        sys->send_to(WEATHER_APP_NAME, CTRL_NAME,
+                     APP_MESSAGE_WIFI_CONN, (void *)UPDATE_NTP, NULL);
     }
+    else if (GET_SYS_MILLIS() - run_data->preLocalTimestamp > 400)
+    {
+        UpdateTime_RTC(get_timestamp());
+    }
+    run_data->coactusUpdateFlag = 0x00; // 取消强制更新标志
+    display_space();
+    delay(30);
+
 }
 
 static int weather_exit_callback(void *param)
@@ -479,10 +411,7 @@ static void weather_message_handle(const char *from, const char *to,
             run_data->update_type |= UPDATE_WEATHER;
 
             get_weather();
-            if (run_data->clock_page == 0)
-            {
-                display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
-            }
+            display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
         };
         break;
         case UPDATE_NTP:
@@ -491,22 +420,7 @@ static void weather_message_handle(const char *from, const char *to,
             run_data->update_type |= UPDATE_TIME;
 
             long long timestamp = get_timestamp(TIME_API); // nowapi时间API
-            if (run_data->clock_page == 0)
-            {
-                UpdateTime_RTC(timestamp);
-            }
-        };
-        break;
-        case UPDATE_DAILY:
-        {
-            log_i("daliy update.");
-            run_data->update_type |= UPDATE_DALIY_WEATHER;
-
-            get_daliyWeather(run_data->wea.daily_max, run_data->wea.daily_min);
-            if (run_data->clock_page == 1)
-            {
-                display_curve(run_data->wea.daily_max, run_data->wea.daily_min, LV_SCR_LOAD_ANIM_NONE);
-            }
+            UpdateTime_RTC(timestamp);
         };
         break;
         default:
