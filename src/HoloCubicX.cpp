@@ -35,8 +35,8 @@ void TaskLvglUpdate(void *parameter)
     // ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
     for (;;)
     {
-        AIO_LVGL_OPERATE_LOCK(lv_timer_handler();)
-        vTaskDelay(5);
+        LVGL_OPERATE_TRY_LOCK(lv_timer_handler();)
+        vTaskDelay(5 / portTICK_PERIOD_MS);
     }
 }
 

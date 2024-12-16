@@ -22,8 +22,7 @@ void taskTwo(void *parameter)
 {
     while (1)
     {
-        // LVGL任务主函数
-        AIO_LVGL_OPERATE_LOCK(lv_task_handler();)
+        LVGL_OPERATE_TRY_LOCK(lv_task_handler();) // 非阻塞
         vTaskDelay((TickType_t)(1000.0 / 60 / portTICK_PERIOD_MS));
     }
 }
@@ -70,10 +69,10 @@ static int game_2048_init(AppController *sys)
     // 刷新棋盘显示
     int new1 = game.addRandom();
     int new2 = game.addRandom();
-    AIO_LVGL_OPERATE_LOCK(showBoard(game.getBoard());)
+    LVGL_OPERATE_LOCK(showBoard(game.getBoard());)
     // 棋子出生动画
-    AIO_LVGL_OPERATE_LOCK(born(new1);)
-    AIO_LVGL_OPERATE_LOCK(born(new2);)
+    LVGL_OPERATE_LOCK(born(new1);)
+    LVGL_OPERATE_LOCK(born(new2);)
 
     return 0;
 }
@@ -99,11 +98,12 @@ static void game_2048_process(AppController *sys,
     if (UNKNOWN != act_info->active) {
         game.moveAndMerge(direction);//移动且合并
         // 渲染动画
-        if (game.comparePre() == 0) { // 棋盘布局改变
-            AIO_LVGL_OPERATE_LOCK(showAnim(game.getMoveRecord(), direction);)
-            while (lv_anim_count_running() > 0) delay(200);
-            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), game.getBoard()));
-            while (lv_anim_count_running() > 0) delay(200);
+        if (game.isChanged()) { // 棋盘布局改变
+            // 移动和合并动画
+            LVGL_OPERATE_LOCK(showAnim(game.getMoveRecord(), direction);)
+            // 展示新棋盘
+            // 新数字出生动画
+            LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), game.getBoard()));
         }
     }
 

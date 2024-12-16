@@ -59,9 +59,9 @@ public:
 
         if (x >= 16)
         {
-            return 1;
+            return 0;
         }
-        return 0;
+        return 1;
     };
     int *getBoard()
     {

@@ -65,7 +65,7 @@ void Display::init(uint8_t rotation, uint8_t backLight)
 
 void Display::routine()
 {
-    AIO_LVGL_OPERATE_LOCK(lv_timer_handler();)
+    LVGL_OPERATE_LOCK(lv_timer_handler();)
 }
 
 void Display::setBackLight(float duty)

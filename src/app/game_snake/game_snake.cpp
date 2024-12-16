@@ -24,7 +24,7 @@ void taskRun(void *parameter)
     while (1)
     {
         // LVGL任务主函数，处理所有的LVGL任务，包括绘制界面，处理用户输入等。
-        AIO_LVGL_OPERATE_LOCK(lv_task_handler();)
+        LVGL_OPERATE_TRY_LOCK(lv_task_handler();)
         vTaskDelay(5 / portTICK_PERIOD_MS);
     }
     Serial.println("Ending lv_task_handler");
@@ -81,7 +81,7 @@ static void game_snake_process(AppController *sys, const ImuAction *act_info)
 
     if (run_data->gameStatus == 0 && run_data->xReturned_task_run == pdPASS)
     {
-        AIO_LVGL_OPERATE_LOCK(display_snake(run_data->gameStatus, LV_SCR_LOAD_ANIM_NONE););
+        LVGL_OPERATE_LOCK(display_snake(run_data->gameStatus, LV_SCR_LOAD_ANIM_NONE););
     }
 
     // 速度控制
