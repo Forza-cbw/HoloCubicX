@@ -67,7 +67,7 @@ void weather_gui_init(void)
     lv_style_set_pad_right(&bar_style, 1);
 }
 
-void display_weather_init(lv_scr_load_anim_t anim_type)
+void display_weather_init(void)
 {
     lv_obj_t *act_obj = lv_scr_act(); // 获取当前活动页
     if (act_obj == scr_1)
@@ -177,10 +177,8 @@ void display_weather_init(lv_scr_load_anim_t anim_type)
     // }
 }
 
-void display_weather(struct Weather weaInfo, lv_scr_load_anim_t anim_type)
+void display_weather(struct Weather weaInfo)
 {
-    display_weather_init(anim_type);
-
     lv_label_set_text(cityLabel, weaInfo.cityname);
     if (strlen(weaInfo.cityname) > 6)
     {
@@ -201,31 +199,11 @@ void display_weather(struct Weather weaInfo, lv_scr_load_anim_t anim_type)
     lv_bar_set_value(humiBar, weaInfo.humidity, LV_ANIM_ON);
     lv_label_set_text_fmt(humiLabel, "%d%%", weaInfo.humidity);
 
-    // // 绘制图形
-    // lv_obj_align(weatherImg, NULL, LV_ALIGN_TOP_RIGHT, -10, 10);
-    // lv_obj_align(cityLabel, NULL, LV_ALIGN_TOP_LEFT, 20, 15);
-    // lv_obj_align(txtLabel, NULL, LV_ALIGN_TOP_LEFT, 0, 50);
-    // lv_obj_align(tempImg, NULL, LV_ALIGN_LEFT_MID, 10, 70);
-    // lv_obj_align(tempBar, NULL, LV_ALIGN_LEFT_MID, 35, 70);
-    // lv_obj_align(tempLabel, NULL, LV_ALIGN_LEFT_MID, 100, 70);
-    // lv_obj_align(humiImg, NULL, LV_ALIGN_LEFT_MID, 0, 100);
-    // lv_obj_align(humiBar, NULL, LV_ALIGN_LEFT_MID, 35, 100);
-    // lv_obj_align(humiLabel, NULL, LV_ALIGN_LEFT_MID, 100, 100);
-    // lv_obj_align(spaceImg, NULL, LV_ALIGN_BOTTOM_RIGHT, -10, -10);
-
-    if (LV_SCR_LOAD_ANIM_NONE != anim_type)
-    {
-        lv_scr_load_anim(scr_1, anim_type, 300, 300, false);
-    }
-    else
-    {
-        lv_scr_load(scr_1);
-    }
+    lv_scr_load(scr_1);
 }
 
-void display_time(struct TimeStr timeInfo, lv_scr_load_anim_t anim_type)
+void display_time(struct TimeStr timeInfo)
 {
-    display_weather_init(anim_type);
     lv_label_set_text_fmt(clockLabel_1, "%02d#ffa500 %02d#", timeInfo.hour, timeInfo.minute);
     lv_label_set_text_fmt(clockLabel_2, "%02d", timeInfo.second);
     lv_label_set_text_fmt(dateLabel, "%2d月%2d日   周%s", timeInfo.month, timeInfo.day,

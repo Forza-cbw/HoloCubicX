@@ -15,11 +15,8 @@
 #define WEATHER_APP_NAME "Weather"
 // 更新使用高德地图
 #define WEATHER_NOW_API_UPDATE "http://restapi.amap.com/v3/weather/weatherInfo?key=%s&city=%s&extensions=base"
-#define WEATHER_DALIY_API "http://restapi.amap.com/v3/weather/weatherInfo?key=%s&city=%s&extensions=all"
 #define TIME_API "http://api.m.taobao.com/rest/api3.do?api=mtop.common.gettimestamp"
-#define WEATHER_PAGE_SIZE 2
 #define UPDATE_WEATHER 0x01       // 更新天气
-#define UPDATE_DALIY_WEATHER 0x02 // 更新每天天气
 #define UPDATE_TIME 0x04          // 更新时间
 
 // NTP 服务器信息
@@ -72,7 +69,7 @@ static void read_config(WT_Config *cfg)
     if (size == 0)
     {
         // 默认值
-        cfg->CITY_CODE = "410305";
+        cfg->CITY_CODE = "340123";
         cfg->weatherUpdataInterval = 900000; // 天气更新的时间间隔900000(900s)
         cfg->timeUpdataInterval = 900000;    // 日期时钟更新的时间间隔900000(900s)
         write_config(cfg);
@@ -101,11 +98,11 @@ struct WeatherAppRunData
     unsigned int coactusUpdateFlag; // 强制更新标志
     unsigned int update_type; // 更新类型的标志位
 
-    BaseType_t xReturned_task_task_update; // 更新数据的异步任务
-    TaskHandle_t xHandle_task_task_update; // 更新数据的异步任务
+//    BaseType_t xReturned_task_task_update; // 更新数据的异步任务
+//    TaskHandle_t xHandle_task_task_update; // 更新数据的异步任务
 
-    ESP32Time g_rtc; // 用于时间解码
     Weather wea;     // 保存天气状况
+    TimeStr t; // 保存ntp时间
 };
 
 static WT_Config cfg_data;
@@ -189,7 +186,7 @@ std::map<String, int> weatherMap = {
 
 };
 
-static void get_weather(void)
+static void updateWeather(void)
 {
     if (WL_CONNECTED != WiFi.status())
         return;
@@ -295,24 +292,27 @@ static long long get_timestamp(String url)
     return run_data->preNetTimestamp;
 }
 
-static void UpdateTime_RTC(long long timestamp)
+static void updateTimeRTC(long long timestamp)
 {
     struct TimeStr t;
-    run_data->g_rtc.setTime(timestamp / 1000);
-    t.month = run_data->g_rtc.getMonth() + 1;
-    t.day = run_data->g_rtc.getDay();
-    t.hour = run_data->g_rtc.getHour(true);
-    t.minute = run_data->g_rtc.getMinute();
-    t.second = run_data->g_rtc.getSecond();
-    t.weekday = run_data->g_rtc.getDayofWeek();
+    ESP32Time g_rtc;
+
+    g_rtc.setTime(timestamp / 1000);
+    t.month = g_rtc.getMonth() + 1;
+    t.day = g_rtc.getDay();
+    t.hour = g_rtc.getHour(true);
+    t.minute = g_rtc.getMinute();
+    t.second = g_rtc.getSecond();
+    t.weekday = g_rtc.getDayofWeek();
     // log_i("time : %d-%d-%d\n",t.hour, t.minute, t.second);
-    display_time(t, LV_SCR_LOAD_ANIM_NONE);
+    run_data->t = t;
 }
 
 static int weather_init(AppController *sys)
 {
     tft->setSwapBytes(true);
     weather_gui_init();
+    display_weather_init();
     // 获取配置信息
     read_config(&cfg_data);
 
@@ -334,24 +334,22 @@ static int weather_init(AppController *sys)
 static void weather_process(AppController *sys,
                             const ImuAction *act_info)
 {
-    lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
-
     if (DOWN_MORE == act_info->active)
     {
         sys->app_exit();
         return;
     }
     //else if (GO_FORWORD == act_info->active)
-    else if (UP == act_info->active) // todo 改成UP有没有问题
+    else if (UP == act_info->active) // todo 改成需要最小时间间隔启动，更新时有提示
     {
         // 间接强制更新
         run_data->coactusUpdateFlag = 0x01;
         delay(1000); // 以防间接强制更新后，生产很多请求 使显示卡顿
     }
 
-
     // 界面刷新
-    display_weather(run_data->wea, anim_type);
+    display_weather(run_data->wea); // todo 分离成异步任务
+    display_time(run_data->t);
     if (0x01 == run_data->coactusUpdateFlag || doDelayMillisTime(cfg_data.weatherUpdataInterval, &run_data->preWeatherMillis, false))
     {
         sys->send_to(WEATHER_APP_NAME, CTRL_NAME,
@@ -366,12 +364,11 @@ static void weather_process(AppController *sys,
     }
     else if (GET_SYS_MILLIS() - run_data->preLocalTimestamp > 400)
     {
-        UpdateTime_RTC(get_timestamp());
+        updateTimeRTC(get_timestamp());
     }
     run_data->coactusUpdateFlag = 0x00; // 取消强制更新标志
     display_space();
     delay(30);
-
 }
 
 static int weather_exit_callback(void *param)
@@ -379,10 +376,10 @@ static int weather_exit_callback(void *param)
     weather_gui_del();
 
     // 查杀异步任务
-    if (run_data->xReturned_task_task_update == pdPASS)
-    {
-        vTaskDelete(run_data->xHandle_task_task_update);
-    }
+//    if (run_data->xReturned_task_task_update == pdPASS)
+//    {
+//        vTaskDelete(run_data->xHandle_task_task_update);
+//    }
 
     // 释放运行数据
     if (NULL != run_data)
@@ -410,8 +407,7 @@ static void weather_message_handle(const char *from, const char *to,
             log_i("weather update.");
             run_data->update_type |= UPDATE_WEATHER;
 
-            get_weather();
-            display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
+            updateWeather();
         };
         break;
         case UPDATE_NTP:
@@ -420,7 +416,7 @@ static void weather_message_handle(const char *from, const char *to,
             run_data->update_type |= UPDATE_TIME;
 
             long long timestamp = get_timestamp(TIME_API); // nowapi时间API
-            UpdateTime_RTC(timestamp);
+            updateTimeRTC(timestamp);
         };
         break;
         default:

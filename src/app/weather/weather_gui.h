@@ -47,13 +47,13 @@ extern "C"
         lv_task_handler(); //等待动画完成
 
     void weather_gui_init(void);
-    void display_weather_init(lv_scr_load_anim_t anim_type);
-    void display_weather(struct Weather weaInfo, lv_scr_load_anim_t anim_type);
-    void display_time(struct TimeStr timeInfo, lv_scr_load_anim_t anim_type);
+    void display_weather_init(void);
+    void display_weather(struct Weather weaInfo);
+    void display_time(struct TimeStr timeInfo);
     void weather_gui_release(void);
     void weather_gui_del(void);
     void display_space(void);
-    int airQulityLevel(char* q);
+//    int airQulityLevel(char* q);
 
 #ifdef __cplusplus
 } /* extern "C" */
