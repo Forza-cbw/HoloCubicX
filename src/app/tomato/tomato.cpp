@@ -216,8 +216,6 @@ static void rgb_reset()
 }
 static void tomato_process(AppController *sys, const ImuAction *act_info)
 {
-    static int count = 0;
-    static int count_down_reset = ON;
     if (!hadOpened)
     {
         delay(750);
@@ -226,72 +224,30 @@ static void tomato_process(AppController *sys, const ImuAction *act_info)
     }
     if (DOWN_MORE == act_info->active)
     {
-        count = 0;
-        count_down_reset = ON;
         hadOpened = false;
         sys->app_exit(); // 退出APP
         return;
     }
 
-    //if (GO_FORWORD == act_info->active)
-    if (UP == act_info->active) // todo GO_FORWORD改成UP会不会有问题？
+    if (UP == act_info->active || DOWN == act_info->active)
     {
         unsigned long currentTime = millis();
         unsigned long elapsedTime = currentTime - run_data->time_start;
+        int inc = UP == act_info->active ? 1 : -1;
 
-        if (count <= 42)
+        if (elapsedTime >= 300) // 控制时间增速
         {
-            if (elapsedTime >= 700)
+            run_data->time_start = currentTime;
+            if (run_data->t_start.minute < 99)
             {
-                run_data->time_start = currentTime;
-                if (count_down_reset == ON)
-                {
-                    run_data->time_start = millis();
-                    count_down_reset = (count > 1) ? OFF : ON;
-                    count = (count > 1) ? count : 0;
-                }
-                if (run_data->t.second != 0)
-                {
-                    count_down_reset = ON;
-                }
-                else if (run_data->t_start.minute < 99)
-                {
-                    run_data->t_start.minute += 1;
-                }
+                run_data->t_start.minute += inc;
             }
-        }
-        else
-        {
-            if (elapsedTime >= 300)
-            {
-                run_data->time_start = currentTime;
-                if (count_down_reset == ON)
-                {
-                    run_data->time_start = millis();
-                    count_down_reset = (count > 1) ? OFF : ON;
-                    count = (count > 1) ? count : 0;
-                }
-                if (run_data->t.second != 0)
-                {
-                    count_down_reset = ON;
-                }
-                else if (run_data->t_start.minute < 99)
-                {
-                    run_data->t_start.minute += 1;
-                }
-            }
-        }
-        if (count <= 42)
-        {
-            count++;
         }
         return;
     }
 
     if (TURN_LEFT == act_info->active || TURN_RIGHT == act_info->active)
     {
-        count = 0;
-        count_down_reset = ON;
         static int last_mode;
         run_data->switch_count <<= 2;
         run_data->switch_count |= 3;      // 写11并移位
