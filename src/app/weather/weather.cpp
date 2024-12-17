@@ -15,7 +15,6 @@
 #define WEATHER_APP_NAME "Weather"
 // 更新使用高德地图
 #define WEATHER_NOW_API_UPDATE "http://restapi.amap.com/v3/weather/weatherInfo?key=%s&city=%s&extensions=base"
-#define TIME_API "http://api.m.taobao.com/rest/api3.do?api=mtop.common.gettimestamp"
 #define UPDATE_WEATHER 0x01       // 更新天气
 #define UPDATE_TIME 0x04          // 更新时间
 
@@ -257,7 +256,7 @@ static long long get_timestamp()
     return run_data->preNetTimestamp;
 }
 
-static long long get_timestamp(String url)
+static long long get_timestamp_ntp()
 {
     if (WL_CONNECTED != WiFi.status())
         return 0;
@@ -415,7 +414,7 @@ static void weather_message_handle(const char *from, const char *to,
             log_i("ntp update.");
             run_data->update_type |= UPDATE_TIME;
 
-            long long timestamp = get_timestamp(TIME_API); // nowapi时间API
+            long long timestamp = get_timestamp_ntp(); // nowapi时间API
             updateTimeRTC(timestamp);
         };
         break;

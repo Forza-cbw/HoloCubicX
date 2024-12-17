@@ -160,7 +160,7 @@ void init_page_header()
 #endif
 
 #if APP_ARCHER_USE
-    webpage_header += F("<li><a href='/archer_setting'>心跳</a></li>");
+    webpage_header += F("<li><a href='/archer_setting'>丘比特</a></li>");
 #endif
 #if APP_PC_RESOURCE_USE
     webpage_header += F("<li><a href='/pc_resource_setting'>PC资源监控</a></li>");
