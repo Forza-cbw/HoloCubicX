@@ -24,7 +24,7 @@ void stock_setting(void);
 void picture_setting(void);
 void media_setting(void);
 void screen_setting(void);
-void heartbeat_setting(void);
+void archer_setting(void);
 void anniversary_setting(void);
 void pc_resource_setting();
 

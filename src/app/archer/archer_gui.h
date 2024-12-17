@@ -17,7 +17,7 @@ enum S_R_TYPE{
         lv_task_handler(); //等待动画完成
 
     void heartbeat_gui_init(void);
-    void display_heartbeat(const char *file_name, lv_scr_load_anim_t anim_type);
+    void display_heartbeat(void);
     void heartbeat_gui_del(void);
     void heartbeat_obj_del(void);
     void display_heartbeat_img(void);
@@ -35,7 +35,7 @@ extern "C"
 #endif
 
 #include "lvgl.h"
-    extern const lv_img_dsc_t app_heartbeat;
+    extern const lv_img_dsc_t app_archer;
 
 #ifdef __cplusplus
 } /* extern "C" */

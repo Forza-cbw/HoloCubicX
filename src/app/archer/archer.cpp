@@ -1,11 +1,11 @@
-#include "heartbeat.h"
-#include "heartbeat_gui.h"
+#include "archer.h"
+#include "archer_gui.h"
 #include "sys/app_controller.h"
 #include "common.h"
 #include "network.h"
 #include <PubSubClient.h>
 
-#define HEARTBEAT_APP_NAME "Heartbeat"
+#define ARCHER_APP_NAME "Archer"
 
 #define DEFALUT_MQTT_IP "120.79.216.105"
 #define DEFALUT_MQTT_IP_CLIMBL "climb.dynv6.net"
@@ -44,7 +44,7 @@ void HeartbeatAppForeverData::callback(char *topic, byte *payload, unsigned int 
         log_i("%c",(char)payload[i]); // 打印主题内容
     }
 
-    app_controller->send_to(HEARTBEAT_APP_NAME, CTRL_NAME, APP_MESSAGE_MQTT_DATA, NULL, NULL);
+    app_controller->send_to(ARCHER_APP_NAME, CTRL_NAME, APP_MESSAGE_MQTT_DATA, NULL, NULL);
 }
 
 HeartbeatAppForeverData hb_cfg;
@@ -128,7 +128,7 @@ static void read_config(HeartbeatAppForeverData *cfg)
         char *param[9] = {0};
         analyseParam(info, 9, param);
         cfg->role = atoi(param[0]);
-        log_i(HEARTBEAT_APP_NAME " role %d\n", cfg->role);
+        log_i(ARCHER_APP_NAME " role %d\n", cfg->role);
 
         strcpy(cfg->liz_mqtt_subtopic, param[1]);
         log_i("mqtt_subtopic %s\n", cfg->liz_mqtt_subtopic);
@@ -212,7 +212,7 @@ static HeartbeatAppRunData *run_data = NULL;
 
 // 当然你也可以添加恒定在内存中的少量变量（退出时不用释放，实现第二次启动时可以读取）
 
-static int heartbeat_init(AppController *sys)
+static int archer_init(AppController *sys)
 {
     heartbeat_gui_init();
     // 初始化运行时参数
@@ -239,15 +239,14 @@ static int heartbeat_init(AppController *sys)
             // hb_cfg.mqtt_client = new PubSubClient(DEFALUT_MQTT_IP_CLIMBL, hb_cfg.port, hb_cfg.callback, hb_cfg.espClient);
         }
         // 连接wifi，并开启mqtt客户端
-        sys->send_to(HEARTBEAT_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
+        sys->send_to(ARCHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
     }
     return 0;
 }
 
-static void heartbeat_process(AppController *sys,
-                              const ImuAction *act_info)
+static void archer_process(AppController *sys,
+                           const ImuAction *act_info)
 {
-    lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
     if (DOWN_MORE == act_info->active)
     {
         sys->app_exit(); // 退出APP
@@ -255,12 +254,11 @@ static void heartbeat_process(AppController *sys,
     }
     else if (DOWN_MORE == act_info->active) // 向前按发送一条消息
     {
-        anim_type = LV_SCR_LOAD_ANIM_MOVE_TOP;
         run_data->send_cnt += 1;
         if (NULL != hb_cfg.mqtt_client)
         {
             hb_cfg.mqtt_client->publish(hb_cfg.liz_mqtt_pubtopic, "hello!");
-            log_i(HEARTBEAT_APP_NAME " sent publish %s successful\n", hb_cfg.liz_mqtt_pubtopic);
+            log_i(ARCHER_APP_NAME " sent publish %s successful\n", hb_cfg.liz_mqtt_pubtopic);
         }
 
         // 发送指示灯
@@ -288,7 +286,7 @@ static void heartbeat_process(AppController *sys,
         if (NULL != hb_cfg.mqtt_client)
         {
             hb_cfg.mqtt_client->publish(hb_cfg.liz_mqtt_pubtopic, MQTT_SEND_MSG);
-            log_i(HEARTBEAT_APP_NAME " sent publish %s successful\n", hb_cfg.liz_mqtt_pubtopic);
+            log_i(ARCHER_APP_NAME " sent publish %s successful\n", hb_cfg.liz_mqtt_pubtopic);
         }
     }
 
@@ -304,20 +302,20 @@ static void heartbeat_process(AppController *sys,
         if (doDelayMillisTime(run_data->timeUpdataInterval, &run_data->preUpdataMillis, false))
         {
             // 发送请求。如果是wifi相关的消息，
-            // 当请求完成后自动会调用 heartbeat_message_handle 函数
-            sys->send_to(HEARTBEAT_APP_NAME, CTRL_NAME,
+            // 当请求完成后自动会调用 archer_message_handle 函数
+            sys->send_to(ARCHER_APP_NAME, CTRL_NAME,
                          APP_MESSAGE_WIFI_ALIVE, NULL, NULL);
         }
     }
 
     // 程序需要时可以适当加延时
-    display_heartbeat("heartbeat", anim_type);
+    display_heartbeat();
     heartbeat_set_send_recv_cnt_label(run_data->send_cnt, run_data->recv_cnt);
     display_heartbeat_img();
     delay(30);
 }
 
-static int heartbeat_exit_callback(void *param)
+static int archer_exit_callback(void *param)
 {
     // 释放资源
     heartbeat_gui_del();
@@ -331,9 +329,9 @@ static int heartbeat_exit_callback(void *param)
     return 0;
 }
 
-static void heartbeat_message_handle(const char *from, const char *to,
-                                     APP_MESSAGE_TYPE type, void *message,
-                                     void *ext_info)
+static void archer_message_handle(const char *from, const char *to,
+                                  APP_MESSAGE_TYPE type, void *message,
+                                  void *ext_info)
 {
     // 目前主要是wifi开关类事件（用于功耗控制）
     switch (type)
@@ -475,7 +473,7 @@ static void heartbeat_message_handle(const char *from, const char *to,
         //                     0.001, 8};
         // set_rgb_and_run(&rgb_setting);
         run_data->recv_cnt++;
-        log_i("received heartbeat");
+        log_i("received archer");
     }
     break;
     default:
@@ -483,6 +481,6 @@ static void heartbeat_message_handle(const char *from, const char *to,
     }
 }
 
-APP_OBJ heartbeat_app = {HEARTBEAT_APP_NAME, &app_heartbeat, "Author WoodwindHu\nVersion 2.0.0\n",
-                         heartbeat_init, heartbeat_process,
-                         heartbeat_exit_callback, heartbeat_message_handle};
+APP_OBJ archer_app = {ARCHER_APP_NAME, &app_archer, "Author WoodwindHu\nVersion 2.0.0\n",
+                      archer_init, archer_process,
+                      archer_exit_callback, archer_message_handle};

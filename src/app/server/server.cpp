@@ -38,29 +38,14 @@ void start_web_config()
 #if APP_WEATHER_USE
     server.on("/weather_setting", weather_setting);
 #endif
-#if APP_WEATHER_OLD_USE
-    server.on("/weather_old_setting", weather_old_setting);
-#endif
-#if APP_BILIBILI_FANS_USE
-    server.on("/bili_setting", bili_setting);
-#endif
-#if APP_STOCK_MARKET_USE
-    server.on("/stock_setting", stock_setting);
-#endif
 #if APP_PICTURE_USE
     server.on("/picture_setting", picture_setting);
 #endif
 #if APP_MEDIA_PLAYER_USE
     server.on("/media_setting", media_setting);
 #endif
-#if APP_SCREEN_SHARE_USE
-    server.on("/screen_setting", screen_setting);
-#endif
-#if APP_HEARTBEAT_USE
-    server.on("/heartbeat_setting", heartbeat_setting);
-#endif
-#if APP_ANNIVERSARY_USE
-    server.on("/anniversary_setting", anniversary_setting);
+#if APP_ARCHER_USE
+    server.on("/archer_setting", archer_setting);
 #endif
 #if APP_PC_RESOURCE_USE
     server.on("/pc_resource_setting", pc_resource_setting);
@@ -78,29 +63,14 @@ void start_web_config()
 #if APP_WEATHER_USE
     server.on("/saveWeatherConf", saveWeatherConf);
 #endif
-#if APP_WEATHER_OLD_USE
-    server.on("/saveWeatherOldConf", saveWeatherOldConf);
-#endif
-#if APP_BILIBILI_FANS_USE
-    server.on("/saveBiliConf", saveBiliConf);
-#endif
-#if APP_STOCK_MARKET_USE
-    server.on("/saveStockConf", saveStockConf);
-#endif
 #if APP_PICTURE_USE
     server.on("/savePictureConf", savePictureConf);
 #endif
 #if APP_MEDIA_PLAYER_USE
     server.on("/saveMediaConf", saveMediaConf);
 #endif
-#if APP_SCREEN_SHARE_USE
-    server.on("/saveScreenConf", saveScreenConf);
-#endif
-#if APP_HEARTBEAT_USE
+#if APP_ARCHER_USE
     server.on("/saveHeartbeatConf", saveHeartbeatConf);
-#endif
-#if APP_ANNIVERSARY_USE
-    server.on("/saveAnniversaryConf", saveAnniversaryConf);
 #endif
 #if APP_PC_RESOURCE_USE
     server.on("/savePCResourceConf", savePCResourceConf);

@@ -1,4 +1,4 @@
-#include "heartbeat_gui.h"
+#include "archer_gui.h"
 
 #define LV_LVGL_H_INCLUDE_SIMPLE
 
@@ -111,7 +111,7 @@ void heartbeat_gui_init(void)
  * 其他函数请根据需要添加
  */
 
-void display_heartbeat(const char *file_name, lv_scr_load_anim_t anim_type)
+void display_heartbeat()
 {
     lv_obj_t *act_obj = lv_scr_act(); // 获取当前活动页
     if (act_obj == heartbeat_gui)

@@ -29,10 +29,10 @@
 #include "app/game_2048/game_2048.h"
 #endif
 
-// 心跳APP
-#define APP_HEARTBEAT_USE 1
-#if APP_HEARTBEAT_USE
-#include "app/heartbeat/heartbeat.h"
+// 丘比特射爱心APP
+#define APP_ARCHER_USE 1
+#if APP_ARCHER_USE
+#include "app/archer/archer.h"
 #endif
 
 // 特效动画APP

@@ -147,8 +147,8 @@ void setup()
 #if APP_ANNIVERSARY_USE
     app_controller->app_install(&anniversary_app);
 #endif
-#if APP_HEARTBEAT_USE
-    app_controller->app_install(&heartbeat_app, APP_TYPE_BACKGROUND);
+#if APP_ARCHER_USE
+    app_controller->app_install(&archer_app, APP_TYPE_BACKGROUND);
 #endif
 #if APP_PC_RESOURCE_USE
     app_controller->app_install(&pc_resource_app);
