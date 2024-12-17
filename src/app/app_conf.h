@@ -17,12 +17,6 @@
 #include "app/example/example.h"
 #endif
 
-// 纪念日APP
-#define APP_ANNIVERSARY_USE 0
-#if APP_ANNIVERSARY_USE
-#include "app/anniversary/anniversary.h"
-#endif
-
 // 文件管理器APP
 #define APP_FILE_MANAGER_USE 0
 #if APP_FILE_MANAGER_USE
