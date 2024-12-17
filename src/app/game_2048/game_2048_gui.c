@@ -3,6 +3,7 @@
 
 #include "lvgl.h"
 #include "esp32-hal-log.h"
+#include "gui_lock.h"
 
 #define SCALE_SIZE 4
 
@@ -32,13 +33,6 @@ void game_2048_gui_init(void)
         lv_obj_align(img[i], LV_ALIGN_TOP_LEFT, 8 + i % 4 * 58, 8 + i / 4 * 58);
     }
     lv_scr_load(game_2048_gui);
-}
-
-/*
- * 其他函数请根据需要添加
- */
-void display_game_2048(const char *file_name, lv_scr_load_anim_t anim_type)
-{
 }
 
 void game_2048_gui_del(void)
@@ -75,7 +69,7 @@ void born(int i)
     lv_anim_init(&a);
     lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)anim_size_cb);
     lv_anim_set_var(&a, img[i]);
-    lv_anim_set_time(&a, 300);
+    lv_anim_set_time(&a, 200);
 
     /* 在动画中设置路径 */
     lv_anim_set_path_cb(&a, lv_anim_path_linear);
@@ -110,7 +104,7 @@ void zoom(int i)
     lv_anim_init(&a);
     lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)anim_size_cb);
     lv_anim_set_var(&a, img[i]);
-    lv_anim_set_delay(&a, 400);
+    lv_anim_set_delay(&a, 0);
     lv_anim_set_time(&a, 100);
     //播完后回放
     lv_anim_set_playback_delay(&a, 0);
@@ -137,6 +131,8 @@ void zoom(int i)
     lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)lv_img_set_offset_y);
     lv_anim_set_values(&a, 0, 3);
     lv_anim_start(&a);
+
+    log_i("(%d,%d)", i/SCALE_SIZE, i%SCALE_SIZE);
 }
 
 /*
@@ -152,7 +148,7 @@ void move(int i, lv_anim_exec_xcb_t direction, int dist)
 
     lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)direction);
     lv_anim_set_var(&a, img[i]);
-    lv_anim_set_time(&a, 500);
+    lv_anim_set_time(&a, 400);
     if (direction == (lv_anim_exec_xcb_t)lv_obj_set_x)
     {
         lv_anim_set_values(&a, lv_obj_get_x(img[i]), lv_obj_get_x(img[i]) + dist * 58);
@@ -164,7 +160,6 @@ void move(int i, lv_anim_exec_xcb_t direction, int dist)
 
     // 在动画中设置路径
     lv_anim_set_path_cb(&a, lv_anim_path_ease_in);
-
     lv_anim_start(&a);
 }
 
@@ -203,7 +198,7 @@ const lv_img_dsc_t *getN(int i)
 }
 
 //刷新棋盘
-void showBoard(int *map)
+void GUI_sync(int *map)
 {
     for (int i = 0; i < SCALE_SIZE * SCALE_SIZE; i++)
     {
@@ -214,37 +209,46 @@ void showBoard(int *map)
 
 /*
  * showAnim————用动画来更新棋盘
- * animMap：动画的轨迹数组
+ * moveRecord：向x或y方向上移动多少格
  * direction：移动的方向，1.上 2.下 3.左 4.右
  */
-void showAnim(int *animMap, int direction)
+void showAnim(int (*moveRecord)[4], bool (*dstNeedZoom)[4], int direction, int* board)
 {
-    lv_anim_exec_xcb_t Normal;
-    switch (direction)
-    {
-    case 1:
-    case 2:
-        Normal = (lv_anim_exec_xcb_t)lv_obj_set_y;
-        break;
-    case 3:
-    case 4:
-        Normal = (lv_anim_exec_xcb_t)lv_obj_set_x;
-        break;
-    }
+    assert(1 <= direction && direction <= 4);
+    lv_anim_exec_xcb_t Normal = direction <= 2 ? (lv_anim_exec_xcb_t)lv_obj_set_y : (lv_anim_exec_xcb_t)lv_obj_set_x;
 
-    //移动和合并
-    for (int i = 0; i < 16; i++)
-    {
-        if (animMap[i] > 4)
-        {
-            zoom(i);
-            move(i, Normal, animMap[i] - 8);
-        }
-        else if (animMap[i] != 0)
-        {
-            move(i, Normal, animMap[i]);
+    int startI = 0, endI = SCALE_SIZE, stepI = 1;
+    int startJ = 0, endJ = SCALE_SIZE, stepJ = 1;
+
+    if (direction == 2) // 下
+        startI = SCALE_SIZE-1, endI = -1, stepI = -1;
+    if (direction == 4) // 右
+        startJ = SCALE_SIZE-1, endJ = -1, stepJ = -1;
+
+    //移动
+    for (int i = startI; i != endI; i += stepI) {
+        for (int j = startJ; j != endJ; j += stepJ) {
+            int img_index = i * SCALE_SIZE + j; // 被移动img的下标
+
+            if (moveRecord[i][j] != 0) {
+                LVGL_OPERATE_LOCK(move(img_index, Normal, moveRecord[i][j]);)
+            }
         }
     }
+    waitForAinm(); // 等待动画完成，因为接下来的缓冲区同步会导致动画被打断
+    // 合并
+    for (int i = startI; i != endI; i += stepI) {
+        for (int j = startJ; j != endJ; j += stepJ) {
+            // 移动的目标位置
+            int dst_i = i, dst_j = j;
+            if (direction <= 2) dst_i += moveRecord[i][j];
+            else dst_j += moveRecord[i][j];
+            LVGL_OPERATE_LOCK(GUI_sync(board));
+            if (dstNeedZoom[i][j])
+                LVGL_OPERATE_LOCK(zoom(dst_i * SCALE_SIZE + dst_j);)
+        }
+    }
+    waitForAinm();
 }
 
 /*
@@ -253,10 +257,11 @@ void showAnim(int *animMap, int direction)
  */
 void showNewBorn(int newborn, int *map)
 {
-    //展示新棋盘
-    showBoard(map);
+    //GUI缓冲区同步
+    LVGL_OPERATE_LOCK(GUI_sync(map);)
     for (int i=0; i<4; i++)
         log_i("%d %d %d %d", map[i*4], map[i*4 + 1], map[i*4 +2], map[i*4 +3]);
     //出现
-    born(newborn);
+    LVGL_OPERATE_LOCK(born(newborn);)
+    waitForAinm();
 }

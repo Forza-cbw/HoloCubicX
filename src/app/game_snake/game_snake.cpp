@@ -2,7 +2,7 @@
 #include "game_snake_gui.h"
 #include "sys/app_controller.h"
 #include "common.h"
-#include "freertos/semphr.h"
+#include "gui_lock.h"
 
 // 游戏名称
 #define GAME_APP_NAME "Snake"

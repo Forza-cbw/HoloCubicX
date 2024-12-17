@@ -39,7 +39,6 @@ int GAME2048::addRandom(void)
  */
 void GAME2048::initLocation(int direction)
 {
-    log_i("direction[%d]", direction);
     for (int i = 0; i < SCALE_SIZE; i++)
     {
         for (int j = 0; j < SCALE_SIZE; j++)
@@ -51,27 +50,18 @@ void GAME2048::initLocation(int direction)
                 Location[i][j] = (board[i][j] != 0 ? std::string(1, 'A' + j) : "");
             }
         }
-        log_i("|%s|%s|%s|%s", Location[i][0].c_str(), Location[i][1].c_str(), Location[i][2].c_str(), Location[i][3].c_str());
     }
 }
 
 /*
  *   通过解析Location变量的变化，获取并记录移动距离和合并位置
  *   direction  1.上 2.下 3.左 4.右
- *   >4则有合并,-8则是移动的值
- *   <4则直接就是移动的值
  */
 void GAME2048::countMoveRecord(int direction)
 {
+    memset(moveRecord, 0, sizeof(moveRecord)); //清空
+    memset(dstNeedZoom, false, sizeof(dstNeedZoom)); //清空
 
-    //清空
-    for (int i = 0; i < SCALE_SIZE; i++)
-    {
-        for (int j = 0; j < SCALE_SIZE; j++)
-        {
-            moveRecord[i][j] = 0;
-        }
-    }
     for (int i = 0; i < SCALE_SIZE; i++)
     {
         for (int j = 0; j < SCALE_SIZE; j++)
@@ -80,6 +70,10 @@ void GAME2048::countMoveRecord(int direction)
             {
             case 1:
             case 2:
+                // 该位置发生了合并，计算（后移动的）源方块所在位置，移动该方块时需要播放zoom
+                if (Location[i][j].length() == 2) {
+                    dstNeedZoom[Location[i][j][1] - 'A'][j] = true;
+                }
                 //移动检测
                 if (Location[i][j].find("A") != -1)
                 {
@@ -100,10 +94,14 @@ void GAME2048::countMoveRecord(int direction)
                 break;
             case 3:
             case 4:
+                // 该位置发生了合并，计算（后移动的）源方块所在位置，移动该方块时需要播放zoom
+                if (Location[i][j].length() == 2) {
+                    dstNeedZoom[i][Location[i][j][1] - 'A'] = true;
+                }
                 //移动检测
                 if (Location[i][j].find("A") != -1)
                 {
-                    moveRecord[i][0] += j;
+                    moveRecord[i][0] += j; // 'A' 向右移动j格
                 }
                 if (Location[i][j].find("B") != -1)
                 {
@@ -119,11 +117,7 @@ void GAME2048::countMoveRecord(int direction)
                 }
                 break;
             }
-            //合并检测
-            if (Location[i][j].length() == 2)
-            {
-                moveRecord[i][j] += 8;
-            }
+
         }
     }
 }

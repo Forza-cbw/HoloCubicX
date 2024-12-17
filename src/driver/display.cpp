@@ -2,6 +2,7 @@
 #include "network.h"
 #include "lv_port_indev.h"
 #include "lv_demo_encoder.h"
+#include "gui_lock.h"
 #include "common.h"
 
 #define LV_HOR_RES_MAX_LEN 80 // 24

@@ -13,6 +13,7 @@
 #include "driver/lv_port_fs.h"
 
 #include "common.h"
+#include "gui_lock.h"
 #include "sys/app_controller.h"
 
 #include "app/app_conf.h"

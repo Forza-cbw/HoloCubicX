@@ -17,6 +17,7 @@ private:
     int previous[4][4];
     string Location[4][4];
     int moveRecord[4][4];
+    bool dstNeedZoom[4][4]; // 方块移动的目的地，是否需要播放zoom动画
 
 public:
     void init()
@@ -47,7 +48,7 @@ public:
         }
     };
 
-    int comparePre()
+    int isChanged()
     {
         //判断移动后是否相同
         int x = 0;
@@ -71,9 +72,13 @@ public:
     {
         return &this->Location[0][0];
     };
-    int *getMoveRecord()
+    int (*getMoveRecord())[4]
     {
-        return &this->moveRecord[0][0];
+        return this->moveRecord;
+    };
+    bool (*getDstNeedZoom())[4]
+    {
+        return this->dstNeedZoom;
     };
 };
 

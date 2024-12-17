@@ -13,12 +13,11 @@ extern "C"
         lv_task_handler(); // 等待动画完成
 
     void game_2048_gui_init(void);
-    void display_game_2048(const char *file_name, lv_scr_load_anim_t anim_type);
     void game_2048_gui_del(void);
 
 	const lv_img_dsc_t* getN(int i);
-	void showBoard(int* map);
-	void showAnim(int* animMap, int direction);
+	void GUI_sync(int* map);
+    void showAnim(int (*moveRecord)[4], bool (*dstNeedZoom)[4], int direction, int* board);
     void showNewBorn(int newborn, int *map);
 	void born(int i);
 

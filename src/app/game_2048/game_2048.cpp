@@ -2,8 +2,7 @@
 #include "game_2048_gui.h"
 #include "game2048_contorller.h"
 #include "sys/app_controller.h"
-#include "common.h"
-#include "freertos/semphr.h"
+#include "gui_lock.h"
 
 #define G2048_APP_NAME "2048"
 
@@ -22,8 +21,8 @@ void taskTwo(void *parameter)
 {
     while (1)
     {
-        LVGL_OPERATE_TRY_LOCK(lv_task_handler();) // 非阻塞
-        vTaskDelay((TickType_t)(1000.0 / 60 / portTICK_PERIOD_MS));
+        LVGL_OPERATE_LOCK(lv_task_handler();) // 阻塞
+        vTaskDelay(1000.0 / 60 / portTICK_PERIOD_MS);
     }
 }
 
@@ -69,7 +68,7 @@ static int game_2048_init(AppController *sys)
     // 刷新棋盘显示
     int new1 = game.addRandom();
     int new2 = game.addRandom();
-    LVGL_OPERATE_LOCK(showBoard(game.getBoard());)
+    LVGL_OPERATE_LOCK(GUI_sync(game.getBoard());)
     // 棋子出生动画
     LVGL_OPERATE_LOCK(born(new1);)
     LVGL_OPERATE_LOCK(born(new2);)
@@ -100,10 +99,9 @@ static void game_2048_process(AppController *sys,
         // 渲染动画
         if (game.isChanged()) { // 棋盘布局改变
             // 移动和合并动画
-            LVGL_OPERATE_LOCK(showAnim(game.getMoveRecord(), direction);)
-            // 展示新棋盘
+            showAnim(game.getMoveRecord(), game.getDstNeedZoom(), direction, game.getBoard());
             // 新数字出生动画
-            LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), game.getBoard()));
+            showNewBorn(game.addRandom(), game.getBoard());
         }
     }
 
@@ -119,7 +117,7 @@ static void game_2048_process(AppController *sys,
     }
 
     // 程序需要时可以适当加延时
-    delay(300);
+    delay(100);
 }
 
 static int game_2048_exit_callback(void *param)
