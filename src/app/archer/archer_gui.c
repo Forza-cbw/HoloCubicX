@@ -92,7 +92,7 @@ static lv_obj_t *txtlabel = NULL;
 
 // lv_timer_t * heartbeat_update_timer = NULL;
 
-void heartbeat_gui_init(void)
+void archer_gui_init(void)
 {
     // if (NULL == default_style.map)
     // {
@@ -111,13 +111,13 @@ void heartbeat_gui_init(void)
  * 其他函数请根据需要添加
  */
 
-void display_heartbeat()
+void display_archer()
 {
     lv_obj_t *act_obj = lv_scr_act(); // 获取当前活动页
     if (act_obj == heartbeat_gui)
         return;
 
-    heartbeat_gui_del();   // 清空对象
+    archer_gui_del();   // 清空对象
     lv_obj_clean(act_obj); // 清空此前页面
 
     heartbeat_gui = lv_obj_create(NULL);
@@ -131,7 +131,7 @@ void display_heartbeat()
 
     lv_label_set_text_fmt(txtlabel, TEXT_TYPE0_FMT, 0, 0);
     s_r_type = SEND;
-    display_heartbeat_img();
+    display_archer_img();
 
     // lv_obj_align(heartbeat_gui, LV_ALIGN_CENTER,0,0);
     lv_obj_align(txtlabel, LV_ALIGN_TOP_MID, 0, 15);
@@ -146,7 +146,7 @@ void display_heartbeat()
     // }
 }
 
-void display_heartbeat_img(void)
+void display_archer_img(void)
 {
     static int _beatIndex = 0;
     if (NULL != heartbeat_gui && lv_scr_act() == heartbeat_gui)
@@ -171,17 +171,17 @@ void display_heartbeat_img(void)
     }
 }
 
-void heartbeat_set_sr_type(enum S_R_TYPE type)
+void archer_set_sr_type(enum S_R_TYPE type)
 {
     s_r_type = type;
 }
 
-void heartbeat_set_send_recv_cnt_label(uint8_t send_num, uint8_t recv_num)
+void archer_set_send_recv_cnt_label(uint8_t send_num, uint8_t recv_num)
 {
     lv_label_set_text_fmt(txtlabel, TEXT_TYPE0_FMT, send_num, recv_num);
 }
 
-void heartbeat_gui_del(void)
+void archer_gui_del(void)
 {
     if (NULL != heartbeat_gui)
     {

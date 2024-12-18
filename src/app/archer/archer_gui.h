@@ -16,13 +16,12 @@ enum S_R_TYPE{
     while (lv_anim_count_running()) \
         lv_task_handler(); //等待动画完成
 
-    void heartbeat_gui_init(void);
-    void display_heartbeat(void);
-    void heartbeat_gui_del(void);
-    void heartbeat_obj_del(void);
-    void display_heartbeat_img(void);
-    void heartbeat_set_sr_type(enum S_R_TYPE type);
-    void heartbeat_set_send_recv_cnt_label(uint8_t send_num, uint8_t recv_num);
+    void archer_gui_init(void);
+    void display_archer(void);
+    void archer_gui_del(void);
+    void display_archer_img(void);
+    void archer_set_sr_type(enum S_R_TYPE type);
+    void archer_set_send_recv_cnt_label(uint8_t send_num, uint8_t recv_num);
 
 #ifdef __cplusplus
 } /* extern "C" */

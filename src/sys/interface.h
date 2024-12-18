@@ -20,7 +20,7 @@ enum APP_MESSAGE_TYPE
 enum APP_TYPE
 {
     APP_TYPE_REAL_TIME = 0, // 实时应用
-    APP_TYPE_BACKGROUND,    // 后台应用
+    APP_TYPE_BACKGROUND,    // todo 后台应用
 
     APP_TYPE_NONE
 };

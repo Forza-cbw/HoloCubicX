@@ -148,7 +148,7 @@ void setup()
     app_controller->app_install(&anniversary_app);
 #endif
 #if APP_ARCHER_USE
-    app_controller->app_install(&archer_app, APP_TYPE_BACKGROUND);
+    app_controller->app_install(&archer_app);
 #endif
 #if APP_PC_RESOURCE_USE
     app_controller->app_install(&pc_resource_app);

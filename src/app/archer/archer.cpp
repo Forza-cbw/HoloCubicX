@@ -12,13 +12,13 @@
 #define DEFALUT_MQTT_IP_CLIMBSNAIL "climbsnail.cn"
 #define DEFALUT_MQTT_PORT 1883
 
-// Bilibili的持久化配置
-#define HEARTBEAT_CONFIG_PATH "/heartbeat_v2.0.cfg"
+// 持久化配置
+#define ARCHER_CONFIG_PATH "/archer.cfg"
 
 extern AppController *app_controller; // APP控制器
 
 // 常驻数据，可以不随APP的生命周期而释放或删除
-struct HeartbeatAppForeverData
+struct ArcherAppForeverData
 {
     int role;                   // 0: heart, 1: beat
     char liz_mqtt_subtopic[32]; // "AIO-beat"
@@ -36,7 +36,7 @@ struct HeartbeatAppForeverData
     void mqtt_reconnect();
 };
 
-void HeartbeatAppForeverData::callback(char *topic, byte *payload, unsigned int length)
+void ArcherAppForeverData::callback(char *topic, byte *payload, unsigned int length)
 {
     log_i("Message arrived [%s]", topic);
     for (int i = 0; i < length; i++)
@@ -47,9 +47,9 @@ void HeartbeatAppForeverData::callback(char *topic, byte *payload, unsigned int 
     app_controller->send_to(ARCHER_APP_NAME, CTRL_NAME, APP_MESSAGE_MQTT_DATA, NULL, NULL);
 }
 
-HeartbeatAppForeverData hb_cfg;
+ArcherAppForeverData hb_cfg;
 
-static void write_config(HeartbeatAppForeverData *cfg)
+static void write_config(ArcherAppForeverData *cfg)
 {
     char tmp[32];
     String w_data;
@@ -97,15 +97,15 @@ static void write_config(HeartbeatAppForeverData *cfg)
     snprintf(tmp, 32, "%s\n", cfg->server_password);
     w_data += tmp;
 
-    g_flashCfg.writeFile(HEARTBEAT_CONFIG_PATH, w_data.c_str());
+    g_flashCfg.writeFile(ARCHER_CONFIG_PATH, w_data.c_str());
 }
 
-static void read_config(HeartbeatAppForeverData *cfg)
+static void read_config(ArcherAppForeverData *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
     char info[256] = {0};
-    uint16_t size = g_flashCfg.readFile(HEARTBEAT_CONFIG_PATH, (uint8_t *)info);
+    uint16_t size = g_flashCfg.readFile(ARCHER_CONFIG_PATH, (uint8_t *)info);
     log_i("size %d\n", size);
     info[size] = 0;
     if (size == 0)
@@ -166,7 +166,7 @@ static void read_config(HeartbeatAppForeverData *cfg)
     log_i("connect_client_id : %s\n", cfg->connect_client_id);
 }
 
-void HeartbeatAppForeverData::mqtt_reconnect()
+void ArcherAppForeverData::mqtt_reconnect()
 {
     log_i("Attempting MQTT connection...\n");
     if (NULL == mqtt_client)
@@ -214,7 +214,7 @@ static HeartbeatAppRunData *run_data = NULL;
 
 static int archer_init(AppController *sys)
 {
-    heartbeat_gui_init();
+    archer_gui_init();
     // 初始化运行时参数
     run_data = (HeartbeatAppRunData *)calloc(1, sizeof(HeartbeatAppRunData));
     run_data->send_cnt = 0;
@@ -228,7 +228,7 @@ static int archer_init(AppController *sys)
 
     // 初始化MQTT
     char info[128] = {0};
-    uint16_t size = g_flashCfg.readFile(HEARTBEAT_CONFIG_PATH, (uint8_t *)info);
+    uint16_t size = g_flashCfg.readFile(ARCHER_CONFIG_PATH, (uint8_t *)info);
     if (size != 0) // 如果已经设置过heartbeat了，则开启mqtt客户端
     {
         // 获取配置参数
@@ -273,15 +273,15 @@ static void archer_process(AppController *sys,
 
     if (run_data->recv_cnt > 0 && run_data->send_cnt > 0)
     {
-        heartbeat_set_sr_type(HEART);
+        archer_set_sr_type(HEART);
     }
     else if (run_data->recv_cnt > 0)
     {
-        heartbeat_set_sr_type(RECV);
+        archer_set_sr_type(RECV);
     }
     else if (run_data->send_cnt == 0) // 进入app时自动发送mqtt消息
     {
-        heartbeat_set_sr_type(SEND);
+        archer_set_sr_type(SEND);
         run_data->send_cnt += 1;
         if (NULL != hb_cfg.mqtt_client)
         {
@@ -293,7 +293,7 @@ static void archer_process(AppController *sys,
     if (GET_SYS_MILLIS() - run_data->lastHeartUpdataTime >= run_data->heartContinueMillis)
     {
         // 用于停止heart
-        heartbeat_set_sr_type(SEND);
+        archer_set_sr_type(SEND);
     }
 
     if (NULL != hb_cfg.mqtt_client)
@@ -309,16 +309,16 @@ static void archer_process(AppController *sys,
     }
 
     // 程序需要时可以适当加延时
-    display_heartbeat();
-    heartbeat_set_send_recv_cnt_label(run_data->send_cnt, run_data->recv_cnt);
-    display_heartbeat_img();
+    display_archer();
+    archer_set_send_recv_cnt_label(run_data->send_cnt, run_data->recv_cnt);
+    display_archer_img();
     delay(30);
 }
 
 static int archer_exit_callback(void *param)
 {
     // 释放资源
-    heartbeat_gui_del();
+    archer_gui_del();
 
     // 释放运行数据
     if (NULL != run_data)
@@ -456,13 +456,13 @@ static void archer_message_handle(const char *from, const char *to,
     {
         // if (run_data->send_cnt > 0) //已经手动发送过了
         // {
-        //     heartbeat_set_sr_type(HEART);
+        //     archer_set_sr_type(HEART);
         // }
         // else
         // {
-        //     heartbeat_set_sr_type(RECV);
+        //     archer_set_sr_type(RECV);
         // }
-        heartbeat_set_sr_type(HEART);
+        archer_set_sr_type(HEART);
         run_data->lastHeartUpdataTime = GET_SYS_MILLIS();
         /* 亮一下 */
         // RgbParam rgb_setting = {LED_MODE_RGB,

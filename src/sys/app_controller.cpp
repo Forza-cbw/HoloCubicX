@@ -359,22 +359,22 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
     {
     }
     break;
-    case APP_MESSAGE_MQTT_DATA:
-    {
-        log_i("APP_MESSAGE_MQTT_DATA");
-        if (app_running_flag == 1 && cur_app_index != getAppIdxByName("Archer")) // 在其他app中
-        {
-            app_running_flag = 0;
-            (*(appList[cur_app_index]->exit_callback))(NULL); // 退出当前app
-        }
-        if (app_running_flag == 0)
-        {
-            app_running_flag = 1; // 进入app, 如果已经在
-            cur_app_index = getAppIdxByName("Archer");
-            (*(getAppByName("Archer")->app_init))(this); // 执行APP初始化
-        }
-    }
-    break;
+//    case APP_MESSAGE_MQTT_DATA: // MQTT消息启动 Archer（P.S.这功能太离谱了，影响代码结构）
+//    {
+//        log_i("APP_MESSAGE_MQTT_DATA");
+//        if (app_running_flag == 1 && cur_app_index != getAppIdxByName("Archer")) // 在其他app中
+//        {
+//            app_running_flag = 0;
+//            (*(appList[cur_app_index]->exit_callback))(NULL); // 退出当前app
+//        }
+//        if (app_running_flag == 0)
+//        {
+//            app_running_flag = 1; // 进入app, 如果已经在
+//            cur_app_index = getAppIdxByName("Archer");
+//            (*(getAppByName("Archer")->app_init))(this); // 执行APP初始化
+//        }
+//    }
+//    break;
     default:
         break;
     }
