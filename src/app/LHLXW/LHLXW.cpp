@@ -40,7 +40,7 @@ static int LHLXW_init(AppController *sys){
     lhlxw_run = (LHLXW_RUN*)malloc(sizeof(LHLXW_RUN));
     lhlxw_run->option_num = 0;//确保每次进入app，当先选项序号都为0
     // setCpuFrequencyMhz(240);
-    // LHLXW_GUI_Init();
+//    LHLXW_GUI_Init();
 
     heartbeat_init();
     return 0;
@@ -58,53 +58,34 @@ static void LHLXW_process(AppController *sys,const ImuAction *action){
 
     heartbeat_process(lhlxw_run->LV_LHLXW_GUI_OBJ);
 
-
-    // while(1){
-    //     lv_timer_handler();
-
-    //     /* MPU6050数据获取 */
-    //     if (isCheckAction){
-    //         isCheckAction = false;
-    //         act_info = mpu.getAction();
-    //     }
-
-    //     /* MPU6050动作响应 */
-    //     if (RETURN == act_info->active){
-    //         LHLXW_GUI_DeInit();
-    //         sys->app_exit();
-    //         return;//退出此功能
-    //     }else if(TURN_RIGHT == act_info->active){
-    //         lhlxw_run->option_num++;
-    //         if(lhlxw_run->option_num==5)lhlxw_run->option_num = 0;
-    //         SWITCH_OPTION(true,lhlxw_run->option_num);
-    //         for(uint16_t i=0;i<400;i++){
-    //             lv_task_handler();
-    //             delay(1);
-    //         }
-    //     }else if(TURN_LEFT == act_info->active){
-    //         lhlxw_run->option_num--;
-    //         if(lhlxw_run->option_num>5)lhlxw_run->option_num = 4;
-    //         SWITCH_OPTION(false,lhlxw_run->option_num);
-    //         for(uint16_t i=0;i<400;i++){
-    //             lv_task_handler();
-    //             delay(1);
-    //         }
-    //     }else if(act_info->active == UP){
-    //         if(lhlxw_run->option_num == 4)
-    //             emoji_process(lhlxw_run->LV_LHLXW_GUI_OBJ);
-    //         else if(lhlxw_run->option_num == 3)
-    //             codeRain_process(lhlxw_run->LV_LHLXW_GUI_OBJ);
-    //         else if(lhlxw_run->option_num == 0)
-    //             eye_process(lhlxw_run->LV_LHLXW_GUI_OBJ);//眼睛渲染算法用了递归，导致无法丝滑退出
-    //         else if(lhlxw_run->option_num == 2)
-    //             heartbeat_process(lhlxw_run->LV_LHLXW_GUI_OBJ);
-    //         else 
-    //             cyber_pros(lhlxw_run->LV_LHLXW_GUI_OBJ);
-    //     } 
-    //     act_info->active = ACTIVE_TYPE::UNKNOWN;
-    //     act_info->block = 0;
-    // }
-
+//    if (TURN_RIGHT == act_info->active){
+//        lhlxw_run->option_num++;
+//        if(lhlxw_run->option_num==5)lhlxw_run->option_num = 0;
+//        SWITCH_OPTION(true,lhlxw_run->option_num);
+//        for(uint16_t i=0;i<400;i++){
+//            lv_task_handler();
+//            delay(1);
+//        }
+//    } else if(TURN_LEFT == act_info->active){
+//        lhlxw_run->option_num--;
+//        if(lhlxw_run->option_num>5)lhlxw_run->option_num = 4;
+//        SWITCH_OPTION(false,lhlxw_run->option_num);
+//        for(uint16_t i=0;i<400;i++){
+//            lv_task_handler();
+//            delay(1);
+//        }
+//    } else if (act_info->active == UP) {
+//        if (lhlxw_run->option_num == 4)
+//            emoji_process(lhlxw_run->LV_LHLXW_GUI_OBJ);
+//        else if (lhlxw_run->option_num == 3)
+//            codeRain_process(lhlxw_run->LV_LHLXW_GUI_OBJ);
+//        else if (lhlxw_run->option_num == 0)
+//            eye_process(lhlxw_run->LV_LHLXW_GUI_OBJ);//眼睛渲染算法用了递归，导致无法丝滑退出
+//        else if (lhlxw_run->option_num == 2)
+//            heartbeat_process(lhlxw_run->LV_LHLXW_GUI_OBJ);
+//        else
+//            cyber_pros(lhlxw_run->LV_LHLXW_GUI_OBJ);
+//    }
 }
 
 static int LHLXW_exit_callback(void *param)
