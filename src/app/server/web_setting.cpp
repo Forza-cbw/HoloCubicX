@@ -85,7 +85,7 @@ String file_size(int bytes)
                       "<label class=\"input\"><span>功耗控制（0低发热 1性能优先）</span><input type=\"text\"name=\"powerFlag\"value=\"%s\"></label>"  \
                       "</label><input class=\"btn\" type=\"submit\" name=\"submit\" value=\"保存\"></form>"
 
-#define ARCHER_SETTING "<form method=\"GET\" action=\"saveHeartbeatConf\">"                                                                            \
+#define ARCHER_SETTING "<form method=\"GET\" action=\"saveArcherConf\">"                                                                            \
                           "<label class=\"input\"><span>Role(0:heart,1:beat)</span><input type=\"text\"name=\"role\"value=\"%s\"></label>"                \
                           "<label class=\"input\"><span>MQTT ClientID(推荐QQ号)</span><input type=\"text\"name=\"mqtt_client_id\"value=\"%s\"></label>"                    \  
                           "<label class=\"input\"><span>MQTT SubTopic(推荐对方QQ号)</span><input type=\"text\"name=\"mqtt_subtopic\"value=\"%s\"></label>"                    \  
@@ -503,7 +503,7 @@ void saveMediaConf(void)
                             NULL, NULL);
 }
 
-void saveHeartbeatConf(void)
+void saveArcherConf(void)
 {
     Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
     app_controller->send_to(SERVER_APP_NAME, "Archer",

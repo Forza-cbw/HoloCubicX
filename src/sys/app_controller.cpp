@@ -6,10 +6,10 @@
 
 const char *app_event_type_info[] = {"APP_MESSAGE_WIFI_CONN", "APP_MESSAGE_WIFI_AP",
                                      "APP_MESSAGE_WIFI_ALIVE", "APP_MESSAGE_WIFI_DISCONN",
-                                     "APP_MESSAGE_UPDATE_TIME", "APP_MESSAGE_MQTT_DATA",
-                                     "APP_MESSAGE_GET_PARAM", "APP_MESSAGE_SET_PARAM",
-                                     "APP_MESSAGE_READ_CFG", "APP_MESSAGE_WRITE_CFG",
-                                     "APP_MESSAGE_NONE"};
+                                     "APP_MESSAGE_WIFI_AP_CLOSE", "APP_MESSAGE_UPDATE_TIME",
+                                     "APP_MESSAGE_MQTT_DATA","APP_MESSAGE_GET_PARAM",
+                                     "APP_MESSAGE_SET_PARAM","APP_MESSAGE_READ_CFG",
+                                     "APP_MESSAGE_WRITE_CFG","APP_MESSAGE_NONE"};
 
 volatile static bool isRunEventDeal = false;
 
@@ -219,14 +219,14 @@ int AppController::getAppIdxByName(const char *name)
     return -1;
 }
 
-// 通信中心（消息转发）
+// 通信中心（消息转发） todo 逻辑太乱，toApp->message_handle()在send_to()和req_event_deal()里都被调用了
 int AppController::send_to(const char *from, const char *to,
                            APP_MESSAGE_TYPE type, void *message,
                            void *ext_info)
 {
     APP_OBJ *fromApp = getAppByName(from); // 来自谁 有可能为空
     APP_OBJ *toApp = getAppByName(to);     // 发送给谁 有可能为空
-    if (type <= APP_MESSAGE_MQTT_DATA)
+    if (type <= APP_MESSAGE_MQTT_DATA) // wifi相关事件，先给wifi_event()处理，再给toApp->message_handle()处理。逻辑在req_event_deal()中
     {
         // 更新事件的请求者
         if (eventList.size() > EVENT_LIST_MAX_LENGTH)
@@ -237,12 +237,10 @@ int AppController::send_to(const char *from, const char *to,
         EVENT_OBJ new_event = {fromApp, type, message, 3, 0, 0};
         eventList.push_back(new_event);
         log_i("[EVENT]\tAdd -> %s" ,app_event_type_info[type]);
-        log_i("\tEventList Size: ");
-        log_i("%d",eventList.size());
+        log_i("\tEventList Size: %d",eventList.size());
     }
-    else
+    else // 各个APP之间通信的消息，直接给toApp->message_handle()处理，不加入事件列表
     {
-        // 各个APP之间通信的消息
         if (NULL != toApp)
         {
             log_i("[Massage]\tFrom  %s  \tTo   %s  \n",fromApp->app_name,toApp->app_name);
@@ -251,7 +249,7 @@ int AppController::send_to(const char *from, const char *to,
                 toApp->message_handle(from, to, type, message, ext_info);
             }
         }
-        else if (!strcmp(to, CTRL_NAME))
+        else if (!strcmp(to, CTRL_NAME)) // 消息目的地是 CTRL_NAME
         {
             log_i("[Massage]\tFrom  %s  \tTo   %s  \n",fromApp->app_name,CTRL_NAME);
             deal_config(type, (const char *)message, (char *)ext_info);
@@ -281,8 +279,7 @@ int AppController::req_event_deal(void)
                 // 多次重试失败
                 log_i("[EVENT]\tDelete -> %s",app_event_type_info[(*event).type]);
                 event = eventList.erase(event); // 删除该响应事件
-                log_i("\tEventList Size: ");
-                log_i("%d",eventList.size());
+                log_i("\tEventList Size: %d",eventList.size());
             }
             else
             {
@@ -301,8 +298,7 @@ int AppController::req_event_deal(void)
         }
         log_i("[EVENT]\tDelete -> %s " ,app_event_type_info[(*event).type]);
         event = eventList.erase(event); // 删除该响应完成的事件
-        log_i("\tEventList Size: ");
-        log_i("%d",eventList.size());
+        log_i("\tEventList Size: %d",eventList.size());
     }
     return 0;
 }
@@ -321,7 +317,7 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
         // CONN_ERROR == g_network.end_conn_wifi() ||
         if (false == m_wifi_status)
         {
-            g_network.start_conn_wifi(sys_cfg.ssid_0.c_str(), sys_cfg.password_0.c_str());
+            g_network.start_conn_wifi(sys_cfg.ssid_0.c_str(), sys_cfg.password_0.c_str()); // 使能STA连接
             m_wifi_status = true;
         }
         m_preWifiReqMillis = GET_SYS_MILLIS();
@@ -355,26 +351,17 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
         // m_preWifiReqMillis = GET_SYS_MILLIS() - WIFI_LIFE_CYCLE;
     }
     break;
+    case APP_MESSAGE_WIFI_AP_CLOSE:
+    {
+        g_network.close_ap();
+        if (WIFI_MODE_NULL == WiFi.getMode())
+            m_wifi_status = false;
+    }
+    break;
     case APP_MESSAGE_UPDATE_TIME:
     {
     }
     break;
-//    case APP_MESSAGE_MQTT_DATA: // MQTT消息启动 Archer（P.S.这功能太离谱了，影响代码结构）
-//    {
-//        log_i("APP_MESSAGE_MQTT_DATA");
-//        if (app_running_flag == 1 && cur_app_index != getAppIdxByName("Archer")) // 在其他app中
-//        {
-//            app_running_flag = 0;
-//            (*(appList[cur_app_index]->exit_callback))(NULL); // 退出当前app
-//        }
-//        if (app_running_flag == 0)
-//        {
-//            app_running_flag = 1; // 进入app, 如果已经在
-//            cur_app_index = getAppIdxByName("Archer");
-//            (*(getAppByName("Archer")->app_init))(this); // 执行APP初始化
-//        }
-//    }
-//    break;
     default:
         break;
     }

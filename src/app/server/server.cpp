@@ -17,6 +17,7 @@ struct ServerAppRunData
     boolean web_start;                    // 标志是否开启web server服务，0为关闭 1为开启
     boolean req_sent;                     // 标志是否发送wifi请求服务，0为关闭 1为开启
     unsigned long serverReflushPreMillis; // 上一回更新的时间
+    AppController *sys = NULL;            // 退出时关闭ap
 };
 
 static ServerAppRunData *run_data = NULL;
@@ -70,7 +71,7 @@ void start_web_config()
     server.on("/saveMediaConf", saveMediaConf);
 #endif
 #if APP_ARCHER_USE
-    server.on("/saveHeartbeatConf", saveHeartbeatConf);
+    server.on("/saveArcherConf", saveArcherConf);
 #endif
 #if APP_PC_RESOURCE_USE
     server.on("/savePCResourceConf", savePCResourceConf);
@@ -99,6 +100,7 @@ static int server_init(AppController *sys)
     run_data->web_start = 0;
     run_data->req_sent = 0;
     run_data->serverReflushPreMillis = 0;
+    run_data->sys = sys;
     return 0;
 }
 
@@ -150,14 +152,18 @@ static void server_process(AppController *sys,
 
 static int server_exit_callback(void *param)
 {
-    setting_gui_del();
+    // 关闭AP
+    run_data->sys->send_to(SERVER_APP_NAME, CTRL_NAME,
+                           APP_MESSAGE_WIFI_AP_CLOSE, NULL, NULL);
 
+    setting_gui_del();
     // 释放运行数据
     if (NULL != run_data)
     {
         free(run_data);
         run_data = NULL;
     }
+
     return 0;
 }
 

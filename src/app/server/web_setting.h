@@ -37,7 +37,7 @@ void saveStockConf(void);
 void savePictureConf(void);
 void saveMediaConf(void);
 void saveScreenConf(void);
-void saveHeartbeatConf(void);
+void saveArcherConf(void);
 void saveAnniversaryConf(void);
 void savePCResourceConf(void);
 

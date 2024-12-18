@@ -117,6 +117,7 @@ boolean Network::end_conn_wifi(void)
     return CONN_SUCC;
 }
 
+// 关闭wifi和ap
 boolean Network::close_wifi(void)
 {
     if(WiFi.getMode() & WIFI_MODE_AP)
@@ -173,6 +174,17 @@ boolean Network::open_ap(const char *ap_ssid, const char *ap_password)
     {
         log_i("MDNS responder started");
     }
+    return true;
+}
+
+boolean Network::close_ap()
+{
+    // 关闭AP模式，但不影响STA（Wi-Fi客户端）
+    WiFi.enableAP(false);
+    log_i("AP shutdowm");
+    // 关闭MDNS
+    MDNS.end();
+    log_i("MDNS responder shutdowm");
     return true;
 }
 
