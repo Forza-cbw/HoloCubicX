@@ -9,7 +9,7 @@
 * HoloCubic_AIO的链接 https://github.com/ClimbSnail/HoloCubic_AIO
 * 本项目链接 https://github.com/Forza-cbw/HoloCubicX
 
-<img src="https://github.com/Forza-cbw/HoloCubicX/blob/main/src/resource/%E6%95%88%E6%9E%9C%E5%9B%BE.jpg?raw=true" width="200" />
+<img src="https://github.com/Forza-cbw/HoloCubicX/blob/main/src/resource/%E6%95%88%E6%9E%9C%E5%9B%BE.jpg" width="200" />
 
 ### 重构清单
 1. 以本人对软件工程的粗浅理解，对原项目代码进行重构，优化系统框架和app功能。
