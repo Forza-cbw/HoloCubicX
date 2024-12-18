@@ -36,6 +36,21 @@ struct ArcherAppForeverData
     void mqtt_reconnect();
 };
 
+// 动态数据，APP的生命周期结束也需要释放它
+struct HeartbeatAppRunData
+{
+    uint8_t send_cnt = 0;
+    uint8_t recv_cnt = 0;
+    unsigned long preUpdataMillis;     // 上一回更新的毫秒数
+    unsigned long timeUpdataInterval;  // 更新时间计数器
+    unsigned long heartContinueMillis; // 心跳的持续时间
+    unsigned long lastHeartUpdataTime; // 上次心跳的更新时间
+};
+
+// 保存APP运行时的参数信息，理论上关闭APP时推荐在 xxx_exit_callback 中释放掉
+static HeartbeatAppRunData *run_data = NULL;
+
+
 void ArcherAppForeverData::callback(char *topic, byte *payload, unsigned int length)
 {
     log_i("Message arrived [%s]", topic);
@@ -43,8 +58,25 @@ void ArcherAppForeverData::callback(char *topic, byte *payload, unsigned int len
     {
         log_i("%c",(char)payload[i]); // 打印主题内容
     }
-
-    app_controller->send_to(ARCHER_APP_NAME, CTRL_NAME, APP_MESSAGE_MQTT_DATA, NULL, NULL);
+    // if (run_data->send_cnt > 0) //已经手动发送过了
+    // {
+    //     archer_set_sr_type(HEART);
+    // }
+    // else
+    // {
+    //     archer_set_sr_type(RECV);
+    // }
+    archer_set_sr_type(HEART);
+    run_data->lastHeartUpdataTime = GET_SYS_MILLIS();
+    /* 亮一下 */
+    // RgbParam rgb_setting = {LED_MODE_RGB,
+    //                     0, 0, 0,
+    //                     3,36,86,
+    //                     1, 1, 1,
+    //                     0.15, 0.25,
+    //                     0.001, 8};
+    // set_rgb_and_run(&rgb_setting);
+    run_data->recv_cnt++;
 }
 
 ArcherAppForeverData hb_cfg;
@@ -195,22 +227,6 @@ void ArcherAppForeverData::mqtt_reconnect()
         log_i("failed, rc=%d\n", mqtt_client->state());
     }
 }
-
-// 动态数据，APP的生命周期结束也需要释放它
-struct HeartbeatAppRunData
-{
-    uint8_t send_cnt = 0;
-    uint8_t recv_cnt = 0;
-    unsigned long preUpdataMillis;     // 上一回更新的毫秒数
-    unsigned long timeUpdataInterval;  // 更新时间计数器
-    unsigned long heartContinueMillis; // 心跳的持续时间
-    unsigned long lastHeartUpdataTime; // 上次心跳的更新时间
-};
-
-// 保存APP运行时的参数信息，理论上关闭APP时推荐在 xxx_exit_callback 中释放掉
-static HeartbeatAppRunData *run_data = NULL;
-
-// 当然你也可以添加恒定在内存中的少量变量（退出时不用释放，实现第二次启动时可以读取）
 
 static int archer_init(AppController *sys)
 {
@@ -450,30 +466,6 @@ static void archer_message_handle(const char *from, const char *to,
     case APP_MESSAGE_WRITE_CFG:
     {
         write_config(&hb_cfg);
-    }
-    break;
-    case APP_MESSAGE_MQTT_DATA:
-    {
-        // if (run_data->send_cnt > 0) //已经手动发送过了
-        // {
-        //     archer_set_sr_type(HEART);
-        // }
-        // else
-        // {
-        //     archer_set_sr_type(RECV);
-        // }
-        archer_set_sr_type(HEART);
-        run_data->lastHeartUpdataTime = GET_SYS_MILLIS();
-        /* 亮一下 */
-        // RgbParam rgb_setting = {LED_MODE_RGB,
-        //                     0, 0, 0,
-        //                     3,36,86,
-        //                     1, 1, 1,
-        //                     0.15, 0.25,
-        //                     0.001, 8};
-        // set_rgb_and_run(&rgb_setting);
-        run_data->recv_cnt++;
-        log_i("received archer");
     }
     break;
     default:
