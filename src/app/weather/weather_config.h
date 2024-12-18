@@ -19,8 +19,8 @@ const long  gmtOffset_sec = 8 * 3600;     // 中国时区（UTC+8）
 const int   daylightOffset_sec = 0;       // 无需夏令时偏移
 // 使用 UDP 连接
 WiFiUDP ntpUDP;
-// 创建NTP客户端
-NTPClient timeClient(ntpUDP, ntpServer, gmtOffset_sec, 60000); // 60秒同步一次
+// 创建NTP客户端 60秒同步一次（这个间隔应该没用，因为timeUpdataInterval制定了手动刷新时间的间隔）
+NTPClient timeClient(ntpUDP, ntpServer, gmtOffset_sec, 60000);
 
 // 天气的持久化配置
 #define WEATHER_CONFIG_PATH "/weather_219.cfg"
@@ -63,8 +63,8 @@ static void read_config(WT_Config *cfg)
     {
         // 默认值
         cfg->CITY_CODE = "340123";
-        cfg->weatherUpdataInterval = 900000; // 天气更新的时间间隔900000(900s)
-        cfg->timeUpdataInterval = 900000;    // 日期时钟更新的时间间隔900000(900s)
+        cfg->weatherUpdataInterval = 60000; // 天气更新的时间间隔60000(60s)
+        cfg->timeUpdataInterval = 60000;    // 日期时钟更新的时间间隔60000(60s)
         write_config(cfg);
     }
     else

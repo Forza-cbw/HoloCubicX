@@ -68,10 +68,10 @@ static int game_2048_init(AppController *sys)
     // 刷新棋盘显示
     int new1 = game.addRandom();
     int new2 = game.addRandom();
-    LVGL_OPERATE_LOCK(GUI_sync(game.getBoard());)
+    LVGL_OPERATE_LOCK(render_board(game.getBoard());)
     // 棋子出生动画
-    LVGL_OPERATE_LOCK(born(new1);)
-    LVGL_OPERATE_LOCK(born(new2);)
+    LVGL_OPERATE_LOCK(render_born(new1);)
+    LVGL_OPERATE_LOCK(render_born(new2);)
 
     return 0;
 }
@@ -132,7 +132,7 @@ static int game_2048_exit_callback(void *param)
         vTaskDelete(run_data->xHandle_task_two);
     }
 
-    xSemaphoreGive(lvgl_mutex);
+//    xSemaphoreGive(lvgl_mutex);
 
     game_2048_gui_del();
 

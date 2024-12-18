@@ -16,10 +16,10 @@ extern "C"
     void game_2048_gui_del(void);
 
 	const lv_img_dsc_t* getN(int i);
-	void GUI_sync(int* map);
+	void render_board(int* map);
     void showAnim(int (*moveRecord)[4], bool (*dstNeedZoom)[4], int direction, int* board);
     void showNewBorn(int newborn, int *map);
-	void born(int i);
+	void render_born(int i);
 
 #ifdef __cplusplus
 } /* extern "C" */

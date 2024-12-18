@@ -106,6 +106,8 @@ void display_weather_init(void)
     lv_obj_set_size(txtLabel, 120, 30);
     lv_label_set_long_mode(txtLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_label_set_text_fmt(txtLabel, "晴天, %s 0 级.   ", "风力");
+    lv_obj_set_style_anim_speed(txtLabel, 40, 0); // 控制滚动速度
+
 
     clockLabel_1 = lv_label_create(scr_1);
     lv_obj_add_style(clockLabel_1, &numberBig_style, LV_STATE_DEFAULT);
@@ -191,7 +193,7 @@ void render_weather(struct Weather weaInfo)
 //    lv_label_set_text(btnLabel, airQualityCh[weaInfo.airQulity]);
     lv_img_set_src(weatherImg, weaImage_map[weaInfo.weather_code]);
     // 下面这行代码可能会出错
-    lv_label_set_text_fmt(txtLabel, "   今日天气:%s,%s风%s 级.              ",
+    lv_label_set_text_fmt(txtLabel, "   今日天气:%s,%s风%s 级.        ",
                           weaInfo.weather, weaInfo.windDir, weaInfo.windpower);
 
     lv_bar_set_value(tempBar, weaInfo.temperature, LV_ANIM_ON);

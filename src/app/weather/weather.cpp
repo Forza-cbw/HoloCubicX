@@ -244,13 +244,12 @@ static void weather_process(AppController *sys,
         sys->send_to(WEATHER_APP_NAME, CTRL_NAME,
                      APP_MESSAGE_WIFI_CONN, (void *)UPDATE_NTP, NULL);
     }
-    else if (GET_SYS_MILLIS() - run_data->preLocalTimestamp > 400)
+    else if (GET_SYS_MILLIS() - run_data->preLocalTimestamp > 200) //间隔应该是1000ms的因数
     {
         updateTimeRTC(get_timestamp()); // 刷新run_data->screenTime。分离计算screenTime和刷新屏幕的过程，减少无效计算。
     }
     run_data->coactusUpdateFlag = 0x00; // 取消强制更新标志
 
-    // 界面刷新
     delay(100);
 }
 

@@ -44,7 +44,7 @@ void game_2048_gui_del(void)
     }
 
     // 手动清除样式，防止内存泄漏
-    // lv_style_reset(&default_style);
+     lv_style_reset(&default_style);
 }
 
 //用于宽高同时增加的lv_anim_exec_xcb_t动画参数
@@ -63,7 +63,7 @@ static void anim_pos_cb(void *var, int32_t v)
  * 出生动画
  * i：出生的位置
  */
-void born(int i)
+void render_born(int i)
 {
     lv_anim_t a;
     lv_anim_init(&a);
@@ -98,7 +98,7 @@ void born(int i)
  * 合并动画
  * i：合并的位置
  */
-void zoom(int i)
+void render_zoom(int i)
 {
     lv_anim_t a;
     lv_anim_init(&a);
@@ -141,7 +141,7 @@ void zoom(int i)
  * direction：移动的方向，lv_obj_set_x或lv_obj_set_y
  * dist：移动的距离，如1、-1
  */
-void move(int i, lv_anim_exec_xcb_t direction, int dist)
+void render_move(int i, lv_anim_exec_xcb_t direction, int dist)
 {
     lv_anim_t a;
     lv_anim_init(&a);
@@ -198,7 +198,7 @@ const lv_img_dsc_t *getN(int i)
 }
 
 //刷新棋盘
-void GUI_sync(int *map)
+void render_board(int *map)
 {
     for (int i = 0; i < SCALE_SIZE * SCALE_SIZE; i++)
     {
@@ -231,7 +231,7 @@ void showAnim(int (*moveRecord)[4], bool (*dstNeedZoom)[4], int direction, int* 
             int img_index = i * SCALE_SIZE + j; // 被移动img的下标
 
             if (moveRecord[i][j] != 0) {
-                LVGL_OPERATE_LOCK(move(img_index, Normal, moveRecord[i][j]);)
+                LVGL_OPERATE_LOCK(render_move(img_index, Normal, moveRecord[i][j]);)
             }
         }
     }
@@ -243,9 +243,9 @@ void showAnim(int (*moveRecord)[4], bool (*dstNeedZoom)[4], int direction, int* 
             int dst_i = i, dst_j = j;
             if (direction <= 2) dst_i += moveRecord[i][j];
             else dst_j += moveRecord[i][j];
-            LVGL_OPERATE_LOCK(GUI_sync(board));
+            LVGL_OPERATE_LOCK(render_board(board));
             if (dstNeedZoom[i][j])
-                LVGL_OPERATE_LOCK(zoom(dst_i * SCALE_SIZE + dst_j);)
+                LVGL_OPERATE_LOCK(render_zoom(dst_i * SCALE_SIZE + dst_j);)
         }
     }
     waitForAinm();
@@ -258,10 +258,10 @@ void showAnim(int (*moveRecord)[4], bool (*dstNeedZoom)[4], int direction, int* 
 void showNewBorn(int newborn, int *map)
 {
     //GUI缓冲区同步
-    LVGL_OPERATE_LOCK(GUI_sync(map);)
+    LVGL_OPERATE_LOCK(render_board(map);)
     for (int i=0; i<4; i++)
         log_i("%d %d %d %d", map[i*4], map[i*4 + 1], map[i*4 +2], map[i*4 +3]);
     //出现
-    LVGL_OPERATE_LOCK(born(newborn);)
+    LVGL_OPERATE_LOCK(render_born(newborn);)
     waitForAinm();
 }
