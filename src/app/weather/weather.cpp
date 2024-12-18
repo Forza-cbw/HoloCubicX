@@ -268,21 +268,27 @@ static long long get_timestamp_ntp()
         log_i("timeClient.begin();");
     }
 
+    unsigned long long epochTime;
     // 更新 NTP 时间
-    timeClient.update();
-    // 获取当前时间戳
-    unsigned long long epochTime = timeClient.getEpochTime();
+    if (timeClient.update()){
+        log_i("timeClient.update(): success.");
+        epochTime = timeClient.getEpochTime(); // 获取当前时间戳
+    }
+    else {
+        log_w("timeClient.update(): failed. set epochTime = 1609459200");
+        epochTime = 1609459200; // 设定时间为2021 年 01 月 01 日 08:00:00，太早的时间会导致ESP32Time库变得超级慢 。
+    }
 
      // 将时间戳转换为本地时间（加上时区偏移）
     unsigned long long localTime = epochTime + gmtOffset_sec;
-    log_i("本地时间戳 (UTC+8): %llu", localTime);
+    log_i("local timestamp (UTC+8): %llu", localTime);
 
     // 将本地时间转换为日期时间格式
     time_t rawTime = localTime;
     struct tm* timeinfo = localtime(&rawTime);
     char buffer[80];
     strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
-    log_i("本地时间: %s", buffer);
+    log_i("local time: %s", buffer);
 
     run_data->preNetTimestamp = epochTime*1000 + run_data->errorNetTimestamp;   //秒的时间戳变ms的
     run_data->preLocalTimestamp = GET_SYS_MILLIS();
@@ -291,11 +297,13 @@ static long long get_timestamp_ntp()
     return run_data->preNetTimestamp;
 }
 
+// A time less than 2017 year makes ESP32Time.getTime() slow
+// https://github.com/espressif/arduino-esp32/issues/8837
 static void updateTimeRTC(long long timestamp)
 {
     struct TimeStr t;
     ESP32Time g_rtc;
-
+    log_d("updateTimeRTC() start");
     g_rtc.setTime(timestamp / 1000);
     t.month = g_rtc.getMonth() + 1;
     t.day = g_rtc.getDay();
@@ -304,6 +312,7 @@ static void updateTimeRTC(long long timestamp)
     t.second = g_rtc.getSecond();
     t.weekday = g_rtc.getDayofWeek();
     // log_i("time : %d-%d-%d\n",t.hour, t.minute, t.second);
+    log_d("updateTimeRTC() return");
     run_data->t = t;
 }
 
