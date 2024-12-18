@@ -101,7 +101,7 @@ struct WeatherAppRunData
 //    TaskHandle_t xHandle_task_task_update; // 更新数据的异步任务
 
     Weather wea;     // 保存天气状况
-    TimeStr t; // 保存ntp时间
+    TimeStr screenTime; // 屏幕显示的时间
 };
 
 static WT_Config cfg_data;
@@ -256,30 +256,32 @@ static long long get_timestamp()
     return run_data->preNetTimestamp;
 }
 
-static long long get_timestamp_ntp()
+// 从ntp服务器同步时间戳
+static bool ntp_sync()
 {
-    if (WL_CONNECTED != WiFi.status())
-        return 0;
+    if (WL_CONNECTED != WiFi.status()){
+        log_w("wifi not connect");
+        return false;
+    }
 
     if(!isUdpInit)
     {
         // 初始化 NTP 客户端
         timeClient.begin();
-        log_i("timeClient.begin();");
+        log_i("timeClient.begin()");
+    }
+
+    // 更新 NTP 时间
+    if (!timeClient.update()){
+        log_w("timeClient.update(): failed"); // timeClient默认时间在1970年，而太早的时间会导致ESP32Time库变得超级慢。
+        return false;
     }
 
     unsigned long long epochTime;
-    // 更新 NTP 时间
-    if (timeClient.update()){
-        log_i("timeClient.update(): success.");
-        epochTime = timeClient.getEpochTime(); // 获取当前时间戳
-    }
-    else {
-        log_w("timeClient.update(): failed. set epochTime = 1609459200");
-        epochTime = 1609459200; // 设定时间为2021 年 01 月 01 日 08:00:00，太早的时间会导致ESP32Time库变得超级慢 。
-    }
+    log_i("timeClient.update(): success.");
+    epochTime = timeClient.getEpochTime(); // 获取当前时间戳
 
-     // 将时间戳转换为本地时间（加上时区偏移）
+    // 将时间戳转换为本地时间（加上时区偏移）
     unsigned long long localTime = epochTime + gmtOffset_sec;
     log_i("local timestamp (UTC+8): %llu", localTime);
 
@@ -293,10 +295,12 @@ static long long get_timestamp_ntp()
     run_data->preNetTimestamp = epochTime*1000 + run_data->errorNetTimestamp;   //秒的时间戳变ms的
     run_data->preLocalTimestamp = GET_SYS_MILLIS();
     log_i("run_data->preNetTimestamp=%lld", run_data->preNetTimestamp);
+    log_i("run_data->preLocalTimestamp=%lld", run_data->preLocalTimestamp);
 
-    return run_data->preNetTimestamp;
+    return true;
 }
 
+// 更新屏幕显示时间的数据
 // A time less than 2017 year makes ESP32Time.getTime() slow
 // https://github.com/espressif/arduino-esp32/issues/8837
 static void updateTimeRTC(long long timestamp)
@@ -313,7 +317,7 @@ static void updateTimeRTC(long long timestamp)
     t.weekday = g_rtc.getDayofWeek();
     // log_i("time : %d-%d-%d\n",t.hour, t.minute, t.second);
     log_d("updateTimeRTC() return");
-    run_data->t = t;
+    run_data->screenTime = t;
 }
 
 static int weather_init(AppController *sys)
@@ -327,7 +331,7 @@ static int weather_init(AppController *sys)
     // 初始化运行时参数
     run_data = (WeatherAppRunData *)calloc(1, sizeof(WeatherAppRunData));
     memset((char *)&run_data->wea, 0, sizeof(Weather));
-    run_data->preNetTimestamp = 1577808000000; // 上一次的网络时间戳 初始化为2020-01-01 00:00:00
+    run_data->preNetTimestamp = 1577808000000; // 上一次的网络时间戳 初始化为2020-01-01 00:00:00 todo 把它放到持久数据里，这样即使退出天气app也不会重置时间
     run_data->errorNetTimestamp = 2;
     run_data->preLocalTimestamp = GET_SYS_MILLIS(); // 上一次的本地机器时间戳
     run_data->preWeatherMillis = 0;
@@ -355,9 +359,6 @@ static void weather_process(AppController *sys,
         delay(1000); // 以防间接强制更新后，生产很多请求 使显示卡顿
     }
 
-    // 界面刷新
-    display_weather(run_data->wea); // todo 分离成异步任务
-    display_time(run_data->t);
     if (0x01 == run_data->coactusUpdateFlag || doDelayMillisTime(cfg_data.weatherUpdataInterval, &run_data->preWeatherMillis, false))
     {
         sys->send_to(WEATHER_APP_NAME, CTRL_NAME,
@@ -372,9 +373,13 @@ static void weather_process(AppController *sys,
     }
     else if (GET_SYS_MILLIS() - run_data->preLocalTimestamp > 400)
     {
-        updateTimeRTC(get_timestamp());
+        updateTimeRTC(get_timestamp()); // 刷新run_data->screenTime。分离计算screenTime和刷新屏幕的过程，减少无效计算。
     }
     run_data->coactusUpdateFlag = 0x00; // 取消强制更新标志
+
+    // 界面刷新
+    display_weather(run_data->wea); // todo 分离成异步任务
+    display_time(run_data->screenTime);
     display_space();
     delay(30);
 }
@@ -423,8 +428,7 @@ static void weather_message_handle(const char *from, const char *to,
             log_i("ntp update.");
             run_data->update_type |= UPDATE_TIME;
 
-            long long timestamp = get_timestamp_ntp(); // nowapi时间API
-            updateTimeRTC(timestamp);
+            ntp_sync(); // nowapi时间API
         };
         break;
         default:
