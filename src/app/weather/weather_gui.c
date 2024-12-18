@@ -161,7 +161,7 @@ void display_weather_init(void)
     lv_obj_align(humiImg, LV_ALIGN_LEFT_MID, 0, 100);
     lv_obj_align(humiBar, LV_ALIGN_LEFT_MID, 35, 100);
     lv_obj_align(humiLabel, LV_ALIGN_LEFT_MID, 103, 100);
-    lv_obj_align(spaceImg, LV_ALIGN_BOTTOM_RIGHT, -10, -10);
+    lv_obj_align(spaceImg, LV_ALIGN_BOTTOM_RIGHT, 0, -10);
 
     lv_obj_align(clockLabel_1, LV_ALIGN_LEFT_MID, 0, 10);
     lv_obj_align(clockLabel_2, LV_ALIGN_LEFT_MID, 165, 9);
@@ -177,7 +177,7 @@ void display_weather_init(void)
     // }
 }
 
-void display_weather(struct Weather weaInfo)
+void render_weather(struct Weather weaInfo)
 {
     lv_label_set_text(cityLabel, weaInfo.cityname);
     if (strlen(weaInfo.cityname) > 6)
@@ -202,7 +202,7 @@ void display_weather(struct Weather weaInfo)
     lv_scr_load(scr_1);
 }
 
-void display_time(struct TimeStr timeInfo)
+void render_time(struct TimeStr timeInfo)
 {
     lv_label_set_text_fmt(clockLabel_1, "%02d#ffa500 %02d#", timeInfo.hour, timeInfo.minute);
     lv_label_set_text_fmt(clockLabel_2, "%02d", timeInfo.second);
@@ -222,6 +222,18 @@ void display_time(struct TimeStr timeInfo)
     //     lv_scr_load(scr_1);
     // }
 }
+
+
+void render_man(void)
+{
+    static int _spaceIndex = 0;
+    if (NULL != scr_1 && lv_scr_act() == scr_1)
+    {
+        lv_img_set_src(spaceImg, manImage_map[_spaceIndex]);
+        _spaceIndex = (_spaceIndex + 1) % 10;
+    }
+}
+
 
 void weather_gui_release(void)
 {
@@ -258,16 +270,6 @@ void weather_gui_del(void)
      lv_style_reset(&numberBig_style);
 //     lv_style_reset(&btn_style);
      lv_style_reset(&bar_style);
-}
-
-void display_space(void)
-{
-    static int _spaceIndex = 0;
-    if (NULL != scr_1 && lv_scr_act() == scr_1)
-    {
-        lv_img_set_src(spaceImg, manImage_map[_spaceIndex]);
-        _spaceIndex = (_spaceIndex + 1) % 10;
-    }
 }
 
 int my_isdigit(char c) {

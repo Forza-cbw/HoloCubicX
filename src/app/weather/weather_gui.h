@@ -48,11 +48,11 @@ extern "C"
 
     void weather_gui_init(void);
     void display_weather_init(void);
-    void display_weather(struct Weather weaInfo);
-    void display_time(struct TimeStr timeInfo);
+    void render_weather(struct Weather weaInfo);
+    void render_time(struct TimeStr timeInfo);
     void weather_gui_release(void);
     void weather_gui_del(void);
-    void display_space(void);
+    void render_man(void);
 //    int airQulityLevel(char* q);
 
 #ifdef __cplusplus
