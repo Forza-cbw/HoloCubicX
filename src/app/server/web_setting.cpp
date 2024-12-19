@@ -7,7 +7,6 @@
 #include "web_setting.h"
 #include "app/app_conf.h"
 #include "FS.h"
-#include "HardwareSerial.h"
 #include <esp32-hal.h>
 
 boolean sd_present = true;
@@ -638,8 +637,7 @@ void handleFileUpload()
         // String filename = uploadFileStream.filename;
         // if (!filename.startsWith("/image"))
         filename = "/image/" + filename;
-        Serial.print(F("Upload File Name: "));
-        Serial.println(filename);
+        log_i("Upload File Name: s", filename.c_str());
         tf.deleteFile(filename);                    // Remove a previous version, otherwise data is appended the file again
         UploadFile = tf.open(filename, FILE_WRITE); // Open the file for writing in SPIFFS (create it, if doesn't exist)
     }
@@ -653,8 +651,7 @@ void handleFileUpload()
         if (UploadFile) // If the file was successfully created
         {
             UploadFile.close(); // Close the file again
-            Serial.print(F("Upload Size: "));
-            Serial.println(uploadFileStream.totalSize);
+            log_i("Upload Size: %d", uploadFileStream.totalSize);
             webpage = webpage_header;
             webpage += F("<h3>File was successfully uploaded</h3>");
             webpage += F("<h2>Uploaded File Name: ");

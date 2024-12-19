@@ -178,12 +178,12 @@ static void server_message_handle(const char *from, const char *to,
     {
         case APP_MESSAGE_WIFI_STA:
         {
-            Serial.print(F("APP_MESSAGE_WIFI_STA enable\n"));
+            log_i("APP_MESSAGE_WIFI_STA enable");
         }
         break;
         case APP_MESSAGE_WIFI_AP:
         {
-            Serial.print(F("APP_MESSAGE_WIFI_AP enable\n"));
+            log_i("APP_MESSAGE_WIFI_AP enable");
             display_setting(
                 "WebServer Start",
                 "Domain: holocubic",
