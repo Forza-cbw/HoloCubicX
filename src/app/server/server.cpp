@@ -125,6 +125,9 @@ static void server_process(AppController *sys,
             "Wait...", "Wait...",
             // "", "",
             LV_SCR_LOAD_ANIM_NONE);
+
+        sys->send_to(SERVER_APP_NAME, CTRL_NAME,
+                     APP_MESSAGE_WIFI_STA, NULL, NULL);
         // 如果web服务没有开启 且 ap开启的请求没有发送 message这边没有作用（填0）
         sys->send_to(SERVER_APP_NAME, CTRL_NAME,
                      APP_MESSAGE_WIFI_AP, NULL, NULL);
@@ -173,26 +176,30 @@ static void server_message_handle(const char *from, const char *to,
 {
     switch (type)
     {
-    case APP_MESSAGE_WIFI_AP:
-    {
-        Serial.print(F("APP_MESSAGE_WIFI_AP enable\n"));
-        display_setting(
-            "WebServer Start",
-            "Domain: holocubic",
-            WiFi.localIP().toString().c_str(),
-            WiFi.softAPIP().toString().c_str(),
-            LV_SCR_LOAD_ANIM_NONE);
-        start_web_config();
-        run_data->web_start = 1;
-    }
-    break;
-    case APP_MESSAGE_WIFI_ALIVE:
-    {
-        // wifi心跳维持的响应 可以不做任何处理
-    }
-    break;
-    default:
+        case APP_MESSAGE_WIFI_STA:
+        {
+            Serial.print(F("APP_MESSAGE_WIFI_STA enable\n"));
+        }
         break;
+        case APP_MESSAGE_WIFI_AP:
+        {
+            Serial.print(F("APP_MESSAGE_WIFI_AP enable\n"));
+            display_setting(
+                "WebServer Start",
+                "Domain: holocubic",
+                WiFi.localIP().toString().c_str(),
+                WiFi.softAPIP().toString().c_str(),
+                LV_SCR_LOAD_ANIM_NONE);
+            start_web_config();
+            run_data->web_start = 1;
+        }
+        break;
+        case APP_MESSAGE_WIFI_ALIVE:
+        {
+        }
+        break;
+        default:
+            break;
     }
 }
 
