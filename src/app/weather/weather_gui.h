@@ -1,14 +1,17 @@
 #ifndef APP_WEATHER_GUI_H
 #define APP_WEATHER_GUI_H
 
+enum {
+    WEATHER_UPDATED = 0,
+    WEATHER_UPDATING
+};
+
 struct Weather
 {
-    
-    
+
     int maxTemp;      // 最高气温
     int minTemp;      // 最低气温
-    
-    
+
     int windLevel;
 //    int airQulity;
 
@@ -48,6 +51,7 @@ extern "C"
 
     void weather_gui_init(void);
     void display_weather_init(void);
+    void render_state(int updateState);
     void render_weather(struct Weather weaInfo);
     void render_time(struct TimeStr timeInfo);
     void weather_gui_release(void);

@@ -11,14 +11,14 @@ static lv_style_t default_style;
 static lv_style_t chFont_style;
 static lv_style_t numberSmall_style;
 static lv_style_t numberBig_style;
-//static lv_style_t btn_style;
+static lv_style_t btn_style;
 static lv_style_t bar_style;
 
 static lv_obj_t *scr_1 = NULL;
 
 static lv_obj_t *weatherImg = NULL;
 static lv_obj_t *cityLabel = NULL;
-//static lv_obj_t *btn = NULL, *btnLabel = NULL;
+static lv_obj_t *btn = NULL, *btnLabel = NULL;
 static lv_obj_t *txtLabel = NULL;
 static lv_obj_t *clockLabel_1 = NULL, *clockLabel_2 = NULL;
 static lv_obj_t *dateLabel = NULL;
@@ -33,7 +33,7 @@ const void *weaImage_map[] = {&weather_0, &weather_9, &weather_14, &weather_5, &
 // 太空人图标路径的映射关系
 const void *manImage_map[] = {&man_0, &man_1, &man_2, &man_3, &man_4, &man_5, &man_6, &man_7, &man_8, &man_9};
 static const char weekDayCh[7][4] = {"日", "一", "二", "三", "四", "五", "六"};
-//static const char airQualityCh[6][10] = {"优", "良", "轻度", "中度", "重度", "严重"};
+static const char updateStateCh[2][10] = {"最新", "更新"};
 
 void weather_gui_init(void)
 {
@@ -55,8 +55,9 @@ void weather_gui_init(void)
     lv_style_set_text_color(&numberBig_style, lv_color_hex(0xffffff));
     lv_style_set_text_font(&numberBig_style, &lv_font_ibmplex_115);
 
-//    lv_style_init(&btn_style);
-//    lv_style_set_border_width(&btn_style, 0);
+    lv_style_init(&btn_style);
+    lv_style_set_border_width(&btn_style, 0);
+
     lv_style_init(&bar_style);
     lv_style_set_bg_color(&bar_style, lv_color_hex(0x000000));
     lv_style_set_border_width(&bar_style, 2);
@@ -87,16 +88,16 @@ void display_weather_init(void)
     lv_label_set_recolor(cityLabel, true);
     lv_label_set_text(cityLabel, "上海");
 
-//    btn = lv_btn_create(scr_1);
-//    lv_obj_add_style(btn, &btn_style, LV_STATE_DEFAULT);
-//    lv_obj_set_pos(btn, 75, 15);
-//    lv_obj_set_size(btn, 50, 25);
-//    lv_obj_set_style_bg_color(btn, lv_palette_main(LV_PALETTE_ORANGE), LV_STATE_DEFAULT);
-//
-//    btnLabel = lv_label_create(btn);
-//    lv_obj_add_style(btnLabel, &chFont_style, LV_STATE_DEFAULT);
-//    lv_obj_align(btnLabel, LV_ALIGN_CENTER, 0, 0);
-//    lv_label_set_text(btnLabel, airQualityCh[0]);
+    btn = lv_btn_create(scr_1);
+    lv_obj_add_style(btn, &btn_style, LV_STATE_DEFAULT);
+    lv_obj_set_pos(btn, 75, 15);
+    lv_obj_set_size(btn, 50, 25);
+    lv_obj_set_style_bg_color(btn, lv_palette_main(LV_PALETTE_ORANGE), LV_STATE_DEFAULT);
+
+    btnLabel = lv_label_create(btn);
+    lv_obj_add_style(btnLabel, &chFont_style, LV_STATE_DEFAULT);
+    lv_obj_align(btnLabel, LV_ALIGN_CENTER, 0, 0);
+    lv_label_set_text(btnLabel, updateStateCh[WEATHER_UPDATING]);
 
     txtLabel = lv_label_create(scr_1);
     lv_obj_add_style(txtLabel, &chFont_style, LV_STATE_DEFAULT);
@@ -168,15 +169,14 @@ void display_weather_init(void)
     lv_obj_align(clockLabel_1, LV_ALIGN_LEFT_MID, 0, 10);
     lv_obj_align(clockLabel_2, LV_ALIGN_LEFT_MID, 165, 9);
     lv_obj_align(dateLabel, LV_ALIGN_LEFT_MID, 10, 38);
+}
 
-    // if (LV_SCR_LOAD_ANIM_NONE != anim_type)
-    // {
-    //     lv_scr_load_anim(scr_1, anim_type, 300, 300, false);
-    // }
-    // else
-    // {
-    // lv_scr_load(scr_1);
-    // }
+void render_state(int updateState) {
+    lv_label_set_text(btnLabel, updateStateCh[updateState]);
+    if (WEATHER_UPDATED == updateState)
+        lv_obj_set_style_bg_color(btn, lv_palette_main(LV_PALETTE_GREEN), LV_STATE_DEFAULT);
+    else
+        lv_obj_set_style_bg_color(btn, lv_palette_main(LV_PALETTE_ORANGE), LV_STATE_DEFAULT);
 }
 
 void render_weather(struct Weather weaInfo)
@@ -190,7 +190,7 @@ void render_weather(struct Weather weaInfo)
     {
         lv_obj_align(cityLabel, LV_ALIGN_TOP_LEFT, 20, 15);
     }
-//    lv_label_set_text(btnLabel, airQualityCh[weaInfo.airQulity]);
+
     lv_img_set_src(weatherImg, weaImage_map[weaInfo.weather_code]);
     // 下面这行代码可能会出错
     lv_label_set_text_fmt(txtLabel, "   今日天气:%s,%s风%s 级.        ",
@@ -210,19 +210,6 @@ void render_time(struct TimeStr timeInfo)
     lv_label_set_text_fmt(clockLabel_2, "%02d", timeInfo.second);
     lv_label_set_text_fmt(dateLabel, "%2d月%2d日   周%s", timeInfo.month, timeInfo.day,
                           weekDayCh[timeInfo.weekday]);
-
-    // lv_obj_align(clockLabel_1, NULL, LV_ALIGN_LEFT_MID, 0, 10);
-    // lv_obj_align(clockLabel_2, NULL, LV_ALIGN_LEFT_MID, 165, 9);
-    // lv_obj_align(dateLabel, NULL, LV_ALIGN_LEFT_MID, 10, 32);
-
-    // if (LV_SCR_LOAD_ANIM_NONE != anim_type)
-    // {
-    //     lv_scr_load_anim(scr_1, anim_type, 300, 300, false);
-    // }
-    // else
-    // {
-    //     lv_scr_load(scr_1);
-    // }
 }
 
 
@@ -245,8 +232,8 @@ void weather_gui_release(void)
         scr_1 = NULL;
         weatherImg = NULL;
         cityLabel = NULL;
-//        btn = NULL;
-//        btnLabel = NULL;
+        btn = NULL;
+        btnLabel = NULL;
         txtLabel = NULL;
         clockLabel_1 = NULL;
         clockLabel_2 = NULL;
@@ -270,7 +257,7 @@ void weather_gui_del(void)
      lv_style_reset(&chFont_style);
      lv_style_reset(&numberSmall_style);
      lv_style_reset(&numberBig_style);
-//     lv_style_reset(&btn_style);
+     lv_style_reset(&btn_style);
      lv_style_reset(&bar_style);
 }
 
@@ -290,29 +277,3 @@ int extractNumbers(const char *str) {
     }
     return result;
 }
-
-//int airQulityLevel(char* q)
-//{
-//    int number = extractNumbers(q);
-//    if (number <= 3 )
-//    {
-//        return 0;
-//    }
-//    else if (number <= 4)
-//    {
-//        return 1;
-//    }
-//    else if (number <= 6)
-//    {
-//        return 2;
-//    }
-//    else if (number <= 8)
-//    {
-//        return 3;
-//    }
-//    else if (number  <= 9)
-//    {
-//        return 4;
-//    }
-//    return 5;
-//}

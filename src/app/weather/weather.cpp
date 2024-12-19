@@ -24,7 +24,7 @@ struct WeatherAppRunData
     long long errorNetTimestamp;    // 网络到显示过程中的时间误差
     long long preLocalTimestamp;    // 上一次的本地机器时间戳
     unsigned int coactusUpdateFlag; // 强制更新标志
-    unsigned int update_type; // 更新类型的标志位
+    unsigned int updateState; // 表示当前是否处在更新状态
 
     BaseType_t xReturned_task_refresh; // 更新数据的异步任务
     TaskHandle_t xHandle_task_refresh; // 更新数据的异步任务
@@ -175,6 +175,7 @@ static void refreshScreen(void *parameter)
 {
     while (1)
     {
+        LVGL_OPERATE_LOCK(render_state(run_data->updateState);)
         LVGL_OPERATE_LOCK(render_weather(run_data->wea);)
         LVGL_OPERATE_LOCK(render_time(run_data->screenTime);)
         LVGL_OPERATE_LOCK(render_man();)
@@ -202,7 +203,7 @@ static int weather_init(AppController *sys)
     run_data->preTimeMillis = 0;
     // 强制更新
     run_data->coactusUpdateFlag = 0x01;
-    run_data->update_type = 0x00; // 表示什么也不需要更新
+    run_data->updateState = WEATHER_UPDATING; // 表示正在更新
 
     // 后台异步渲染
     run_data->xReturned_task_refresh = xTaskCreate(
@@ -229,6 +230,7 @@ static void weather_process(AppController *sys,
     {
         // 间接强制更新
         run_data->coactusUpdateFlag = 0x01;
+        run_data->updateState = WEATHER_UPDATING;
         delay(1000); // 以防间接强制更新后，生产很多请求 使显示卡顿
     }
 
@@ -287,17 +289,15 @@ static void weather_message_handle(const char *from, const char *to,
         case UPDATE_NOW:
         {
             log_i("weather update.");
-            run_data->update_type |= UPDATE_WEATHER;
-
             updateWeather();
+            run_data->updateState = WEATHER_UPDATED;
         };
         break;
         case UPDATE_NTP:
         {
             log_i("ntp update.");
-            run_data->update_type |= UPDATE_TIME;
-
             ntp_sync(); // nowapi时间API
+            run_data->updateState = WEATHER_UPDATED;
         };
         break;
         default:
