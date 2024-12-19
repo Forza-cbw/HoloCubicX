@@ -63,7 +63,7 @@ static void file_maneger_process(AppController *sys,
             LV_SCR_LOAD_ANIM_NONE);
         // 如果web服务没有开启 且 ap开启的请求没有发送 event_id这边没有作用（填0）
         sys->send_to(FILE_MANAGER_APP_NAME, CTRL_NAME,
-                     APP_MESSAGE_WIFI_CONN, NULL, NULL);
+                     APP_MESSAGE_WIFI_STA, NULL, NULL);
         run_data->req_sent = 1; // 标志为 ap开启请求已发送
     }
     else if (1 == run_data->tcp_start)
@@ -109,7 +109,7 @@ static void file_maneger_message_handle(const char *from, const char *to,
 {
     switch (type)
     {
-    case APP_MESSAGE_WIFI_CONN:
+    case APP_MESSAGE_WIFI_STA:
     {
         Serial.print(F("APP_MESSAGE_WIFI_AP enable\n"));
         display_file_manager(

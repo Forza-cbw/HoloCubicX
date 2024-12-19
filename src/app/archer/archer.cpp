@@ -255,7 +255,7 @@ static int archer_init(AppController *sys)
             // hb_cfg.mqtt_client = new PubSubClient(DEFALUT_MQTT_IP_CLIMBL, hb_cfg.port, hb_cfg.callback, hb_cfg.espClient);
         }
         // 连接wifi，并开启mqtt客户端
-        sys->send_to(ARCHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
+        sys->send_to(ARCHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_STA, NULL, NULL);
     }
     return 0;
 }
@@ -352,7 +352,7 @@ static void archer_message_handle(const char *from, const char *to,
     // 目前主要是wifi开关类事件（用于功耗控制）
     switch (type)
     {
-    case APP_MESSAGE_WIFI_CONN:
+    case APP_MESSAGE_WIFI_STA:
     {
         log_i("MQTT keep alive");
         if (!hb_cfg.mqtt_client->connected())

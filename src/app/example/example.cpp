@@ -61,7 +61,7 @@ static void example_process(AppController *sys,
     }
     // 发送请求。如果是wifi相关的消息，当请求完成后自动会调用 example_message_handle 函数
     // sys->send_to(EXAMPLE_APP_NAME, CTRL_NAME,
-    //              APP_MESSAGE_WIFI_CONN, (void *)run_data->val1, NULL);
+    //              APP_MESSAGE_WIFI_STA, (void *)run_data->val1, NULL);
 
     // 程序需要时可以适当加延时
     // delay(300);
@@ -85,7 +85,7 @@ static void example_message_handle(const char *from, const char *to,
     // 目前主要是wifi开关类事件（用于功耗控制）
     switch (type)
     {
-    case APP_MESSAGE_WIFI_CONN:
+    case APP_MESSAGE_WIFI_STA:
     {
         // todo
     }

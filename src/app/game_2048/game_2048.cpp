@@ -152,7 +152,7 @@ static void game_2048_message_handle(const char *from, const char *to,
     // 目前事件主要是wifi开关类事件（用于功耗控制）
     switch (type)
     {
-    case APP_MESSAGE_WIFI_CONN:
+    case APP_MESSAGE_WIFI_STA:
     {
         // todo
     }

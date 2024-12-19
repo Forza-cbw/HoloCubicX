@@ -338,7 +338,7 @@ static void tomato_message_handle(const char *from, const char *to, APP_MESSAGE_
 {
     switch (type)
     {
-    case APP_MESSAGE_WIFI_CONN:
+    case APP_MESSAGE_WIFI_STA:
     {
         // get_timestamp(TIME_API);
     }

@@ -235,14 +235,14 @@ static void weather_process(AppController *sys,
     if (0x01 == run_data->coactusUpdateFlag || doDelayMillisTime(cfg_data.weatherUpdataInterval, &run_data->preWeatherMillis, false))
     {
         sys->send_to(WEATHER_APP_NAME, CTRL_NAME,
-                     APP_MESSAGE_WIFI_CONN, (void *)UPDATE_NOW, NULL);
+                     APP_MESSAGE_WIFI_STA, (void *)UPDATE_NOW, NULL);
     }
 
     if (0x01 == run_data->coactusUpdateFlag || doDelayMillisTime(cfg_data.timeUpdataInterval, &run_data->preTimeMillis, false))
     {
         // 尝试同步网络上的时钟
         sys->send_to(WEATHER_APP_NAME, CTRL_NAME,
-                     APP_MESSAGE_WIFI_CONN, (void *)UPDATE_NTP, NULL);
+                     APP_MESSAGE_WIFI_STA, (void *)UPDATE_NTP, NULL);
     }
     else if (GET_SYS_MILLIS() - run_data->preLocalTimestamp > 200) //间隔应该是1000ms的因数
     {
@@ -278,7 +278,7 @@ static void weather_message_handle(const char *from, const char *to,
 {
     switch (type)
     {
-    case APP_MESSAGE_WIFI_CONN:
+    case APP_MESSAGE_WIFI_STA:
     {
         log_i("----->weather_event_notification");
         int event_id = (int)message;

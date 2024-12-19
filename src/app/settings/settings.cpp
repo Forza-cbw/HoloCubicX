@@ -189,7 +189,7 @@ static void settings_process(AppController *sys,
     }
 
     // 发送请求，当请求完成后自动会调用 settings_event_notification 函数
-    // sys->req_event(&settings_app, APP_MESSAGE_WIFI_CONN, run_data->val1);
+    // sys->req_event(&settings_app, APP_MESSAGE_WIFI_STA, run_data->val1);
     // 程序需要时可以适当加延时
     // delay(200);
 }
@@ -214,7 +214,7 @@ static void settings_message_handle(const char *from, const char *to,
     // 目前事件主要是wifi开关类事件（用于功耗控制）
     switch (type)
     {
-    case APP_MESSAGE_WIFI_CONN:
+    case APP_MESSAGE_WIFI_STA:
     {
         // todo
     }

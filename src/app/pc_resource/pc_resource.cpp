@@ -221,7 +221,7 @@ static void pc_resource_process(AppController *sys, const ImuAction *act_info)
     {
         // 发送更新数据显示事件
         sys->send_to(PC_RESOURCE_APP_NAME, CTRL_NAME,
-                     APP_MESSAGE_WIFI_CONN, (void *)UPDATE_RS_DATA, NULL);
+                     APP_MESSAGE_WIFI_STA, (void *)UPDATE_RS_DATA, NULL);
     }
 
     delay(30);
@@ -257,7 +257,7 @@ static void pc_resource_message_handle(const char *from, const char *to,
 {
     switch (type)
     {
-    case APP_MESSAGE_WIFI_CONN:
+    case APP_MESSAGE_WIFI_STA:
     {
         log_i("----->pc_resource_event_notification");
         int event_id = (int)message;

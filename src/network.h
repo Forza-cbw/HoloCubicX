@@ -4,8 +4,6 @@
 // 时区偏移(小时) 8*60*60
 #define TIMEZERO_OFFSIZE (28800000)
 
-#define CONN_SUCC 0
-#define CONN_ERROR 1
 #define CONN_ERR_TIMEOUT 15 // 连接WiFi的超时时间（s）
 
 // wifi是否连接标志
@@ -57,7 +55,7 @@ public:
     Network();
     void search_wifi(void);
     boolean start_conn_wifi(const char *ssid, const char *password);
-    boolean end_conn_wifi(void);
+    boolean is_conn_wifi(void);
     boolean close_wifi(void);
     boolean open_ap(const char *ap_ssid = AP_SSID, const char *ap_password = NULL);
     boolean close_ap();

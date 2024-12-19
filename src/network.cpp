@@ -95,7 +95,7 @@ boolean Network::start_conn_wifi(const char *ssid, const char *password)
     return true;
 }
 
-boolean Network::end_conn_wifi(void)
+boolean Network::is_conn_wifi(void)
 {
     if (WL_CONNECTED != WiFi.status())
     {
@@ -104,7 +104,7 @@ boolean Network::end_conn_wifi(void)
             // 这个if为了减少频繁的打印
             log_i("\nWiFi connect error.\n");
         }
-        return CONN_ERROR;
+        return false;
     }
 
     if (doDelayMillisTime(10000, &m_preDisWifiConnInfoMillis, false))
@@ -114,7 +114,7 @@ boolean Network::end_conn_wifi(void)
         log_i("IP address: ");
         log_i("%s",WiFi.localIP());
     }
-    return CONN_SUCC;
+    return true;
 }
 
 // 关闭wifi和ap
