@@ -1,5 +1,6 @@
 #include "app_controller.h"
 #include "app_controller_gui.h"
+#include "app/app_name.h"
 #include "common.h"
 #include "interface.h"
 #include "Arduino.h"
@@ -293,7 +294,7 @@ int AppController::req_event_deal(void)
         // 事件回调
         if (NULL != (*event).from && NULL != (*event).from->message_handle)
         {
-            (*((*event).from->message_handle))(CTRL_NAME, (*event).from->app_name,
+            (*((*event).from->message_handle))(SELF_SYS_NAME, (*event).from->app_name,
                                                (*event).type, (*event).info, NULL);
         }
         log_i("[EVENT]\tDelete -> %s " ,app_event_type_info[(*event).type]);

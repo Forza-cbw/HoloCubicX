@@ -1,12 +1,11 @@
 #include "message.h"
 #include "file_manager.h"
 #include "file_manager_gui.h"
+#include "app/app_name.h"
 #include "sys/app_controller.h"
 #include "network.h"
 #include "common.h"
 #include "ESP32FtpServer.h"
-
-#define FILE_MANAGER_APP_NAME "File Manager"
 
 #define FILE_MANAGER_REFLUSH_INTERVAL 2000UL // 配置界面重新刷新时间(2s)
 
@@ -62,7 +61,7 @@ static void file_maneger_process(AppController *sys,
             "Wait connect ....",
             LV_SCR_LOAD_ANIM_NONE);
         // 如果web服务没有开启 且 ap开启的请求没有发送 event_id这边没有作用（填0）
-        sys->send_to(FILE_MANAGER_APP_NAME, CTRL_NAME,
+        sys->send_to(FILE_MANAGER_APP_NAME, WIFI_SYS_NAME,
                      APP_MESSAGE_WIFI_STA, NULL, NULL);
         run_data->req_sent = 1; // 标志为 ap开启请求已发送
     }
@@ -71,7 +70,7 @@ static void file_maneger_process(AppController *sys,
         if (doDelayMillisTime(SHARE_WIFI_ALIVE, &run_data->apAlivePreMillis, false))
         {
             // 发送wifi维持的心跳
-            sys->send_to(FILE_MANAGER_APP_NAME, CTRL_NAME,
+            sys->send_to(FILE_MANAGER_APP_NAME, WIFI_SYS_NAME,
                          APP_MESSAGE_WIFI_ALIVE, NULL, NULL);
         }
         ftpSrv.handleFTP(); // make sure in loop you call handleFTP()!!

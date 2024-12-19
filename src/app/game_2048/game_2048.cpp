@@ -1,10 +1,10 @@
 #include "game_2048.h"
 #include "game_2048_gui.h"
 #include "game2048_contorller.h"
+#include "app/app_name.h"
 #include "sys/app_controller.h"
 #include "gui_lock.h"
 
-#define G2048_APP_NAME "2048"
 
 void taskOne(void *parameter)
 {

@@ -1,11 +1,10 @@
 #include "archer.h"
 #include "archer_gui.h"
+#include "app/app_name.h"
 #include "sys/app_controller.h"
 #include "common.h"
 #include "network.h"
 #include <PubSubClient.h>
-
-#define ARCHER_APP_NAME "Archer"
 
 #define DEFALUT_MQTT_IP "120.79.216.105"
 #define DEFALUT_MQTT_IP_CLIMBL "climb.dynv6.net"
@@ -255,7 +254,7 @@ static int archer_init(AppController *sys)
             // hb_cfg.mqtt_client = new PubSubClient(DEFALUT_MQTT_IP_CLIMBL, hb_cfg.port, hb_cfg.callback, hb_cfg.espClient);
         }
         // 连接wifi，并开启mqtt客户端
-        sys->send_to(ARCHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_STA, NULL, NULL);
+        sys->send_to(ARCHER_APP_NAME, WIFI_SYS_NAME, APP_MESSAGE_WIFI_STA, NULL, NULL);
     }
     return 0;
 }
@@ -319,7 +318,7 @@ static void archer_process(AppController *sys,
         {
             // 发送请求。如果是wifi相关的消息，
             // 当请求完成后自动会调用 archer_message_handle 函数
-            sys->send_to(ARCHER_APP_NAME, CTRL_NAME,
+            sys->send_to(ARCHER_APP_NAME, WIFI_SYS_NAME,
                          APP_MESSAGE_WIFI_ALIVE, NULL, NULL);
         }
     }

@@ -1,12 +1,12 @@
 #include "media_player.h"
 #include "media_gui.h"
+#include "app/app_name.h"
 #include "sys/app_controller.h"
 #include "common.h"
 #include "driver/sd_card.h"
 #include "docoder.h"
 #include "DMADrawer.h"
 
-#define MEDIA_PLAYER_APP_NAME "Media"
 
 #define VIDEO_WIDTH 240L
 #define VIDEO_HEIGHT 240L

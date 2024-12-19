@@ -1,10 +1,10 @@
 #include "settings.h"
-#include "message.h"
 #include "settings_gui.h"
+#include "app/app_name.h"
 #include "sys/app_controller.h"
 #include "common.h"
+#include "message.h"
 
-#define SETTINGS_APP_NAME "Settings"
 #define RECV_BUF_LEN 128
 
 struct SettingsAppRunData

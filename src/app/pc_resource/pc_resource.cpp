@@ -1,12 +1,12 @@
 #include "pc_resource.h"
 #include "pc_resource_gui.h"
+#include "app/app_name.h"
 #include "ESP32Time.h"
 #include "sys/app_controller.h"
 #include "network.h"
 #include "common.h"
 #include "ArduinoJson.h"
 
-#define PC_RESOURCE_APP_NAME "PC Resource"
 
 // 数据解析表 - 前导字符串
 static const char *rs_data_header[] = {
@@ -220,7 +220,7 @@ static void pc_resource_process(AppController *sys, const ImuAction *act_info)
     if (doDelayMillisTime(cfg_data.sensorUpdataInterval, &run_data->preTimeMillis, false))
     {
         // 发送更新数据显示事件
-        sys->send_to(PC_RESOURCE_APP_NAME, CTRL_NAME,
+        sys->send_to(PC_RESOURCE_APP_NAME, WIFI_SYS_NAME,
                      APP_MESSAGE_WIFI_STA, (void *)UPDATE_RS_DATA, NULL);
     }
 

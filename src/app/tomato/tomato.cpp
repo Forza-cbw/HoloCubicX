@@ -1,9 +1,10 @@
 #include "tomato.h"
 #include "tomato_gui.h"
+#include "app/app_name.h"
 #include "sys/app_controller.h"
 #include "common.h"
 #include "ESP32Time.h"
-#define TOMATO_APP_NAME "Tomato"
+
 #define ON 1
 #define OFF 0
 

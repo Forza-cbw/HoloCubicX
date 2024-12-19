@@ -3,11 +3,12 @@
 
 #include "Arduino.h"
 #include "interface.h"
+#include "app/app_name.h"
 #include "driver/imu.h"
 #include "common.h"
 #include <list>
 
-#define CTRL_NAME "AppCtrl"
+
 #define APP_MAX_NUM 20             // 最大的可运行的APP数量
 #define WIFI_LIFE_CYCLE 60000      // wifi的生命周期（60s）
 #define MQTT_ALIVE_CYCLE 1000      // mqtt重连周期
@@ -36,7 +37,7 @@ struct EVENT_OBJ
 class AppController
 {
 public:
-    AppController(const char *name = CTRL_NAME);
+    AppController(const char *name = SELF_SYS_NAME);
     ~AppController();
     void init(void);
     void Display(void); // 显示接口

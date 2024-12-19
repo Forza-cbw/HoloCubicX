@@ -1,9 +1,9 @@
 #include "example.h"
 #include "example_gui.h"
+#include "app/app_name.h"
 #include "sys/app_controller.h"
 #include "common.h"
 
-#define EXAMPLE_APP_NAME "Example"
 
 // 动态数据，APP的生命周期结束也需要释放它
 struct ExampleAppRunData
@@ -60,7 +60,7 @@ static void example_process(AppController *sys,
         return;
     }
     // 发送请求。如果是wifi相关的消息，当请求完成后自动会调用 example_message_handle 函数
-    // sys->send_to(EXAMPLE_APP_NAME, CTRL_NAME,
+    // sys->send_to(EXAMPLE_APP_NAME, WIFI_SYS_NAME,
     //              APP_MESSAGE_WIFI_STA, (void *)run_data->val1, NULL);
 
     // 程序需要时可以适当加延时

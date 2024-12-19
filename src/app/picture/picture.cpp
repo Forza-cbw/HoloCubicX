@@ -1,12 +1,11 @@
 #include "picture.h"
 #include "picture_gui.h"
+#include "app/app_name.h"
 #include "sys/app_controller.h"
 #include "common.h"
 
 // Include the jpeg decoder library
 #include <TJpg_Decoder.h>
-
-#define PICTURE_APP_NAME "Picture"
 
 // 相册的持久化配置
 #define PICTURE_CONFIG_PATH "/picture.cfg"

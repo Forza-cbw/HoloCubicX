@@ -3,6 +3,7 @@
 
 enum APP_MESSAGE_TYPE
 {
+    /* wifi相关 */
     APP_MESSAGE_WIFI_STA = 0, // 开启连接
     APP_MESSAGE_WIFI_ALIVE,    // wifi开关的心跳维持
     APP_MESSAGE_WIFI_AP,       // 开启AP事件
@@ -10,6 +11,7 @@ enum APP_MESSAGE_TYPE
     APP_MESSAGE_WIFI_AP_CLOSE, // 关闭AP
     APP_MESSAGE_UPDATE_TIME,
     APP_MESSAGE_MQTT_DATA, // MQTT客户端收到消息
+    /* 配置相关 */
     APP_MESSAGE_GET_PARAM, // 获取参数
     APP_MESSAGE_SET_PARAM, // 设置参数
     APP_MESSAGE_READ_CFG,  // 向磁盘读取参数

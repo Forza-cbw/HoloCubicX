@@ -1,11 +1,12 @@
 #include "game_snake.h"
 #include "game_snake_gui.h"
+#include "app/app_name.h"
 #include "sys/app_controller.h"
 #include "common.h"
 #include "gui_lock.h"
 
 // 游戏名称
-#define GAME_APP_NAME "Snake"
+
 
 #define SNAKE_SPEED 1000
 

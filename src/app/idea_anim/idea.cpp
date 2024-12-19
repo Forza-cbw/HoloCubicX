@@ -1,11 +1,11 @@
 #include "idea.h"
+#include "app/app_name.h"
 #include "sys/app_controller.h"
 #include "network.h"
 #include "common.h"
 #include <stdint.h>
 #include "ui_animation.h"
 
-#define IDEA_APP_NAME "Idea"
 
 // 由于tft屏幕刷新太慢，现在是先开辟一块屏幕分辨率大小的空间作为一张需要显示的图像，
 // 所有的绘图操作在虚拟的空间上，绘制图像，最后调用tft的图像显示功能显示图像

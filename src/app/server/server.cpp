@@ -126,10 +126,10 @@ static void server_process(AppController *sys,
             // "", "",
             LV_SCR_LOAD_ANIM_NONE);
 
-        sys->send_to(SERVER_APP_NAME, CTRL_NAME,
+        sys->send_to(SERVER_APP_NAME, WIFI_SYS_NAME,
                      APP_MESSAGE_WIFI_STA, NULL, NULL);
         // 如果web服务没有开启 且 ap开启的请求没有发送 message这边没有作用（填0）
-        sys->send_to(SERVER_APP_NAME, CTRL_NAME,
+        sys->send_to(SERVER_APP_NAME, WIFI_SYS_NAME,
                      APP_MESSAGE_WIFI_AP, NULL, NULL);
         run_data->req_sent = 1; // 标志为 ap开启请求已发送
     }
@@ -140,7 +140,7 @@ static void server_process(AppController *sys,
         if (doDelayMillisTime(SERVER_REFLUSH_INTERVAL, &run_data->serverReflushPreMillis, false) == true)
         {
             // 发送wifi维持的心跳
-            sys->send_to(SERVER_APP_NAME, CTRL_NAME,
+            sys->send_to(SERVER_APP_NAME, WIFI_SYS_NAME,
                          APP_MESSAGE_WIFI_ALIVE, NULL, NULL);
 
             display_setting(
@@ -156,7 +156,7 @@ static void server_process(AppController *sys,
 static int server_exit_callback(void *param)
 {
     // 关闭AP
-    run_data->sys->send_to(SERVER_APP_NAME, CTRL_NAME,
+    run_data->sys->send_to(SERVER_APP_NAME, WIFI_SYS_NAME,
                            APP_MESSAGE_WIFI_AP_CLOSE, NULL, NULL);
 
     setting_gui_del();

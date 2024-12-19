@@ -3,11 +3,10 @@
 #include "./eye/eye.h"
 #include "./heartbeat_/heartbeat_.h"
 #include "./cyber/cyber.h"
-#include "sys/app_controller.h"
 #include "LHLXW_GUI.h"
+#include "app/app_name.h"
+#include "sys/app_controller.h"
 
-
-#define APP_NAME   "LOVE"//APP名字
 extern const lv_img_dsc_t LHLXW_ico;//APP图标
 
 /*
