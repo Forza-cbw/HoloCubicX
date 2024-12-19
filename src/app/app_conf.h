@@ -18,7 +18,7 @@
 #endif
 
 // 文件管理器APP
-#define APP_FILE_MANAGER_USE 0
+#define APP_FILE_MANAGER_USE 1
 #if APP_FILE_MANAGER_USE
 #include "app/file_manager/file_manager.h"
 #endif
@@ -36,25 +36,25 @@
 #endif
 
 // 特效动画APP
-#define APP_IDEA_ANIM_USE 0
+#define APP_IDEA_ANIM_USE 1
 #if APP_IDEA_ANIM_USE
 #include "app/idea_anim/idea.h"
 #endif
 
 // 视频播放器APP
-#define APP_MEDIA_PLAYER_USE 0
+#define APP_MEDIA_PLAYER_USE 1
 #if APP_MEDIA_PLAYER_USE
 #include "app/media_player/media_player.h"
 #endif
 
 // 相册APP
-#define APP_PICTURE_USE 0
+#define APP_PICTURE_USE 1
 #if APP_PICTURE_USE
 #include "app/picture/picture.h"
 #endif
 
 // 遥感器APP
-#define APP_PC_RESOURCE_USE 0
+#define APP_PC_RESOURCE_USE 1
 #if APP_PC_RESOURCE_USE
 #include "app/pc_resource/pc_resource.h"
 #endif
@@ -66,7 +66,7 @@
 #endif
 
 // 设置APP
-#define APP_SETTING_USE 0
+#define APP_SETTING_USE 1
 #if APP_SETTING_USE
 #include "app/settings/settings.h"
 #endif

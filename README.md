@@ -29,3 +29,12 @@
 5. 提供web端的文件上传到SD卡（包括删除），无需拔插SD来更新图片。
 6. `遛马小哥`开源上位机源码，可进行刷机等操作。 https://github.com/ClimbSnail/HoloCubic_AIO_Tool
 
+### **烧录地址**
+本固件适用于esp32-s3-devkitc-1版本的HoloCubic，其他版本需要移植。注意烧录地址与pico版本有所差异。
+
+|   地址  |  二进制文件   |
+|-------|-------|
+|  **0x0000***  |  bootloader.bin  |
+|  0x8000  |  partitions.bin  |
+|  0xe000  |  boot_app0.bin  |
+|  0x10000  |  firmware.bin  |
