@@ -110,7 +110,7 @@ static void file_maneger_message_handle(const char *from, const char *to,
     {
     case APP_MESSAGE_WIFI_STA:
     {
-        Serial.print(F("APP_MESSAGE_WIFI_AP enable\n"));
+        Serial.print(F("APP_MESSAGE_WIFI_STA enable\n"));
         display_file_manager(
             "File Manager",
             WiFi.localIP().toString().c_str(),
@@ -119,18 +119,6 @@ static void file_maneger_message_handle(const char *from, const char *to,
             LV_SCR_LOAD_ANIM_NONE);
         run_data->tcp_start = 1;
         ftpSrv.begin("holocubic", "aio");
-    }
-    break;
-    case APP_MESSAGE_WIFI_AP:
-    {
-        Serial.print(F("APP_MESSAGE_WIFI_AP enable\n"));
-        display_file_manager(
-            "File Manager",
-            WiFi.localIP().toString().c_str(),
-            "21",
-            "Connect succ",
-            LV_SCR_LOAD_ANIM_NONE);
-        run_data->tcp_start = 1;
     }
     break;
     case APP_MESSAGE_WIFI_ALIVE:

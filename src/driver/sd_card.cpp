@@ -83,13 +83,13 @@ static const char *get_file_basename(const char *path)
 
 void SdCard::init()
 {
-
+    log_i("SdCard init");
 #ifdef USE_SD_MMC
     //因为默认的40mHz频率在S3上有错误，会时不时卡住，搜索过后得到解决方案就是降低频率到20MHz
     SD_MMC.setPins(SDMC_CLK,SDMMC_CMD,SDMMC_D0);
-    if(!SD_MMC.begin("/root", true,false,SDMMC_FREQ_DEFAULT))  
+    if(!SD_MMC.begin("/root", true,false,SDMMC_FREQ_DEFAULT))
     {
-        log_i("Card Mount Failed");
+        log_i("SD Card Mount Failed");
         return;
     }
     tf_vfs = &SD_MMC;
@@ -97,7 +97,7 @@ void SdCard::init()
 
     if (cardType == CARD_NONE)
     {
-        log_i("No SD card attached");
+        log_i("No SD Card attached");
         return;
     }
 
