@@ -31,7 +31,7 @@ AppController::AppController(const char *name)
     cur_app_index = 0;
     pre_app_index = 0;
     // appList = new APP_OBJ[APP_MAX_NUM];
-    m_wifi_status = false;
+//    m_wifi_status = false;
     m_preWifiReqMillis = GET_SYS_MILLIS();
 
     // 定义一个事件处理定时器
@@ -136,7 +136,7 @@ int AppController::main_process(ImuAction *act_info)
     }
 
     // wifi自动关闭(在节能模式下)
-    if (0 == sys_cfg.power_mode && true == m_wifi_status && doDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis, false))
+    if (0 == sys_cfg.power_mode && WIFI_MODE_NULL != WiFi.getMode() && doDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis, false))
     {
         send_to(SELF_SYS_NAME, WIFI_SYS_NAME, APP_MESSAGE_WIFI_DISABLE, 0, NULL);
     }
@@ -345,43 +345,31 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
     {
         case APP_MESSAGE_WIFI_STA:
         {
-            // 更新请求
-            if (false == m_wifi_status)
-            {
-                g_network.start_conn_wifi(sys_cfg.ssid_0.c_str(), sys_cfg.password_0.c_str()); // 使能wifi-sta连接
-                m_wifi_status = true;
-            }
-            if ((WiFi.getMode() & WIFI_MODE_STA) == WIFI_MODE_STA && !g_network.is_conn_wifi())
-            {   // 在STA模式下 并且还没连接上wifi
+            g_network.start_conn_wifi(sys_cfg.ssid_0.c_str(), sys_cfg.password_0.c_str()); // 使能wifi-sta连接
+            if (!g_network.is_conn_wifi())
                 result = false;
-            }
         } // 注意这里没有break！！！！
         case APP_MESSAGE_WIFI_ALIVE:
         {   // 持续收到心跳 wifi才不会（因为自己写的省电逻辑）被关闭
-            if (true == m_wifi_status)
-                m_preWifiReqMillis = GET_SYS_MILLIS(); // 更新wifi保活时间戳
+            m_preWifiReqMillis = GET_SYS_MILLIS(); // 更新wifi保活时间戳
         }
         break;
         case APP_MESSAGE_WIFI_AP:
         {
             // 更新请求
             g_network.open_ap(AP_SSID);
-            m_wifi_status = true;
             m_preWifiReqMillis = GET_SYS_MILLIS();
         }
         break;
         case APP_MESSAGE_WIFI_DISABLE:
         {
             g_network.close_wifi();
-            m_wifi_status = false; // 标志位
             // m_preWifiReqMillis = GET_SYS_MILLIS() - WIFI_LIFE_CYCLE;
         }
         break;
         case APP_MESSAGE_WIFI_AP_CLOSE:
         {
             g_network.close_ap();
-            if (WIFI_MODE_NULL == WiFi.getMode())
-                m_wifi_status = false;
         }
         break;
         default:

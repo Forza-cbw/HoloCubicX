@@ -52,7 +52,7 @@ boolean Network::start_conn_wifi(const char *ssid, const char *password)
 {
     if (WiFi.status() == WL_CONNECTED)
     {
-        log_i("\nWiFi is OK.\n");
+        log_d("\nWiFi is OK.\n");
         return false;
     }
     log_i("");
