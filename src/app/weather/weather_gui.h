@@ -2,8 +2,9 @@
 #define APP_WEATHER_GUI_H
 
 enum {
-    WEATHER_UPDATED = 0,
-    WEATHER_UPDATING
+    WEATHER_STATUS_LATEST = 0,
+    WEATHER_STATUS_EXPIRED,
+    WEATHER_STATUS_UPDATING
 };
 
 struct Weather
@@ -51,7 +52,7 @@ extern "C"
 
     void weather_gui_init(void);
     void display_weather_init(void);
-    void render_state(int updateState);
+    void render_state(int timeStatus, int weatherStatus);
     void render_weather(struct Weather weaInfo);
     void render_time(struct TimeStr timeInfo);
     void weather_gui_release(void);

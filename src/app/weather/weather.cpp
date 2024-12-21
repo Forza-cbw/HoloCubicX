@@ -22,7 +22,7 @@ struct WeatherAppRunData
     long long errorNetTimestamp;    // 网络到显示过程中的时间误差
     long long preLocalTimestamp;    // 上一次的本地机器时间戳
     unsigned int coactusUpdateFlag; // 强制更新标志
-    unsigned int updateState; // 表示当前是否处在更新状态
+    int  timeStatus, weatherStatus; // 表示数据是否过期
 
     BaseType_t xReturned_task_refresh; // 更新数据的异步任务
     TaskHandle_t xHandle_task_refresh; // 更新数据的异步任务
@@ -33,15 +33,15 @@ struct WeatherAppRunData
 
 static WeatherAppRunData *run_data = NULL;
 
-static void updateWeather(void)
+static bool weather_sync(void)
 {
-    if (WL_CONNECTED != WiFi.status())
-        return;
-
+    bool ret = false;
     HTTPClient http;
     http.setTimeout(1000);
     char api[128] = {0};
 
+    if (WL_CONNECTED != WiFi.status())
+        return false;
 
     // 暂时用tianqi_appid，当CITY_CODE
     // 使用WEATHER_API_KEY当WEATHER_API_KEY
@@ -80,13 +80,14 @@ static void updateWeather(void)
 //            run_data->wea.airQulity = airQulityLevel(run_data->wea.windpower);
 
             log_i(" Get weather info OK");
+            ret = true;
         }
         else
         {
             // 返回值错误，记录
-            log_i("[APP] Get weather error,info");
+            log_e("[APP] Get weather error,info");
             String err_info = doc["info"];
-            log_i("%s", err_info.c_str());
+            log_e("%s", err_info.c_str());
         }
     }
     else
@@ -94,6 +95,8 @@ static void updateWeather(void)
         log_e("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
     }
     http.end();
+
+    return ret;
 }
 
 static long long get_timestamp()
@@ -120,7 +123,7 @@ static bool ntp_sync()
     }
 
     // 更新 NTP 时间
-    if (!timeClient.update()){
+    if (!timeClient.forceUpdate()){
         log_w("timeClient.update(): failed"); // timeClient默认时间在1970年，而太早的时间会导致ESP32Time库变得超级慢。
         return false;
     }
@@ -173,7 +176,7 @@ static void refreshScreen(void *parameter)
 {
     while (1)
     {
-        LVGL_OPERATE_LOCK(render_state(run_data->updateState);)
+        LVGL_OPERATE_LOCK(render_state(run_data->timeStatus, run_data->weatherStatus);)
         LVGL_OPERATE_LOCK(render_weather(run_data->wea);)
         LVGL_OPERATE_LOCK(render_time(run_data->screenTime);)
         LVGL_OPERATE_LOCK(render_man();)
@@ -201,7 +204,7 @@ static int weather_init(AppController *sys)
     run_data->preTimeMillis = 0;
     // 强制更新
     run_data->coactusUpdateFlag = 0x01;
-    run_data->updateState = WEATHER_UPDATING; // 表示正在更新
+    run_data->timeStatus = run_data->weatherStatus  = WEATHER_STATUS_EXPIRED;
 
     // 后台异步渲染
     run_data->xReturned_task_refresh = xTaskCreate(
@@ -224,27 +227,29 @@ static void weather_process(AppController *sys,
         return;
     }
     //else if (GO_FORWORD == act_info->active)
-    else if (UP == act_info->active) // todo 改成需要最小时间间隔启动，更新时有提示
+    else if (UP == act_info->active) // todo 改成需要最小时间间隔启动
     {
         // 间接强制更新
         run_data->coactusUpdateFlag = 0x01;
-        run_data->updateState = WEATHER_UPDATING;
         delay(1000); // 以防间接强制更新后，生产很多请求 使显示卡顿
     }
 
     if (0x01 == run_data->coactusUpdateFlag || doDelayMillisTime(cfg_data.weatherUpdataInterval, &run_data->preWeatherMillis, false))
     {
+        run_data->weatherStatus = WEATHER_STATUS_UPDATING;
         sys->send_to(WEATHER_APP_NAME, WIFI_SYS_NAME,
                      APP_MESSAGE_WIFI_STA, (void *)UPDATE_NOW, NULL);
     }
 
     if (0x01 == run_data->coactusUpdateFlag || doDelayMillisTime(cfg_data.timeUpdataInterval, &run_data->preTimeMillis, false))
     {
+        run_data->timeStatus = WEATHER_STATUS_UPDATING;
         // 尝试同步网络上的时钟
         sys->send_to(WEATHER_APP_NAME, WIFI_SYS_NAME,
                      APP_MESSAGE_WIFI_STA, (void *)UPDATE_NTP, NULL);
     }
-    else if (GET_SYS_MILLIS() - run_data->preLocalTimestamp > 200) //间隔应该是1000ms的因数
+    // 更新时间缓存
+    if (GET_SYS_MILLIS() - run_data->preLocalTimestamp > 200) //间隔应该是1000ms的因数
     {
         updateTimeRTC(get_timestamp()); // 刷新run_data->screenTime。分离计算screenTime和刷新屏幕的过程，减少无效计算。
     }
@@ -287,15 +292,19 @@ static void weather_message_handle(const char *from, const char *to,
         case UPDATE_NOW:
         {
             log_i("weather update.");
-            updateWeather();
-            run_data->updateState = WEATHER_UPDATED;
+            if (weather_sync() == true)
+                run_data->weatherStatus = WEATHER_STATUS_LATEST;
+            else
+                run_data->weatherStatus = WEATHER_STATUS_EXPIRED;
         };
         break;
         case UPDATE_NTP:
         {
             log_i("ntp update.");
-            ntp_sync(); // nowapi时间API
-            run_data->updateState = WEATHER_UPDATED;
+            if (ntp_sync() == true)
+                run_data->timeStatus = WEATHER_STATUS_LATEST;
+            else
+                run_data->timeStatus = WEATHER_STATUS_EXPIRED;
         };
         break;
         default:

@@ -33,7 +33,6 @@ const void *weaImage_map[] = {&weather_0, &weather_9, &weather_14, &weather_5, &
 // 太空人图标路径的映射关系
 const void *manImage_map[] = {&man_0, &man_1, &man_2, &man_3, &man_4, &man_5, &man_6, &man_7, &man_8, &man_9};
 static const char weekDayCh[7][4] = {"日", "一", "二", "三", "四", "五", "六"};
-static const char updateStateCh[2][10] = {"最新", "更新"};
 
 void weather_gui_init(void)
 {
@@ -97,7 +96,7 @@ void display_weather_init(void)
     btnLabel = lv_label_create(btn);
     lv_obj_add_style(btnLabel, &chFont_style, LV_STATE_DEFAULT);
     lv_obj_align(btnLabel, LV_ALIGN_CENTER, 0, 0);
-    lv_label_set_text(btnLabel, updateStateCh[WEATHER_UPDATING]);
+    lv_label_set_text(btnLabel, "--");
 
     txtLabel = lv_label_create(scr_1);
     lv_obj_add_style(txtLabel, &chFont_style, LV_STATE_DEFAULT);
@@ -171,12 +170,23 @@ void display_weather_init(void)
     lv_obj_align(dateLabel, LV_ALIGN_LEFT_MID, 10, 38);
 }
 
-void render_state(int updateState) {
-    lv_label_set_text(btnLabel, updateStateCh[updateState]);
-    if (WEATHER_UPDATED == updateState)
-        lv_obj_set_style_bg_color(btn, lv_palette_main(LV_PALETTE_GREEN), LV_STATE_DEFAULT);
-    else
+void render_state(int timeStatus, int weatherStatus) {
+    char str[10] = "TW";
+
+    if (WEATHER_STATUS_UPDATING == timeStatus || WEATHER_STATUS_UPDATING == weatherStatus) {
+        strcpy(str, "更新");
+        lv_obj_set_style_bg_color(btn, lv_palette_main(LV_PALETTE_BLUE), LV_STATE_DEFAULT);
+    }
+    else if (WEATHER_STATUS_EXPIRED == timeStatus || WEATHER_STATUS_EXPIRED == weatherStatus) {
+        if (WEATHER_STATUS_EXPIRED == timeStatus) str[0] = '-';
+        if (WEATHER_STATUS_EXPIRED == weatherStatus) str[1] = '-';
         lv_obj_set_style_bg_color(btn, lv_palette_main(LV_PALETTE_ORANGE), LV_STATE_DEFAULT);
+    }
+    else {
+        lv_obj_set_style_bg_color(btn, lv_palette_main(LV_PALETTE_GREEN), LV_STATE_DEFAULT);
+    }
+
+    lv_label_set_text(btnLabel, str);
 }
 
 void render_weather(struct Weather weaInfo)
