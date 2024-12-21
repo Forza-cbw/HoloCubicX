@@ -17,6 +17,7 @@ String webpage_footer = "";
 
 void Send_HTML(const String &content)
 {
+    log_i("Send_HTML()");
     server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     server.sendHeader("Pragma", "no-cache");
     server.sendHeader("Expires", "-1");
@@ -199,29 +200,29 @@ void sys_setting()
     char auto_start_app[32];
     // 读取数据
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_READ_CFG,
-                            NULL, NULL);
+                            NULL, NULL, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"ssid_0", ssid_0);
+                            (void *)"ssid_0", ssid_0, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"password_0", password_0);
+                            (void *)"password_0", password_0, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"power_mode", power_mode);
+                            (void *)"power_mode", power_mode, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"backLight", backLight);
+                            (void *)"backLight", backLight, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"rotation", rotation);
+                            (void *)"rotation", rotation, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"mpu_order", mpu_order);
+                            (void *)"mpu_order", mpu_order, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"min_brightness", min_brightness);
+                            (void *)"min_brightness", min_brightness, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"max_brightness", max_brightness);
+                            (void *)"max_brightness", max_brightness, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"time", time);
+                            (void *)"time", time, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"auto_calibration_mpu", auto_calibration_mpu);
+                            (void *)"auto_calibration_mpu", auto_calibration_mpu, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"auto_start_app", auto_start_app);
+                            (void *)"auto_start_app", auto_start_app, true);
     SysUtilConfig cfg = app_controller->sys_cfg;
     // 主要为了处理启停MPU自动校准的单选框
     if (0 == cfg.auto_calibration_mpu)
@@ -252,13 +253,13 @@ void rgb_setting()
     char time[32];
     // 读取数据
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_READ_CFG,
-                            NULL, NULL);
+                            NULL, NULL, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"min_brightness", min_brightness);
+                            (void *)"min_brightness", min_brightness, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"max_brightness", max_brightness);
+                            (void *)"max_brightness", max_brightness, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"time", time);
+                            (void *)"time", time, true);
     sprintf(buf, RGB_SETTING,
             min_brightness, max_brightness, time);
     webpage = buf;
@@ -276,19 +277,19 @@ void weather_setting()
     char timeUpdataInterval[32];
     // 读取数据
     app_controller->send_to(SERVER_APP_NAME, WEATHER_APP_NAME, APP_MESSAGE_READ_CFG,
-                            NULL, NULL);
+                            NULL, NULL, true);
     app_controller->send_to(SERVER_APP_NAME, WEATHER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"tianqi_url", tianqi_url);
+                            (void *)"tianqi_url", tianqi_url, true);
     app_controller->send_to(SERVER_APP_NAME, WEATHER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"CITY_CODE", CITY_CODE);
+                            (void *)"CITY_CODE", CITY_CODE, true);
     app_controller->send_to(SERVER_APP_NAME, WEATHER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"WEATHER_API_KEY", WEATHER_API_KEY);
+                            (void *)"WEATHER_API_KEY", WEATHER_API_KEY, true);
     app_controller->send_to(SERVER_APP_NAME, WEATHER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"tianqi_addr", tianqi_addr);
+                            (void *)"tianqi_addr", tianqi_addr, true);
     app_controller->send_to(SERVER_APP_NAME, WEATHER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"weatherUpdataInterval", weatherUpdataInterval);
+                            (void *)"weatherUpdataInterval", weatherUpdataInterval, true);
     app_controller->send_to(SERVER_APP_NAME, WEATHER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"timeUpdataInterval", timeUpdataInterval);
+                            (void *)"timeUpdataInterval", timeUpdataInterval, true);
     sprintf(buf, WEATHER_SETTING, CITY_CODE,
             WEATHER_API_KEY,
             weatherUpdataInterval,
@@ -303,9 +304,9 @@ void picture_setting()
     char switchInterval[32];
     // 读取数据
     app_controller->send_to(SERVER_APP_NAME, PICTURE_APP_NAME, APP_MESSAGE_READ_CFG,
-                            NULL, NULL);
+                            NULL, NULL, true);
     app_controller->send_to(SERVER_APP_NAME, PICTURE_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"switchInterval", switchInterval);
+                            (void *)"switchInterval", switchInterval, true);
     sprintf(buf, PICTURE_SETTING, switchInterval);
     webpage = buf;
     Send_HTML(webpage);
@@ -318,11 +319,11 @@ void media_setting()
     char powerFlag[32];
     // 读取数据
     app_controller->send_to(SERVER_APP_NAME, MEDIA_PLAYER_APP_NAME, APP_MESSAGE_READ_CFG,
-                            NULL, NULL);
+                            NULL, NULL, true);
     app_controller->send_to(SERVER_APP_NAME, MEDIA_PLAYER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"switchFlag", switchFlag);
+                            (void *)"switchFlag", switchFlag, true);
     app_controller->send_to(SERVER_APP_NAME, MEDIA_PLAYER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"powerFlag", powerFlag);
+                            (void *)"powerFlag", powerFlag, true);
     sprintf(buf, MEDIA_SETTING, switchFlag, powerFlag);
     webpage = buf;
     Send_HTML(webpage);
@@ -340,22 +341,22 @@ void archer_setting()
     char server_password[32];
     // 读取数据
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME, APP_MESSAGE_READ_CFG,
-                            NULL, NULL);
+                            NULL, NULL, true);
 
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"role", role);
+                            (void *)"role", role, true);
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"client_id", client_id);
+                            (void *)"client_id", client_id, true);
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"subtopic", subtopic);
+                            (void *)"subtopic", subtopic, true);
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"mqtt_server", mqtt_server);
+                            (void *)"mqtt_server", mqtt_server, true);
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"port", port);
+                            (void *)"port", port, true);
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"server_user", server_user);
+                            (void *)"server_user", server_user, true);
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"server_password", server_password);
+                            (void *)"server_password", server_password, true);
 
     sprintf(buf, ARCHER_SETTING, role, client_id, subtopic, mqtt_server,
             port, server_user, server_password);
@@ -370,11 +371,11 @@ void pc_resource_setting()
     char sensorUpdataInterval[32];
     // 读取数据
     app_controller->send_to(SERVER_APP_NAME, PC_RESOURCE_APP_NAME, APP_MESSAGE_READ_CFG,
-                            NULL, NULL);
+                            NULL, NULL, true);
     app_controller->send_to(SERVER_APP_NAME, PC_RESOURCE_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"pc_ipaddr", pc_ipaddr);
+                            (void *)"pc_ipaddr", pc_ipaddr, true);
     app_controller->send_to(SERVER_APP_NAME, PC_RESOURCE_APP_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"sensorUpdataInterval", sensorUpdataInterval);
+                            (void *)"sensorUpdataInterval", sensorUpdataInterval, true);
     sprintf(buf, REMOTR_SENSOR_SETTING, pc_ipaddr, sensorUpdataInterval);
     webpage = buf;
     Send_HTML(webpage);
@@ -382,177 +383,181 @@ void pc_resource_setting()
 
 void saveSysConf(void)
 {
-    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
-
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"ssid_0",
-                            (void *)server.arg("ssid_0").c_str());
+                            (void *)server.arg("ssid_0").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"password_0",
-                            (void *)server.arg("password_0").c_str());
+                            (void *)server.arg("password_0").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"power_mode",
-                            (void *)server.arg("power_mode").c_str());
+                            (void *)server.arg("power_mode").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"backLight",
-                            (void *)server.arg("backLight").c_str());
+                            (void *)server.arg("backLight").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"rotation",
-                            (void *)server.arg("rotation").c_str());
+                            (void *)server.arg("rotation").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"mpu_order",
-                            (void *)server.arg("mpu_order").c_str());
+                            (void *)server.arg("mpu_order").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"auto_calibration_mpu",
-                            (void *)server.arg("auto_calibration_mpu").c_str());
+                            (void *)server.arg("auto_calibration_mpu").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"auto_start_app",
-                            (void *)server.arg("auto_start_app").c_str());
+                            (void *)server.arg("auto_start_app").c_str(), true);
     // 持久化数据
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_WRITE_CFG,
-                            NULL, NULL);
+                            NULL, NULL, true);
+
+    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
 }
 
 void saveRgbConf(void)
 {
-    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
-
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"min_brightness",
-                            (void *)server.arg("min_brightness").c_str());
+                            (void *)server.arg("min_brightness").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"max_brightness",
-                            (void *)server.arg("max_brightness").c_str());
+                            (void *)server.arg("max_brightness").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"time",
-                            (void *)server.arg("time").c_str());
+                            (void *)server.arg("time").c_str(), true);
     // 持久化数据
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_WRITE_CFG,
-                            NULL, NULL);
+                            NULL, NULL, true);
+
+    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
 }
 
 void saveWeatherConf(void)
 {
-    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
-
     app_controller->send_to(SERVER_APP_NAME, WEATHER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"tianqi_url",
-                            (void *)server.arg("tianqi_url").c_str());
+                            (void *)server.arg("tianqi_url").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, WEATHER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"CITY_CODE",
-                            (void *)server.arg("CITY_CODE").c_str());
+                            (void *)server.arg("CITY_CODE").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, WEATHER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"WEATHER_API_KEY",
-                            (void *)server.arg("WEATHER_API_KEY").c_str());
+                            (void *)server.arg("WEATHER_API_KEY").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, WEATHER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"tianqi_addr",
-                            (void *)server.arg("tianqi_addr").c_str());
+                            (void *)server.arg("tianqi_addr").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, WEATHER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"weatherUpdataInterval",
-                            (void *)server.arg("weatherUpdataInterval").c_str());
+                            (void *)server.arg("weatherUpdataInterval").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, WEATHER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"timeUpdataInterval",
-                            (void *)server.arg("timeUpdataInterval").c_str());
+                            (void *)server.arg("timeUpdataInterval").c_str(), true);
     // 持久化数据
     app_controller->send_to(SERVER_APP_NAME, WEATHER_APP_NAME, APP_MESSAGE_WRITE_CFG,
-                            NULL, NULL);
+                            NULL, NULL, true);
+
+    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
 }
 
 void savePictureConf(void)
 {
-    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
     app_controller->send_to(SERVER_APP_NAME, PICTURE_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"switchInterval",
-                            (void *)server.arg("switchInterval").c_str());
+                            (void *)server.arg("switchInterval").c_str(), true);
     // 持久化数据
     app_controller->send_to(SERVER_APP_NAME, PICTURE_APP_NAME, APP_MESSAGE_WRITE_CFG,
-                            NULL, NULL);
+                            NULL, NULL, true);
+
+    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
 }
 
 void saveMediaConf(void)
 {
-    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
     app_controller->send_to(SERVER_APP_NAME, MEDIA_PLAYER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"switchFlag",
-                            (void *)server.arg("switchFlag").c_str());
+                            (void *)server.arg("switchFlag").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, MEDIA_PLAYER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"powerFlag",
-                            (void *)server.arg("powerFlag").c_str());
+                            (void *)server.arg("powerFlag").c_str(), true);
     // 持久化数据
     app_controller->send_to(SERVER_APP_NAME, MEDIA_PLAYER_APP_NAME, APP_MESSAGE_WRITE_CFG,
-                            NULL, NULL);
+                            NULL, NULL, true);
+
+    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
 }
 
 void saveArcherConf(void)
 {
-    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"role",
-                            (void *)server.arg("role").c_str());
+                            (void *)server.arg("role").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"client_id",
-                            (void *)server.arg("mqtt_client_id").c_str());
+                            (void *)server.arg("mqtt_client_id").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"subtopic",
-                            (void *)server.arg("mqtt_subtopic").c_str());
+                            (void *)server.arg("mqtt_subtopic").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"mqtt_server",
-                            (void *)server.arg("mqtt_server").c_str());
+                            (void *)server.arg("mqtt_server").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"port",
-                            (void *)server.arg("mqtt_port").c_str());
+                            (void *)server.arg("mqtt_port").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"server_user",
-                            (void *)server.arg("mqtt_user").c_str());
+                            (void *)server.arg("mqtt_user").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"server_password",
-                            (void *)server.arg("mqtt_password").c_str());
+                            (void *)server.arg("mqtt_password").c_str(), true);
     // 持久化数据
     app_controller->send_to(SERVER_APP_NAME, ARCHER_APP_NAME, APP_MESSAGE_WRITE_CFG,
-                            NULL, NULL);
+                            NULL, NULL, true);
+
+    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
 }
 
 void savePCResourceConf(void)
 {
-    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
     app_controller->send_to(SERVER_APP_NAME, PC_RESOURCE_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"pc_ipaddr",
-                            (void *)server.arg("pc_ipaddr").c_str());
+                            (void *)server.arg("pc_ipaddr").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, PC_RESOURCE_APP_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"sensorUpdataInterval",
-                            (void *)server.arg("sensorUpdataInterval").c_str());
+                            (void *)server.arg("sensorUpdataInterval").c_str(), true);
     // 持久化数据
     app_controller->send_to(SERVER_APP_NAME, PC_RESOURCE_APP_NAME, APP_MESSAGE_WRITE_CFG,
-                            NULL, NULL);
+                            NULL, NULL, true);
+
+    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
 }
 
 void File_Delete()

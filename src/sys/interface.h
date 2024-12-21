@@ -3,19 +3,23 @@
 
 enum APP_MESSAGE_TYPE
 {
-    /* wifi相关 */
+    /* wifi相关 - 异步 */
+    /* 目的 WIFI_SYS_NAME */
     APP_MESSAGE_WIFI_STA = 0, // 开启连接
     APP_MESSAGE_WIFI_ALIVE,    // wifi开关的心跳维持
     APP_MESSAGE_WIFI_AP,       // 开启AP事件
     APP_MESSAGE_WIFI_DISABLE,  // 关闭wifi(sta & ap)
     APP_MESSAGE_WIFI_AP_CLOSE, // 关闭AP
-    APP_MESSAGE_UPDATE_TIME,
-    APP_MESSAGE_MQTT_DATA, // MQTT客户端收到消息
-    /* 配置相关 */
+
+    /* 配置相关 - 同步 */
+    /* 目的 WIFI_SYS_NAME | **_APP_NAME */
     APP_MESSAGE_GET_PARAM, // 获取参数
     APP_MESSAGE_SET_PARAM, // 设置参数
     APP_MESSAGE_READ_CFG,  // 向磁盘读取参数
     APP_MESSAGE_WRITE_CFG, // 向磁盘写入参数
+
+//    APP_MESSAGE_UPDATE_TIME,
+//    APP_MESSAGE_MQTT_DATA, // MQTT客户端收到消息
 
     APP_MESSAGE_NONE
 };

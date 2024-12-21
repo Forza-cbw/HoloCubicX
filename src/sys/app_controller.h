@@ -12,7 +12,7 @@
 #define APP_MAX_NUM 20             // 最大的可运行的APP数量
 #define WIFI_LIFE_CYCLE 60000      // wifi的生命周期（60s）
 #define MQTT_ALIVE_CYCLE 1000      // mqtt重连周期
-#define EVENT_LIST_MAX_LENGTH 10   // 消息队列的容量
+#define EVENT_LIST_MAX_LENGTH 16  // 消息队列的容量
 #define APP_CONTROLLER_NAME_LEN 16 // app控制器的名字长度
 
 // struct EVENT_OBJ
@@ -26,9 +26,14 @@
 
 struct EVENT_OBJ
 {
-    const APP_OBJ *from;       // 发送请求服务的APP
+    const char *from;       // 发送请求服务的APP
+    const char *to;       // 接受请求服务的APP
     APP_MESSAGE_TYPE type;     // app的事件类型
-    void *info;                // 请求携带的信息
+    void *message;                // 请求携带的信息
+    void *ext_info;           // 返回的信息
+
+    // 重试机制的元数据
+    bool isSync;               // 是否需要同步调用事件处理函数（而不是主循环中异步调用）
     uint8_t retryMaxNum;       // 重试次数
     uint8_t retryCount;        // 重试计数
     unsigned long nextRunTime; // 下次运行的时间戳
@@ -51,11 +56,12 @@ public:
     // 消息发送
     int send_to(const char *from, const char *to,
                 APP_MESSAGE_TYPE type, void *message,
-                void *ext_info);
+                void *ext_info, bool isSync = false);
     void deal_config(APP_MESSAGE_TYPE type,
                      const char *key, char *value);
     // 事件处理
-    int req_event_deal(void);
+    std::list<EVENT_OBJ>::iterator event_wait_retry(std::list<EVENT_OBJ>::iterator event);
+    int req_event_deal(bool onlySync); // onlySync==true时只处理同步时间
     bool wifi_event(APP_MESSAGE_TYPE type); // wifi事件的处理
     void read_config(SysUtilConfig *cfg);
     void write_config(SysUtilConfig *cfg);
@@ -88,6 +94,7 @@ public:
     SysUtilConfig sys_cfg;
     SysMpuConfig mpu_cfg;
     RgbConfig rgb_cfg;
+
 };
 
 #endif

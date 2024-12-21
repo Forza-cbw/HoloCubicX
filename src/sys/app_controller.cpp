@@ -7,8 +7,7 @@
 
 const char *app_event_type_info[] = {"APP_MESSAGE_WIFI_STA", "APP_MESSAGE_WIFI_ALIVE",
                                      "APP_MESSAGE_WIFI_AP", "APP_MESSAGE_WIFI_DISABLE",
-                                     "APP_MESSAGE_WIFI_AP_CLOSE", "APP_MESSAGE_UPDATE_TIME",
-                                     "APP_MESSAGE_MQTT_DATA","APP_MESSAGE_GET_PARAM",
+                                     "APP_MESSAGE_WIFI_AP_CLOSE", "APP_MESSAGE_GET_PARAM",
                                      "APP_MESSAGE_SET_PARAM","APP_MESSAGE_READ_CFG",
                                      "APP_MESSAGE_WRITE_CFG","APP_MESSAGE_NONE"};
 
@@ -133,13 +132,13 @@ int AppController::main_process(ImuAction *act_info)
     {
         isRunEventDeal = false;
         // 扫描事件
-        this->req_event_deal();
+        this->req_event_deal(false); // 事件处理器不要做成后台任务，会有数据一致性的问题
     }
 
     // wifi自动关闭(在节能模式下)
     if (0 == sys_cfg.power_mode && true == m_wifi_status && doDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis, false))
     {
-        send_to(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_DISABLE, 0, NULL);
+        send_to(SELF_SYS_NAME, WIFI_SYS_NAME, APP_MESSAGE_WIFI_DISABLE, 0, NULL);
     }
 
     if (0 == app_running_flag)
@@ -220,86 +219,117 @@ int AppController::getAppIdxByName(const char *name)
     return -1;
 }
 
-// 通信中心（消息转发） todo 逻辑太乱，toApp->message_handle()在send_to()和req_event_deal()里都被调用了
+// 通信中心（消息转发）
 int AppController::send_to(const char *from, const char *to,
                            APP_MESSAGE_TYPE type, void *message,
-                           void *ext_info)
+                           void *ext_info, bool isSync)
 {
-    APP_OBJ *fromApp = getAppByName(from); // 来自谁 有可能为空
-    APP_OBJ *toApp = getAppByName(to);     // 发送给谁 有可能为空
-    if (type <= APP_MESSAGE_MQTT_DATA) // wifi相关事件，先给wifi_event()处理，再给toApp->message_handle()处理。逻辑在req_event_deal()中
-    {
-        // 更新事件的请求者
-        if (eventList.size() > EVENT_LIST_MAX_LENGTH)
-        {
-            return 1;
-        }
-        // 发给控制器的消息(目前都是wifi事件)
-        EVENT_OBJ new_event = {fromApp, type, message, 3, 0, 0};
+    assert(NULL != from && NULL != to);
+    int ret = 0;
+    log_i("Add\t [%s]\t -> [%s]\t: [%s]", from, to, app_event_type_info[type]);
+
+    if (eventList.size() > EVENT_LIST_MAX_LENGTH) {
+        log_e("Reject\t [%s]\t -> [%s]\t: [%s]", from, to, app_event_type_info[type]);
+        ret = 1;
+    } else {
+        // 插入事件列表
+        EVENT_OBJ new_event = {from, to, type, message, ext_info, isSync, 3, 0, 0};
         eventList.push_back(new_event);
-        log_i("[EVENT]\tAdd -> %s" ,app_event_type_info[type]);
-        log_i("\tEventList Size: %d",eventList.size());
+        log_i("Add\t [%s]\t -> [%s]\t: [%s]", from, to, app_event_type_info[type]);
     }
-    else // 各个APP之间通信的消息，直接给toApp->message_handle()处理，不加入事件列表
-    {
-        if (NULL != toApp)
-        {
-            log_i("[Massage]\tFrom  %s  \tTo   %s  \n",fromApp->app_name,toApp->app_name);
-            if (NULL != toApp->message_handle)
-            {
-                toApp->message_handle(from, to, type, message, ext_info);
-            }
-        }
-        else if (!strcmp(to, CTRL_NAME)) // 消息目的地是 CTRL_NAME
-        {
-            log_i("[Massage]\tFrom  %s  \tTo   %s  \n",fromApp->app_name,CTRL_NAME);
-            deal_config(type, (const char *)message, (char *)ext_info);
-        }
-    }
-    return 0;
+    log_i("EventList Size: %d",eventList.size());
+
+    if (isSync) // 同步消息，立刻同步调用事件处理函数
+        req_event_deal(true); // isSync==true
+
+    return ret;
 }
 
-int AppController::req_event_deal(void)
+std::list<EVENT_OBJ>::iterator AppController::event_wait_retry(std::list<EVENT_OBJ>::iterator event) {
+    std::list<EVENT_OBJ>::iterator ret;
+
+    event->retryCount += 1;
+    if (event->retryCount >= event->retryMaxNum)
+    {   // 多次重试失败
+        log_e("Failed\t [%d] times", event->retryCount);
+        log_i("Delete\t from EventList");
+        log_i("EventList Size: %d",eventList.size() - 1);
+        return eventList.erase(event); // 删除该响应事件
+    }
+    else
+    {   // 下次重试
+        log_w("Failed\t [%d] times and wait for retry", event->retryCount);
+        event->nextRunTime = GET_SYS_MILLIS() + 4000;
+        return ++event;
+    }
+}
+
+int AppController::req_event_deal(bool onlySync)
 {
     // 请求事件的处理
     for (std::list<EVENT_OBJ>::iterator event = eventList.begin(); event != eventList.end();)
     {
-        if ((*event).nextRunTime > GET_SYS_MILLIS())
-        {
+        assert(NULL != event->from && NULL != event->to);
+        APP_OBJ *fromApp = getAppByName(event->from); // 来自谁 有可能为空
+        APP_OBJ *toApp = getAppByName(event->to);     // 发送给谁 有可能为空
+        bool isDone;
+
+        if (event->nextRunTime > GET_SYS_MILLIS()) { // 没到重试时间
             ++event;
             continue;
         }
-        // 后期可以拓展其他事件的处理
-        bool ret = wifi_event((*event).type);
-        if (false == ret)
-        {
-            // 本事件没处理完成
-            (*event).retryCount += 1;
-            if ((*event).retryCount >= (*event).retryMaxNum)
-            {
-                // 多次重试失败
-                log_i("[EVENT]\tDelete -> %s",app_event_type_info[(*event).type]);
-                event = eventList.erase(event); // 删除该响应事件
-                log_i("\tEventList Size: %d",eventList.size());
-            }
-            else
-            {
-                // 下次重试
-                (*event).nextRunTime = GET_SYS_MILLIS() + 4000;
-                ++event;
-            }
+        if (onlySync && !event->isSync) { // 如果是同步调用，只处理同步任务
+            ++event;
             continue;
         }
 
-        // 事件回调
-        if (NULL != (*event).from && NULL != (*event).from->message_handle)
-        {
-            (*((*event).from->message_handle))(SELF_SYS_NAME, (*event).from->app_name,
-                                               (*event).type, (*event).info, NULL);
+        log_i("--------------------------------------------------------------------------");
+        log_i("Handle\t [%s]\t -> [%s]\t: [%s]", event->from, event->to, app_event_type_info[event->type]);
+
+        // 在这里区分WIFI事件消息 和 其他消息
+        if (event->type <= APP_MESSAGE_WIFI_AP_CLOSE) { // WIFI事件消息： 先处理WIFI任务再回调message_handler
+            assert(!strcmp(event->to, WIFI_SYS_NAME));
+            isDone = wifi_event(event->type);
+        } else if (event->type <= APP_MESSAGE_WRITE_CFG) {
+            // assert(!strcmp(event->to, CONFIG_SYS_NAME) || !strcmp(event->to, **_APP_NAME))
+            if (!strcmp(event->to, CONFIG_SYS_NAME)) { // 读写系统配置（没有回调，toApp==NULL）
+                deal_config(event->type, (const char *)event->message, (char *)event->ext_info);
+            } // APP_MESSAGE_WRITE_CFG也有可能目的是某个APP，此时会有回调
+            isDone = true;
         }
-        log_i("[EVENT]\tDelete -> %s " ,app_event_type_info[(*event).type]);
+        else { // 其他消息：
+            isDone = true;
+        }
+
+        // 失败重试机制
+        if (!isDone)
+        {
+            event = event_wait_retry(event);
+            continue;
+        }
+
+        // 回调
+        if (event->type <= APP_MESSAGE_WIFI_AP_CLOSE) // WIFI事件消息： 先处理WIFI任务再回调message_handler
+        {
+            assert(NULL != fromApp);
+            if (NULL != fromApp->message_handle)
+            {
+                log_i("Callback\t [%s]", fromApp->app_name);
+                fromApp->message_handle(SELF_SYS_NAME, fromApp->app_name, // !!!wifi事件结束调用的是from的消息处理函数
+                                                 event->type, event->message, NULL);
+            }
+        } else // 其他消息：
+        {
+            if (NULL != toApp && NULL != toApp->message_handle) // 发给APP的消息
+            {
+                log_i("Callback\t [%s]", toApp->app_name);
+                toApp->message_handle(event->from, event->to, event->type, event->message, event->ext_info);
+            }
+        }
+
+        log_i("Delete\t from EventList");
         event = eventList.erase(event); // 删除该响应完成的事件
-        log_i("\tEventList Size: %d",eventList.size());
+        log_i("EventList Size: %d",eventList.size());
     }
     return 0;
 }
@@ -354,10 +384,6 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
                 m_wifi_status = false;
         }
         break;
-        case APP_MESSAGE_UPDATE_TIME:
-        {
-        }
-        break;
         default:
             break;
     }
@@ -372,7 +398,9 @@ void AppController::app_exit()
     // 清空该对象的所有请求
     for (std::list<EVENT_OBJ>::iterator event = eventList.begin(); event != eventList.end();)
     {
-        if (appList[cur_app_index] == (*event).from)
+        APP_OBJ *fromApp = getAppByName(event->from); // 来自谁 在这里不应该为空，因为一定是某个app调用的本函数
+        assert(NULL != fromApp);
+        if (appList[cur_app_index] == fromApp)
         {
             event = eventList.erase(event); // 删除该响应事件
         }

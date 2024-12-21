@@ -3,8 +3,8 @@
 
 // 他们三用getAppByName()是查不到的
 #define SELF_SYS_NAME "SelfSys"
-#define WIFI_SYS_NAME "WifiSys"
-#define CONFIG_SYS_NAME "ConfigSys"
+#define WIFI_SYS_NAME "WifiSys" // 最终会调用running APP的消息处理函数
+#define CONFIG_SYS_NAME "ConfigSys" // 读写系统配置（读写APP配置，目的地应该是APP名）
 
 #define ARCHER_APP_NAME "Archer"
 #define EXAMPLE_APP_NAME "Example"
