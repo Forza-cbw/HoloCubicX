@@ -17,8 +17,8 @@
 #include "app/example/example.h"
 #endif
 
-// 文件管理器APP
-#define APP_FILE_MANAGER_USE 1
+// ftp文件管理器APP
+#define APP_FILE_MANAGER_USE 0
 #if APP_FILE_MANAGER_USE
 #include "app/file_manager/file_manager.h"
 #endif
@@ -54,7 +54,7 @@
 #endif
 
 // 遥感器APP
-#define APP_PC_RESOURCE_USE 1
+#define APP_PC_RESOURCE_USE 0
 #if APP_PC_RESOURCE_USE
 #include "app/pc_resource/pc_resource.h"
 #endif
@@ -66,7 +66,7 @@
 #endif
 
 // 设置APP
-#define APP_SETTING_USE 1
+#define APP_SETTING_USE 0
 #if APP_SETTING_USE
 #include "app/settings/settings.h"
 #endif
