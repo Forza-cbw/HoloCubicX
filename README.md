@@ -39,3 +39,6 @@
 |  0x8000  |  partitions.bin  |
 |  0xe000  |  boot_app0.bin  |
 |  0x10000  |  firmware.bin  |
+
+### **调试配置**
+esp32-s3内置JTAG，使用前需要安装驱动：https://dl.espressif.com/dl/idf-driver/idf-driver-esp32-usb-jtag-2021-07-15.zip 。
