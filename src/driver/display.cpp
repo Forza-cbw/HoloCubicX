@@ -29,12 +29,7 @@ void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color
 
 void Display::init(uint8_t rotation, uint8_t backLight)
 {
-    ledcSetup(LCD_BL_PWM_CHANNEL, 5000, 8);
-    ledcAttachPin(LCD_BL_PIN, LCD_BL_PWM_CHANNEL);
-
     lv_init();
-
-    setBackLight(0.0); // 设置亮度 为了先不显示初始化时的"花屏"
 
     tft->begin(); /* TFT init */
     tft->fillScreen(TFT_BLACK);
@@ -49,7 +44,7 @@ void Display::init(uint8_t rotation, uint8_t backLight)
     // 正常方向需要设置为0 如果加上分光棱镜需要镜像改为4 如果是侧显示的需要设置为5
     tft->setRotation(rotation); /* mirror 修改反转，如果加上分光棱镜需要改为4镜像*/
 
-    setBackLight(backLight / 100.0); // 设置亮度
+    setBackLight(backLight / 100.0); // 设置亮度 todo 无效的
 
     lv_disp_draw_buf_init(&disp_buf, buf, NULL, SCREEN_HOR_RES * LV_HOR_RES_MAX_LEN);
 
@@ -73,5 +68,5 @@ void Display::setBackLight(float duty)
 {
     duty = constrain(duty, 0, 1);
     duty = 1 - duty;
-    ledcWrite(LCD_BL_PWM_CHANNEL, (int)(duty * 255));
+    analogWrite(TFT_BL, (int)(duty * 255));
 }

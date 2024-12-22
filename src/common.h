@@ -13,6 +13,7 @@
 #include "driver/ambient.h"
 #include "driver/imu.h"
 #include "network.h"
+#include "../../lib/TFT_eSPI/User_Setups/Setup24_ST7789.h"
 
 #include "esp_log.h"
 
@@ -51,10 +52,6 @@ boolean doDelayMillisTime(unsigned long interval,
 // 屏幕尺寸
 #define SCREEN_HOR_RES 240 // 水平
 #define SCREEN_VER_RES 240 // 竖直
-
-// TFT屏幕接口
-#define LCD_BL_PIN 46
-#define LCD_BL_PWM_CHANNEL 0
 
 // 优先级定义(数值越小优先级越低)
 // 最高为 configMAX_PRIORITIES-1

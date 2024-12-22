@@ -156,28 +156,6 @@ void DEV_GPIO_Mode(uint16_t Pin, uint16_t Mode)
 }
 
 /**
- * KEY Config
- **/
-void DEV_KEY_Config(uint16_t Pin)
-{
-    pinMode(Pin,INPUT_PULLUP);
-}
-/*
-** PWM
-*/
-void DEV_SET_PWM(uint8_t Value)
-{
-    if (Value < 0 || Value > 100)
-    {
-        printf("DEV_SET_PWM Error \r\n");
-    }
-    else
-    {
-        analogWrite(LCD_BL_PIN, Value * 2.55);
-    }
-}
-
-/**
  * delay x ms
  **/
 void DEV_Delay_ms(uint32_t xms)
@@ -190,58 +168,3 @@ void DEV_Delay_us(uint32_t xus)
     delayMicroseconds(xus);
 }
 
-void DEV_GPIO_Init(void)
-{
-
-    DEV_GPIO_Mode(LCD_RST_PIN, 1);
-    DEV_GPIO_Mode(LCD_DC_PIN, 1);
-    DEV_GPIO_Mode(LCD_CS_PIN, 1);
-    DEV_GPIO_Mode(LCD_BL_PIN, 1);
-    DEV_GPIO_Mode(Touch_RST_PIN, 1);
-    //ADC
-//    DEV_GPIO_Mode(BAT_ADC_PIN,0);
-    // analogReadResolution(12);
-    
-    DEV_Digital_Write(LCD_CS_PIN, 1);
-    DEV_Digital_Write(LCD_DC_PIN, 0);
-    // PWM Config
-    // DEV_SET_PWM(0);
-    DEV_Digital_Write(LCD_BL_PIN, 1);
-}
-
-
-/******************************************************************************
-function:	Module Initialize, the library and initialize the pins, SPI protocol
-parameter:
-Info:
-******************************************************************************/
-uint8_t DEV_Module_Init(void)
-{
-    Serial.begin(115200);
-    DEV_Delay_ms(100);
-    // GPIO Config
-    DEV_GPIO_Init();
-    // SPI Config
-    vspi = new SPIClass(VSPI);
-    vspi->begin(LCD_CLK_PIN, LCD_MISO_PIN, LCD_MOSI_PIN, LCD_CS_PIN); //SCLK, MISO, MOSI, SS
-    pinMode(vspi->pinSS(), OUTPUT); //VSPI SS
-    vspi->beginTransaction(SPISettings(80000000, MSBFIRST, SPI_MODE0));
-    
-    // I2C Config
-    Wire.setPins(DEV_SDA_PIN, DEV_SCL_PIN);
-    Wire.setClock(400000);
-    Wire.begin();
-    printf("DEV_Module_Init OK \r\n");
-    return 0;
-}
-
-/******************************************************************************
-function:	Module exits, closes SPI and BCM2835 library
-parameter:
-Info:
-******************************************************************************/
-void DEV_Module_Exit(void)
-{
-  vspi->end();
-  Wire.end();
-}

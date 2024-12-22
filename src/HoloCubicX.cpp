@@ -57,7 +57,6 @@ void my_print(const char *buf)
 void setup()
 {
     Serial.begin(115200);
-    esp_log_level_set("*", ESP_LOG_INFO);
     log_i("\nAIO (All in one) version " AIO_VERSION "\n");
     Serial.flush();
     // MAC ID可用作芯片唯一标识
