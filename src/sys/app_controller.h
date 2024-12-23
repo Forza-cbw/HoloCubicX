@@ -81,8 +81,9 @@ private:
     APP_TYPE appTypeList[APP_MAX_NUM];  // 对应APP的运行类型
     // std::list<const APP_OBJ *> app_list; // APP注册位(为了C语言可移植，放弃使用链表)
     std::list<EVENT_OBJ> eventList;   // 用来储存事件
-    boolean m_wifi_status;            // 表示是wifi(ap/sta)状态 true开启 false关闭
+    boolean m_saverEnable;            // 表示屏保状态 true开启 false关闭
     unsigned long m_preWifiReqMillis; // 保存上一回请求的时间戳
+    unsigned long m_preActionMillis; // 保存上一回动作的时间戳
     unsigned int app_num;
     boolean app_running_flag; // 表示APP应用是否在运行
     int cur_app_index;     // 当前运行的APP下标

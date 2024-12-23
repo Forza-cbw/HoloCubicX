@@ -53,15 +53,17 @@ String file_size(int bytes)
                    ".input .radio {height: 30px;width: 50px;}"                                          \
                    ".btn {width: 120px;height: 35px;background-color: #000000;border: 0px;color: #ffffff;margin-top: 15px;margin-left: auto;}" // margin-left: 100px;
 
-#define SYS_SETTING "<form method=\"GET\" action=\"saveSysConf\">"                                                                                                                                                                                                      \
-                    "<label class=\"input\"><span>WiFi SSID_0(2.4G)</span><input type=\"text\"name=\"ssid_0\"value=\"%s\"></label>"                                                                                                                                     \
-                    "<label class=\"input\"><span>WiFi Passwd_0</span><input type=\"text\"name=\"password_0\"value=\"%s\"></label>"                                                                                                                                     \
-                    "<label class=\"input\"><span>功耗控制（0低发热 1性能优先）</span><input type=\"text\"name=\"power_mode\"value=\"%s\"></label>"                                                                                                        \
-                    "<label class=\"input\"><span>屏幕亮度 (值为1~100)</span><input type=\"text\"name=\"backLight\"value=\"%s\"></label>"                                                                                                                         \
-                    "<label class=\"input\"><span>屏幕方向 (0~5可选)</span><input type=\"text\"name=\"rotation\"value=\"%s\"></label>"                                                                                                                            \
-                    "<label class=\"input\"><span>操作方向（0~15可选）</span><input type=\"text\"name=\"mpu_order\"value=\"%s\"></label>"                                                                                                                       \
+#define SYS_SETTING "<form method=\"GET\" action=\"saveSysConf\">"                                                                              \
+                    "<label class=\"input\"><span>WiFi SSID_0(2.4G)</span><input type=\"text\"name=\"ssid_0\"value=\"%s\"></label>"             \
+                    "<label class=\"input\"><span>WiFi Passwd_0</span><input type=\"text\"name=\"password_0\"value=\"%s\"></label>"             \
+                    "<label class=\"input\"><span>功耗控制（0低发热 1性能优先）</span><input type=\"text\"name=\"power_mode\"value=\"%s\"></label>"  \
+                    "<label class=\"input\"><span>屏幕亮度 (值为0~100)</span><input type=\"text\"name=\"back_light\"value=\"%s\"></label>"        \
+                    "<label class=\"input\"><span>屏保亮度 (值为0~100)</span><input type=\"text\"name=\"back_light2\"value=\"%s\"></label>"       \
+                    "<label class=\"input\"><span>屏保触发时间（毫秒，0不使用屏保）</span><input type=\"text\"name=\"screensaver_interval\"value=\"%s\"></label>"  \
+                    "<label class=\"input\"><span>屏幕方向 (0~5可选)</span><input type=\"text\"name=\"rotation\"value=\"%s\"></label>"            \
+                    "<label class=\"input\"><span>操作方向（0~15可选）</span><input type=\"text\"name=\"mpu_order\"value=\"%s\"></label>"          \
                     "<label class=\"input\"><span>MPU6050自动校准</span><input class=\"radio\" type=\"radio\" value=\"0\" name=\"auto_calibration_mpu\" %s>关闭<input class=\"radio\" type=\"radio\" value=\"1\" name=\"auto_calibration_mpu\" %s>开启</label>" \
-                    "<label class=\"input\"><span>开机自启的APP名字</span><input type=\"text\"name=\"auto_start_app\"value=\"%s\"></label>"                                                                                                                      \
+                    "<label class=\"input\"><span>开机自启的APP名字</span><input type=\"text\"name=\"auto_start_app\"value=\"%s\"></label>"        \
                     "</label><input class=\"btn\" type=\"submit\" name=\"submit\" value=\"保存\"></form>"
 
 #define RGB_SETTING "<form method=\"GET\" action=\"saveRgbConf\">"                                                                                             \
@@ -190,7 +192,9 @@ void sys_setting()
     char ssid_0[32];
     char password_0[32];
     char power_mode[32];
-    char backLight[32];
+    char back_light[32];
+    char back_light2[32];
+    char screensaver_interval[32];
     char rotation[32];
     char mpu_order[32];
     char min_brightness[32];
@@ -208,7 +212,11 @@ void sys_setting()
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
                             (void *)"power_mode", power_mode, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
-                            (void *)"backLight", backLight, true);
+                            (void *)"back_light", back_light, true);
+    app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
+                            (void *)"back_light2", back_light2, true);
+    app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
+                            (void *)"screensaver_interval", screensaver_interval, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
                             (void *)"rotation", rotation, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
@@ -229,7 +237,7 @@ void sys_setting()
     {
         sprintf(buf, SYS_SETTING,
                 ssid_0, password_0,
-                power_mode, backLight, rotation,
+                power_mode, back_light, back_light2, screensaver_interval, rotation,
                 mpu_order, "checked=\"checked\"", "",
                 auto_start_app);
     }
@@ -237,7 +245,7 @@ void sys_setting()
     {
         sprintf(buf, SYS_SETTING,
                 ssid_0, password_0,
-                power_mode, backLight, rotation,
+                power_mode, back_light, back_light2, screensaver_interval, rotation,
                 mpu_order, "", "checked=\"checked\"",
                 auto_start_app);
     }
@@ -397,8 +405,16 @@ void saveSysConf(void)
                             (void *)server.arg("power_mode").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
                             APP_MESSAGE_SET_PARAM,
-                            (void *)"backLight",
-                            (void *)server.arg("backLight").c_str(), true);
+                            (void *)"back_light",
+                            (void *)server.arg("back_light").c_str(), true);
+    app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
+                            APP_MESSAGE_SET_PARAM,
+                            (void *)"back_light2",
+                            (void *)server.arg("back_light2").c_str(), true);
+    app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
+                            APP_MESSAGE_SET_PARAM,
+                            (void *)"screensaver_interval",
+                            (void *)server.arg("screensaver_interval").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"rotation",

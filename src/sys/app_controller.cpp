@@ -32,8 +32,9 @@ AppController::AppController(const char *name)
     cur_app_index = 0;
     pre_app_index = 0;
     // appList = new APP_OBJ[APP_MAX_NUM];
-//    m_wifi_status = false;
+    m_saverEnable = false; // 屏保未触发
     m_preWifiReqMillis = GET_SYS_MILLIS();
+    m_preActionMillis = GET_SYS_MILLIS();
 
     // 定义一个事件处理定时器
     xTimerEventDeal = xTimerCreate("Event Deal",
@@ -118,6 +119,12 @@ int AppController::main_process(ImuAction *act_info)
     if (ACTIVE_TYPE::UNKNOWN != act_info->active)
     {
         log_i("[Operate]\tact_info->active:%s ",active_type_info[act_info->active]);
+        if (m_saverEnable) {
+            log_i("Screen saver disable,\t set backLight: [%d]", sys_cfg.back_light);
+            screen.setBackLight(sys_cfg.back_light / 100.0);
+            m_saverEnable = false; // 屏保关闭
+        }
+        m_preActionMillis = GET_SYS_MILLIS();
     }
 
     if (isRunEventDeal)
@@ -131,6 +138,15 @@ int AppController::main_process(ImuAction *act_info)
     if (0 == sys_cfg.power_mode && WIFI_MODE_NULL != WiFi.getMode() && doDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis, false))
     {
         send_to(SELF_SYS_NAME, WIFI_SYS_NAME, APP_MESSAGE_WIFI_DISABLE, 0, NULL);
+    }
+
+    // 屏保触发
+    if (0 != sys_cfg.screensaver_interval && doDelayMillisTime(sys_cfg.screensaver_interval, &m_preActionMillis, false))
+    {
+        log_i("Screen saver enable,\t set backLight: [%d]", sys_cfg.back_light2);
+        screen.setBackLight(sys_cfg.back_light2 / 100.0);
+        m_saverEnable = true; // 屏保触发
+        m_preActionMillis = GET_SYS_MILLIS();
     }
 
     if (0 == app_running_flag)

@@ -18,7 +18,9 @@ void AppController::read_config(SysUtilConfig *cfg)
     {
         // 默认值
         cfg->power_mode = 1;           // 功耗模式（0为节能模式 1为性能模式）
-        cfg->backLight = 100;           // 屏幕亮度（1-100）
+        cfg->back_light = 100;           // 屏幕亮度（1-100）
+        cfg->back_light2 = 50;            // 屏保屏幕亮度（1-100）
+        cfg->screensaver_interval = 30000;   // 屏保触发时间ms（无动作触发屏保）
         cfg->rotation = 4;             // 屏幕旋转方向
         cfg->auto_calibration_mpu = 1; // 是否自动校准陀螺仪 0关闭自动校准 1打开自动校准
         cfg->mpu_order = 4;            // 操作方向
@@ -28,8 +30,8 @@ void AppController::read_config(SysUtilConfig *cfg)
     else
     {
         // 解析数据
-        char *param[12] = {0};
-        analyseParam(info, 12, param);
+        char *param[14] = {0};
+        analyseParam(info, 14, param);
         cfg->ssid_0 = param[0];
         cfg->password_0 = param[1];
         cfg->ssid_1 = param[2];
@@ -37,11 +39,13 @@ void AppController::read_config(SysUtilConfig *cfg)
         cfg->ssid_2 = param[4];
         cfg->password_2 = param[5];
         cfg->power_mode = atol(param[6]);
-        cfg->backLight = atol(param[7]);
-        cfg->rotation = atol(param[8]);
-        cfg->auto_calibration_mpu = atol(param[9]);
-        cfg->mpu_order = atol(param[10]);
-        cfg->auto_start_app = param[11]; // 开机自启APP的name
+        cfg->back_light = atol(param[7]);
+        cfg->back_light2 = atol(param[8]);
+        cfg->screensaver_interval = atol(param[9]);
+        cfg->rotation = atol(param[10]);
+        cfg->auto_calibration_mpu = atol(param[11]);
+        cfg->mpu_order = atol(param[12]);
+        cfg->auto_start_app = param[13]; // 开机自启APP的name
     }
     log_i("cfg->ssid_0 = %s",cfg->ssid_0.c_str());
     log_i("cfg->password_0 = %s",cfg->password_0.c_str());
@@ -63,7 +67,15 @@ void AppController::write_config(SysUtilConfig *cfg)
     w_data += tmp;
 
     memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->backLight);
+    snprintf(tmp, 25, "%u\n", cfg->back_light);
+    w_data += tmp;
+
+    memset(tmp, 0, 25);
+    snprintf(tmp, 25, "%u\n", cfg->back_light2);
+    w_data += tmp;
+
+    memset(tmp, 0, 25);
+    snprintf(tmp, 25, "%u\n", cfg->screensaver_interval);
     w_data += tmp;
 
     memset(tmp, 0, 25);
@@ -83,7 +95,7 @@ void AppController::write_config(SysUtilConfig *cfg)
     g_flashCfg.writeFile(APP_CTRL_CONFIG_PATH, w_data.c_str());
 
     // 立即生效相关配置
-    screen.setBackLight(cfg->backLight / 100.0);
+    screen.setBackLight(cfg->back_light / 100.0);
     tft->setRotation(cfg->rotation);
     mpu.setOrder(cfg->mpu_order);
 }
@@ -325,9 +337,17 @@ void AppController::deal_config(APP_MESSAGE_TYPE type,
         {
             snprintf(value, 32, "%u", sys_cfg.power_mode);
         }
-        else if (!strcmp(key, "backLight"))
+        else if (!strcmp(key, "back_light"))
         {
-            snprintf(value, 32, "%u", sys_cfg.backLight);
+            snprintf(value, 32, "%u", sys_cfg.back_light);
+        }
+        else if (!strcmp(key, "back_light2"))
+        {
+            snprintf(value, 32, "%u", sys_cfg.back_light2);
+        }
+        else if (!strcmp(key, "screensaver_interval"))
+        {
+            snprintf(value, 32, "%u", sys_cfg.screensaver_interval);
         }
         else if (!strcmp(key, "rotation"))
         {
@@ -389,9 +409,17 @@ void AppController::deal_config(APP_MESSAGE_TYPE type,
         {
             sys_cfg.power_mode = atol(value);
         }
-        else if (!strcmp(key, "backLight"))
+        else if (!strcmp(key, "back_light"))
         {
-            sys_cfg.backLight = atol(value);
+            sys_cfg.back_light = atol(value);
+        }
+        else if (!strcmp(key, "back_light2"))
+        {
+            sys_cfg.back_light2 = atol(value);
+        }
+        else if (!strcmp(key, "screensaver_interval"))
+        {
+            sys_cfg.screensaver_interval = atol(value);
         }
         else if (!strcmp(key, "rotation"))
         {

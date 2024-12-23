@@ -68,7 +68,9 @@ struct SysUtilConfig
     String password_2;
     String auto_start_app;        // 开机自启的APP名字
     uint8_t power_mode;           // 功耗模式（0为节能模式 1为性能模式）
-    uint8_t backLight;            // 屏幕亮度（1-100）
+    uint8_t back_light;            // 屏幕亮度（1-100）
+    uint8_t back_light2;            // 屏保屏幕亮度（1-100）
+    uint32_t screensaver_interval;   // 屏保触发时间ms（无动作触发屏保）
     uint8_t rotation;             // 屏幕旋转方向
     uint8_t auto_calibration_mpu; // 是否自动校准陀螺仪 0关闭自动校准 1打开自动校准
     uint8_t mpu_order;            // 操作方向
