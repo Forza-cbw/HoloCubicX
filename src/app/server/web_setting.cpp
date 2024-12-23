@@ -68,7 +68,8 @@ String file_size(int bytes)
 
 #define RGB_SETTING "<form method=\"GET\" action=\"saveRgbConf\">"                                                                                             \
                     "<label class=\"input\"><span>RGB最低亮度（0.00~0.99可选）</span><input type=\"text\"name=\"min_brightness\"value=\"%s\"></label>" \
-                    "<label class=\"input\"><span>RGB最高亮度（0.00~0.99可选）</span><input type=\"text\"name=\"max_brightness\"value=\"%s\"></label>" \
+                    "<label class=\"input\"><span>RGB最高亮度（0.00~0.99可选）</span><input type=\"text\"name=\"max_brightness\"value=\"%s\"></label>"                 \
+                    "<label class=\"input\"><span>RGB亮度步长（0.00~0.99可选）</span><input type=\"text\"name=\"brightness_step\"value=\"%s\"></label>"                \
                     "<label class=\"input\"><span>RGB渐变时间（整数毫秒值）</span><input type=\"text\"name=\"time\"value=\"%s\"></label>"           \
                     "</label><input class=\"btn\" type=\"submit\" name=\"submit\" value=\"保存\"></form>"
 
@@ -258,6 +259,7 @@ void rgb_setting()
     char buf[2048];
     char min_brightness[32];
     char max_brightness[32];
+    char brightness_step[32];
     char time[32];
     // 读取数据
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_READ_CFG,
@@ -267,9 +269,11 @@ void rgb_setting()
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
                             (void *)"max_brightness", max_brightness, true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
+                            (void *)"brightness_step", brightness_step, true);
+    app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME, APP_MESSAGE_GET_PARAM,
                             (void *)"time", time, true);
     sprintf(buf, RGB_SETTING,
-            min_brightness, max_brightness, time);
+            min_brightness, max_brightness, brightness_step, time);
     webpage = buf;
     Send_HTML(webpage);
 }
@@ -448,6 +452,10 @@ void saveRgbConf(void)
                             APP_MESSAGE_SET_PARAM,
                             (void *)"max_brightness",
                             (void *)server.arg("max_brightness").c_str(), true);
+    app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
+                            APP_MESSAGE_SET_PARAM,
+                            (void *)"brightness_step",
+                            (void *)server.arg("brightness_step").c_str(), true);
     app_controller->send_to(SERVER_APP_NAME, CONFIG_SYS_NAME,
                             APP_MESSAGE_SET_PARAM,
                             (void *)"time",
