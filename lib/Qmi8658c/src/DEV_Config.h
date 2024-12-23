@@ -35,28 +35,6 @@
 #include <SPI.h>
 #include <Wire.h>
 #include "Debug.h"
-/**
- * data
- **/
-#define UBYTE uint8_t
-#define UWORD uint16_t
-#define UDOUBLE uint32_t
-
-#define SPI_PORT spi1
-#define I2C_PORT i2c2
-
-#if CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
-#define VSPI FSPI
-#endif
-
-#define DEV_SDA_PIN     (6)
-#define DEV_SCL_PIN     (7)
-
-#define Touch_INT_PIN   (5)
-#define Touch_RST_PIN   (13)
-
-#define BAT_ADC_PIN     (1)
-// #define BAR_CHANNEL     (A3)
 
 /*------------------------------------------------------------------------------------------------------*/
 
@@ -65,8 +43,6 @@ uint8_t DEV_Digital_Read(uint16_t Pin);
 
 void DEV_GPIO_Mode(uint16_t Pin, uint16_t Mode);
 void DEV_KEY_Config(uint16_t Pin);
-void DEV_Digital_Write(uint16_t Pin, uint8_t Value);
-uint8_t DEV_Digital_Read(uint16_t Pin);
 
 uint16_t DEC_ADC_Read(void);
 

@@ -100,22 +100,6 @@ uint8_t DEV_I2C_Read_Byte(uint8_t addr, uint8_t reg)
   
     return value;
 }
-void DEV_I2C_Read_Register(uint8_t addr, uint8_t reg, uint16_t *value)
-{
-    uint8_t tmpi[2];
-    
-    Wire.beginTransmission(addr);
-    Wire.write(reg);
-    // Wire.endTransmission();
-    Wire.requestFrom(addr, 2);
-  
-    uint8_t i = 0;
-    for(i = 0; i < 2; i++) {
-      tmpi[i] =  Wire.read();
-    }
-    Wire.endTransmission();
-    *value = (((uint16_t)tmpi[0] << 8) | (uint16_t)tmpi[1]);
-}
 
 void DEV_I2C_Read_nByte(uint8_t addr, uint8_t reg, uint8_t *pData, uint32_t Len)
 {
@@ -132,12 +116,6 @@ void DEV_I2C_Read_nByte(uint8_t addr, uint8_t reg, uint8_t *pData, uint32_t Len)
     Wire.endTransmission();
 }
 
-uint16_t DEC_ADC_Read(void)
-{
-  return analogReadMilliVolts(BAT_ADC_PIN);
-    // return analogRead(BAR_CHANNEL);
-  // return 0;
-}
 
 /**
  * GPIO Mode

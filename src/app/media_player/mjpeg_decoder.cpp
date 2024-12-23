@@ -1,6 +1,7 @@
 #include "docoder.h"
 #include "common.h"
 #include <TJpg_Decoder.h>
+#include "../lib/TFT_eSPI/User_Setups/Setup24_ST7789.h"
 // #include "MjpegClass.h"
 // static MjpegClass mjpeg;
 
@@ -11,13 +12,6 @@
 #define MOVIE_BUFFER_SIZE 20000 // 理论上是JPEG_BUFFER_SIZE的两倍就够了
 
 #define DMA_BUFFER_SIZE 512 // (16*16*2)
-
-#define TFT_MISO -1
-#define TFT_MOSI 23
-#define TFT_SCLK 18
-#define TFT_CS -1 // Not connected
-#define TFT_DC 2
-#define TFT_RST 4 // Connect reset to ensure display initialises
 
 bool MjpegPlayDocoder::m_isUseDMA = 0;
 uint8_t *MjpegPlayDocoder::m_displayBufWithDma[2];

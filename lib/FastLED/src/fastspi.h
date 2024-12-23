@@ -11,6 +11,9 @@
 
 #include "fastspi_bitbang.h"
 
+/// Disables pragma messages and warnings
+#define FASTLED_INTERNAL
+
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)
