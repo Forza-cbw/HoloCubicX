@@ -95,7 +95,7 @@ static int game_2048_exit_callback(void *param)
 //        vTaskDelete(run_data->xHandle_task_two);
 //    }
 
-    game_2048_gui_del();
+    LVGL_OPERATE_LOCK(game_2048_gui_del();)
 
     // 释放运行数据
     if (NULL != run_data)

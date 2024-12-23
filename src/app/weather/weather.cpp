@@ -263,7 +263,7 @@ static int weather_exit_callback(void *param)
     // 先关闭refresh任务，再删除GUI
     if (pdPASS == run_data->xReturned_task_refresh)
     {
-        vTaskDelete(run_data->xHandle_task_refresh);
+        LVGL_OPERATE_LOCK(vTaskDelete(run_data->xHandle_task_refresh);)  // task可能正持有锁
     }
 
     LVGL_OPERATE_LOCK(weather_gui_del();)
