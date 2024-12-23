@@ -6,6 +6,7 @@
 #include "network.h"
 #include "common.h"
 #include "ESP32FtpServer.h"
+#include "gui_lock.h"
 
 #define FILE_MANAGER_REFLUSH_INTERVAL 2000UL // 配置界面重新刷新时间(2s)
 
@@ -29,7 +30,7 @@ struct FileManagerAppRunData
 static FileManagerAppRunData *run_data = NULL;
 static int file_maneger_init(AppController *sys)
 {
-    file_maneger_gui_init();
+    LVGL_OPERATE_LOCK(file_maneger_gui_init();)
     // 初始化运行时参数
     run_data = (FileManagerAppRunData *)calloc(1, sizeof(FileManagerAppRunData));
     run_data->tcp_start = 0;
@@ -54,12 +55,12 @@ static void file_maneger_process(AppController *sys,
     if (0 == run_data->tcp_start && 0 == run_data->req_sent)
     {
         // 预显示
-        display_file_manager(
+        LVGL_OPERATE_LOCK(display_file_manager(
             "File Manager",
             WiFi.softAPIP().toString().c_str(),
             "21",
             "Wait connect ....",
-            LV_SCR_LOAD_ANIM_NONE);
+            LV_SCR_LOAD_ANIM_NONE);)
         // 如果web服务没有开启 且 ap开启的请求没有发送 event_id这边没有作用（填0）
         sys->send_to(FILE_MANAGER_APP_NAME, WIFI_SYS_NAME,
                      APP_MESSAGE_WIFI_STA, NULL, NULL);
@@ -79,7 +80,7 @@ static void file_maneger_process(AppController *sys,
 
 static int file_maneger_exit_callback(void *param)
 {
-    file_manager_gui_del();
+    LVGL_OPERATE_LOCK(file_manager_gui_del();)
 
     if (NULL == run_data->recvBuf)
     {
@@ -111,12 +112,12 @@ static void file_maneger_message_handle(const char *from, const char *to,
     case APP_MESSAGE_WIFI_STA:
     {
         Serial.print(F("APP_MESSAGE_WIFI_STA enable\n"));
-        display_file_manager(
+        LVGL_OPERATE_LOCK(display_file_manager(
             "File Manager",
             WiFi.localIP().toString().c_str(),
             "21",
             "Connect succ",
-            LV_SCR_LOAD_ANIM_NONE);
+            LV_SCR_LOAD_ANIM_NONE);)
         run_data->tcp_start = 1;
         ftpSrv.begin("holocubic", "aio");
     }

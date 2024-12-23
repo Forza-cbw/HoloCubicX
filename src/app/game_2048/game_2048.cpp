@@ -5,36 +5,15 @@
 #include "sys/app_controller.h"
 #include "gui_lock.h"
 
-
-void taskOne(void *parameter)
-{
-    while (1)
-    {
-        // 心跳任务
-        //  lv_tick_inc(5); // todo
-        delay(5);
-    }
-}
-
-// 自动刷新屏幕
-void taskTwo(void *parameter)
-{
-    while (1)
-    {
-        LVGL_OPERATE_LOCK(lv_task_handler();) // 阻塞
-        vTaskDelay(1000.0 / 60 / portTICK_PERIOD_MS);
-    }
-}
-
 GAME2048 game;
 
 struct Game2048AppRunData
 {
 //    int Normal = 0;       // 记录移动的方向
-    BaseType_t xReturned_task_one = pdFALSE;
-    TaskHandle_t xHandle_task_one = NULL;
-    BaseType_t xReturned_task_two = pdFALSE;
-    TaskHandle_t xHandle_task_two = NULL;
+//    BaseType_t xReturned_task_one = pdFALSE;
+//    TaskHandle_t xHandle_task_one = NULL;
+//    BaseType_t xReturned_task_two = pdFALSE;
+//    TaskHandle_t xHandle_task_two = NULL;
 };
 
 static Game2048AppRunData *run_data = NULL;
@@ -48,22 +27,6 @@ static int game_2048_init(AppController *sys)
     // 初始化运行时参数
     run_data = (Game2048AppRunData *)calloc(1, sizeof(Game2048AppRunData));
     game.init();
-
-    // run_data->xReturned_task_one = xTaskCreate(
-    //     taskOne,                      /*任务函数*/
-    //     "TaskOne",                    /*带任务名称的字符串*/
-    //     10000,                        /*堆栈大小，单位为字节*/
-    //     NULL,                         /*作为任务输入传递的参数*/
-    //     1,                            /*任务的优先级*/
-    //     &run_data->xHandle_task_one); /*任务句柄*/
-
-    run_data->xReturned_task_two = xTaskCreate(
-        taskTwo,                      /*任务函数*/
-        "TaskTwo",                    /*带任务名称的字符串*/
-        8 * 1024,                     /*堆栈大小，单位为字节*/
-        NULL,                         /*作为任务输入传递的参数*/
-        1,                            /*任务的优先级*/
-        &run_data->xHandle_task_two); /*任务句柄*/
 
     // 刷新棋盘显示
     int new1 = game.addRandom();
@@ -122,17 +85,15 @@ static void game_2048_process(AppController *sys,
 
 static int game_2048_exit_callback(void *param)
 {
-    // 查杀任务
-    if (pdPASS == run_data->xReturned_task_one)
-    {
-        vTaskDelete(run_data->xHandle_task_one);
-    }
-    if (pdPASS == run_data->xReturned_task_two)
-    {
-        vTaskDelete(run_data->xHandle_task_two);
-    }
-
-//    xSemaphoreGive(lvgl_mutex);
+//    // 查杀任务
+//    if (pdPASS == run_data->xReturned_task_one)
+//    {
+//        vTaskDelete(run_data->xHandle_task_one);
+//    }
+//    if (pdPASS == run_data->xReturned_task_two)
+//    {
+//        vTaskDelete(run_data->xHandle_task_two);
+//    }
 
     game_2048_gui_del();
 

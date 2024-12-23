@@ -45,7 +45,7 @@ public:
     AppController(const char *name = SELF_SYS_NAME);
     ~AppController();
     void init(void);
-    void Display(void); // 显示接口
+
     int app_auto_start();
     // 将APP注册到app_controller中
     int app_install(APP_OBJ *app,

@@ -90,7 +90,7 @@ static void LHLXW_process(AppController *sys,const ImuAction *action){
 static int LHLXW_exit_callback(void *param)
 {
     log_d("LHLXW_exit_callback  out!");
-    heartbeat__gui_del();
+    heartbeat_gui_del();
     free(lhlxw_run);
 
     log_d("LHLXW_exit_callback  out!");

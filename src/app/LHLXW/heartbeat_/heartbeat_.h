@@ -3,6 +3,6 @@
 #include "lvgl.h"
 void heartbeat_process(lv_obj_t *ym);
 void heartbeat_init(void);
-void heartbeat__gui_del(void);
+void heartbeat_gui_del(void);
 
 #endif

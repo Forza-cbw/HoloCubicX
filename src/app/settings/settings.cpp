@@ -4,6 +4,7 @@
 #include "sys/app_controller.h"
 #include "common.h"
 #include "message.h"
+#include "gui_lock.h"
 
 #define RECV_BUF_LEN 128
 
@@ -149,9 +150,9 @@ int analysis_uart_data(int data_len, uint8_t *data)
 static int settings_init(AppController *sys)
 {
     // 初始化运行时的参数
-    settings_gui_init();
+    LVGL_OPERATE_LOCK(settings_gui_init();)
 
-    display_settings(AIO_VERSION, "v 2.3.0", LV_SCR_LOAD_ANIM_NONE);
+    LVGL_OPERATE_LOCK(display_settings(AIO_VERSION, "v 2.3.0", LV_SCR_LOAD_ANIM_NONE);)
 
     // 初始化运行时参数
     run_data = (SettingsAppRunData *)calloc(1, sizeof(SettingsAppRunData));
@@ -196,7 +197,7 @@ static void settings_process(AppController *sys,
 
 static int settings_exit_callback(void *param)
 {
-    settings_gui_del();
+    LVGL_OPERATE_LOCK(settings_gui_del();)
 
     // 释放运行数据
     if (NULL != run_data)

@@ -4,6 +4,7 @@
 #include "common.h"
 #include "interface.h"
 #include "Arduino.h"
+#include "gui_lock.h"
 
 const char *app_event_type_info[] = {"APP_MESSAGE_WIFI_STA", "APP_MESSAGE_WIFI_ALIVE",
                                      "APP_MESSAGE_WIFI_AP", "APP_MESSAGE_WIFI_DISABLE",
@@ -61,18 +62,9 @@ void AppController::init(void)
     appList[0]->app_image = &app_loading;
     appList[0]->app_name = "Loading...";
     appTypeList[0] = APP_TYPE_REAL_TIME;
-    app_control_display_scr(appList[cur_app_index]->app_image,
+    LVGL_OPERATE_LOCK(app_control_display_scr(appList[cur_app_index]->app_image,
                             appList[cur_app_index]->app_name,
-                            LV_SCR_LOAD_ANIM_NONE, true);
-    // Display();
-}
-
-void AppController::Display()
-{
-    // appList[0].app_image = &app_loading;
-    app_control_display_scr(appList[cur_app_index]->app_image,
-                            appList[cur_app_index]->app_name,
-                            LV_SCR_LOAD_ANIM_NONE, true);
+                            LV_SCR_LOAD_ANIM_NONE, true);)
 }
 
 AppController::~AppController()
@@ -173,18 +165,14 @@ int AppController::main_process(ImuAction *act_info)
         // 如果不是甩动，则切换菜单显示的图标
         if (ACTIVE_TYPE::DOWN_MORE != act_info->active) // && UNKNOWN != act_info->active
         {
-            app_control_display_scr(appList[cur_app_index]->app_image,
+            LVGL_OPERATE_LOCK(app_control_display_scr(appList[cur_app_index]->app_image,
                                     appList[cur_app_index]->app_name,
-                                    anim_type, false);
+                                    anim_type, false);)
             vTaskDelay(200 / portTICK_PERIOD_MS);
         }
     }
     else
     {
-//        app_control_display_scr(appList[cur_app_index]->app_image,
-//                                appList[cur_app_index]->app_name,
-//                                LV_SCR_LOAD_ANIM_NONE, false);
-
         // 运行APP主进程一次（主进程中不可以无限循环，主循环在HoloCubic_AIO.cpp中）
         (*(appList[cur_app_index]->main_process))(this, act_info);
     }
@@ -403,9 +391,9 @@ void AppController::app_exit()
         // 执行APP退出回调
         (*(appList[cur_app_index]->exit_callback))(NULL);
     }
-    app_control_display_scr(appList[cur_app_index]->app_image,
+    LVGL_OPERATE_LOCK(app_control_display_scr(appList[cur_app_index]->app_image,
                             appList[cur_app_index]->app_name,
-                            LV_SCR_LOAD_ANIM_NONE, true);
+                            LV_SCR_LOAD_ANIM_NONE, true);)
 
     // 恢复RGB灯  HSV色彩模式
     RgbConfig *cfg = &rgb_cfg;

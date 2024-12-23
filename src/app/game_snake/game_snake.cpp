@@ -14,41 +14,20 @@ struct SnakeAppRunData
 {
     unsigned int score;
     int gameStatus;
-    BaseType_t xReturned_task_run = pdFALSE;
-    TaskHandle_t xHandle_task_run = NULL;
 };
 
 static SnakeAppRunData *run_data = NULL;
-
-void taskRun(void *parameter)
-{
-    while (1)
-    {
-        // LVGL任务主函数，处理所有的LVGL任务，包括绘制界面，处理用户输入等。
-        LVGL_OPERATE_TRY_LOCK(lv_task_handler();)
-        vTaskDelay(5 / portTICK_PERIOD_MS);
-    }
-    Serial.println("Ending lv_task_handler");
-    vTaskDelete(NULL);
-}
 
 static int game_snake_init(AppController *sys)
 {
     // 随机数种子
     randomSeed(analogRead(A0));
     // 初始化运行时的参数
-    game_snake_gui_init();
+    LVGL_OPERATE_LOCK(game_snake_gui_init();)
     // 初始化运行时参数
     run_data = (SnakeAppRunData *)calloc(1, sizeof(SnakeAppRunData));
     run_data->score = 0;
     run_data->gameStatus = 0;
-    run_data->xReturned_task_run = xTaskCreate(
-        taskRun,                      /*任务函数*/
-        "taskRun",                    /*任务名称*/
-        8 * 1024,                     /*堆栈大小，单位为字节*/
-        NULL,                         /*参数*/
-        1,                            /*优先级*/
-        &run_data->xHandle_task_run); /*任务句柄*/
 
     return 0;
 }
@@ -80,7 +59,7 @@ static void game_snake_process(AppController *sys, const ImuAction *act_info)
         update_driection(DIR_DOWN);
     }
 
-    if (run_data->gameStatus == 0 && run_data->xReturned_task_run == pdPASS)
+    if (run_data->gameStatus == 0)
     {
         LVGL_OPERATE_LOCK(display_snake(run_data->gameStatus, LV_SCR_LOAD_ANIM_NONE););
     }
@@ -91,17 +70,8 @@ static void game_snake_process(AppController *sys, const ImuAction *act_info)
 
 static int game_snake_exit_callback(void *param)
 {
-    // 查杀任务
-    if (run_data->xReturned_task_run == pdPASS)
-    {
-        vTaskDelete(run_data->xHandle_task_run);
-    }
-
-    // 释放lvgl_mutex信号量
-    xSemaphoreGive(lvgl_mutex);
-
     // 释放页面资源
-    game_snake_gui_del();
+    LVGL_OPERATE_LOCK(game_snake_gui_del();)
 
     // 释放事件资源
     if (NULL != run_data)

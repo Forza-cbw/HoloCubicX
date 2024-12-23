@@ -36,6 +36,8 @@ void Display::init(uint8_t rotation, uint8_t backLight)
     tft->writecommand(ST7789_DISPON); // Display on
     // tft->fillScreen(BLACK);
 
+    setBackLight(0); // 设置亮度最低，防止显示开机花屏
+
     // 尝试读取屏幕数据作为屏幕检测的依旧
     // uint8_t ret = tft->readcommand8(0x01, TFT_MADCTL);
     // log_if("TFT read -> %u\r\n", ret);
@@ -44,7 +46,7 @@ void Display::init(uint8_t rotation, uint8_t backLight)
     // 正常方向需要设置为0 如果加上分光棱镜需要镜像改为4 如果是侧显示的需要设置为5
     tft->setRotation(rotation); /* mirror 修改反转，如果加上分光棱镜需要改为4镜像*/
 
-    setBackLight(backLight / 100.0); // 设置亮度 todo 无效的
+    setBackLight(backLight / 100.0); // 设置亮度
 
     lv_disp_draw_buf_init(&disp_buf, buf, NULL, SCREEN_HOR_RES * LV_HOR_RES_MAX_LEN);
 

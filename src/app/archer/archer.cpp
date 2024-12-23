@@ -5,6 +5,7 @@
 #include "common.h"
 #include "network.h"
 #include <PubSubClient.h>
+#include "gui_lock.h"
 
 #define DEFALUT_MQTT_IP "120.79.216.105"
 #define DEFALUT_MQTT_IP_CLIMBL "climb.dynv6.net"
@@ -229,7 +230,7 @@ void ArcherAppForeverData::mqtt_reconnect()
 
 static int archer_init(AppController *sys)
 {
-    archer_gui_init();
+    LVGL_OPERATE_LOCK(archer_gui_init();)
     // 初始化运行时参数
     run_data = (HeartbeatAppRunData *)calloc(1, sizeof(HeartbeatAppRunData));
     run_data->send_cnt = 0;
@@ -324,16 +325,16 @@ static void archer_process(AppController *sys,
     }
 
     // 程序需要时可以适当加延时
-    display_archer();
-    archer_set_send_recv_cnt_label(run_data->send_cnt, run_data->recv_cnt);
-    display_archer_img();
+    LVGL_OPERATE_LOCK(display_archer();)
+    LVGL_OPERATE_LOCK(archer_set_send_recv_cnt_label(run_data->send_cnt, run_data->recv_cnt);)
+    LVGL_OPERATE_LOCK(display_archer_img();)
     delay(30);
 }
 
 static int archer_exit_callback(void *param)
 {
     // 释放资源
-    archer_gui_del();
+    LVGL_OPERATE_LOCK(archer_gui_del();)
 
     // 释放运行数据
     if (NULL != run_data)

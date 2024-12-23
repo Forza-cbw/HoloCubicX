@@ -6,7 +6,7 @@
 #include "network.h"
 #include "common.h"
 #include "ArduinoJson.h"
-
+#include "gui_lock.h"
 
 // 数据解析表 - 前导字符串
 static const char *rs_data_header[] = {
@@ -188,7 +188,7 @@ static void get_pc_resource_data(void)
 static int pc_resource_init(AppController *sys)
 {
     tft->setSwapBytes(true);
-    display_pc_resource_gui_init();
+    LVGL_OPERATE_LOCK(display_pc_resource_gui_init();)
     // 获取配置信息
     read_config(&cfg_data);
 
@@ -200,7 +200,7 @@ static int pc_resource_init(AppController *sys)
     run_data->host = cfg_data.pc_ipaddr.c_str();
     run_data->client = new WiFiClient();
 
-    display_pc_resource(run_data->rs_data);
+    LVGL_OPERATE_LOCK(display_pc_resource(run_data->rs_data);)
 
     return 0;
 }
@@ -232,7 +232,7 @@ static void pc_resource_process(AppController *sys, const ImuAction *act_info)
  */
 static int pc_resource_exit_callback(void *param)
 {
-    pc_resource_gui_release();
+    LVGL_OPERATE_LOCK(pc_resource_gui_release();)
 
     if (1 == run_data->client->connected()) // 服务器已连接
         run_data->client->stop();
@@ -268,7 +268,7 @@ static void pc_resource_message_handle(const char *from, const char *to,
             log_i("pc_resource update data.\n");
 
             get_pc_resource_data();
-            display_pc_resource(run_data->rs_data);
+            LVGL_OPERATE_LOCK(display_pc_resource(run_data->rs_data);)
         };
         break;
         default:

@@ -3,6 +3,7 @@
 #include "app/app_name.h"
 #include "sys/app_controller.h"
 #include "common.h"
+#include "gui_lock.h"
 
 // Include the jpeg decoder library
 #include <TJpg_Decoder.h>
@@ -102,7 +103,7 @@ static File_Info *get_next_file(File_Info *p_cur_file, int direction)
 
 static int picture_init(AppController *sys)
 {
-    photo_gui_init();
+    LVGL_OPERATE_LOCK(photo_gui_init();)
     // 获取配置信息
     read_config(&cfg_data);
     // 初始化运行时参数
@@ -187,7 +188,7 @@ static void picture_process(AppController *sys,
         else if (NULL != strstr(file_name, ".bin") || NULL != strstr(file_name, ".BIN"))
         {
             // 使用LVGL的bin格式的图片
-            display_photo(file_name, anim_type);
+            LVGL_OPERATE_LOCK(display_photo(file_name, anim_type);)
         }
         run_data->refreshFlag = false;
         // 重置更新的时间标记
@@ -198,7 +199,7 @@ static void picture_process(AppController *sys,
 
 static int picture_exit_callback(void *param)
 {
-    photo_gui_del();
+    LVGL_OPERATE_LOCK(photo_gui_del();)
     // 释放文件名链表
     release_file_info(run_data->image_file);
     // 恢复此前的驱动参数

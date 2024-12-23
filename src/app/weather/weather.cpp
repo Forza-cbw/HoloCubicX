@@ -171,8 +171,8 @@ static void updateTimeRTC(long long timestamp)
     run_data->screenTime = t;
 }
 
-// 自动刷新缓冲区和屏幕
-static void refreshScreen(void *parameter)
+// 自动刷新缓冲区
+static void weather_refreshBuf(void *parameter)
 {
     while (1)
     {
@@ -180,7 +180,7 @@ static void refreshScreen(void *parameter)
         LVGL_OPERATE_LOCK(render_weather(run_data->wea);)
         LVGL_OPERATE_LOCK(render_time(run_data->screenTime);)
         LVGL_OPERATE_LOCK(render_man();)
-        LVGL_OPERATE_LOCK(lv_task_handler();)
+//        LVGL_OPERATE_LOCK(lv_task_handler();)
         vTaskDelay(1000.0 / 60 / portTICK_PERIOD_MS);
     }
 }
@@ -189,8 +189,8 @@ static void refreshScreen(void *parameter)
 static int weather_init(AppController *sys)
 {
     tft->setSwapBytes(true);
-    weather_gui_init();
-    display_weather_init();
+    LVGL_OPERATE_LOCK(weather_gui_init();)
+    LVGL_OPERATE_LOCK(display_weather_init();)
     // 获取配置信息
     read_config(&cfg_data);
 
@@ -208,8 +208,8 @@ static int weather_init(AppController *sys)
 
     // 后台异步渲染
     run_data->xReturned_task_refresh = xTaskCreate(
-            refreshScreen,                 /*任务函数*/
-            "refreshScreen",                  /*带任务名称的字符串*/
+            weather_refreshBuf,                 /*任务函数*/
+            "weather_refreshBuf",                  /*带任务名称的字符串*/
             8 * 1024,                     /*堆栈大小，单位为字节*/
             NULL,                         /*作为任务输入传递的参数*/
             1,                            /*任务的优先级*/
@@ -260,7 +260,7 @@ static void weather_process(AppController *sys,
 
 static int weather_exit_callback(void *param)
 {
-    weather_gui_del();
+    LVGL_OPERATE_LOCK(weather_gui_del();)
 
     // 查杀异步任务
     if (pdPASS == run_data->xReturned_task_refresh)

@@ -4,6 +4,7 @@
 #include "sys/app_controller.h"
 #include "common.h"
 #include "ESP32Time.h"
+#include "gui_lock.h"
 
 #define ON 1
 #define OFF 0
@@ -41,7 +42,7 @@ static TomatoAppForeverData forever_data;
 static int tomato_init(AppController *sys)
 {
     // 初始化运行时的参数
-    tomato_gui_init();
+    LVGL_OPERATE_LOCK(tomato_gui_init();)
     // 初始化运行时参数
     run_data = (TomatoAppRunData *)calloc(1, sizeof(TomatoAppRunData));
     run_data->time_start = millis();
@@ -318,13 +319,13 @@ static void tomato_process(AppController *sys, const ImuAction *act_info)
         run_data->t.minute = run_data->time_ms / 60 / 1000;
     }
     // Serial.print(run_data->rgb_fast);
-    display_tomato(run_data->t, run_data->time_mode);
+    LVGL_OPERATE_LOCK(display_tomato(run_data->t, run_data->time_mode);)
     delay(100);
 }
 
 static int tomato_exit_callback(void *param)
 {
-    tomato_gui_del();
+    LVGL_OPERATE_LOCK(tomato_gui_del();)
     rgb_reset();
     if (run_data != NULL)
     {

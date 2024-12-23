@@ -3,7 +3,7 @@
 #include "app/app_name.h"
 #include "sys/app_controller.h"
 #include "common.h"
-
+#include "gui_lock.h"
 
 // 动态数据，APP的生命周期结束也需要释放它
 struct ExampleAppRunData
@@ -31,7 +31,7 @@ static ExampleAppForeverData forever_data;
 static int example_init(AppController *sys)
 {
     // 初始化运行时的参数
-    example_gui_init();
+    LVGL_OPERATE_LOCK(example_gui_init();)
     // 初始化运行时参数
     run_data = (ExampleAppRunData *)calloc(1, sizeof(ExampleAppRunData));
     run_data->val1 = 0;

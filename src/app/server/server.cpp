@@ -5,6 +5,7 @@
 #include "app/app_conf.h"
 #include "network.h"
 #include "common.h"
+#include "gui_lock.h"
 
 #define SERVER_REFLUSH_INTERVAL 5000UL // 配置界面重新刷新时间(5s)
 #define DNS_PORT 53                    // DNS端口
@@ -94,7 +95,7 @@ void stop_web_config()
 
 static int server_init(AppController *sys)
 {
-    server_gui_init();
+    LVGL_OPERATE_LOCK(server_gui_init();)
     // 初始化运行时参数
     run_data = (ServerAppRunData *)malloc(sizeof(ServerAppRunData));
     run_data->web_start = 0;
@@ -119,12 +120,12 @@ static void server_process(AppController *sys,
     if (0 == run_data->web_start && 0 == run_data->req_sent)
     {
         // 预显示
-        display_setting(
+        LVGL_OPERATE_LOCK(display_setting(
             "WebServer Start",
             "Domain: holocubic",
             "Wait...", "Wait...",
             // "", "",
-            LV_SCR_LOAD_ANIM_NONE);
+            LV_SCR_LOAD_ANIM_NONE);)
 
         sys->send_to(SERVER_APP_NAME, WIFI_SYS_NAME,
                      APP_MESSAGE_WIFI_STA, NULL, NULL);
@@ -143,12 +144,12 @@ static void server_process(AppController *sys,
             sys->send_to(SERVER_APP_NAME, WIFI_SYS_NAME,
                          APP_MESSAGE_WIFI_ALIVE, NULL, NULL);
 
-            display_setting(
+            LVGL_OPERATE_LOCK(display_setting(
                 "WebServer Start",
                 "Domain: holocubic",
                 WiFi.localIP().toString().c_str(),
                 WiFi.softAPIP().toString().c_str(),
-                LV_SCR_LOAD_ANIM_NONE);
+                LV_SCR_LOAD_ANIM_NONE);)
         }
     }
 }
@@ -159,7 +160,7 @@ static int server_exit_callback(void *param)
     run_data->sys->send_to(SERVER_APP_NAME, WIFI_SYS_NAME,
                            APP_MESSAGE_WIFI_AP_CLOSE, NULL, NULL);
 
-    setting_gui_del();
+    LVGL_OPERATE_LOCK(setting_gui_del();)
     // 释放运行数据
     if (NULL != run_data)
     {
@@ -184,12 +185,12 @@ static void server_message_handle(const char *from, const char *to,
         case APP_MESSAGE_WIFI_AP:
         {
             log_i("APP_MESSAGE_WIFI_AP enable");
-            display_setting(
+            LVGL_OPERATE_LOCK(display_setting(
                 "WebServer Start",
                 "Domain: holocubic",
                 WiFi.localIP().toString().c_str(),
                 WiFi.softAPIP().toString().c_str(),
-                LV_SCR_LOAD_ANIM_NONE);
+                LV_SCR_LOAD_ANIM_NONE);)
             start_web_config();
             run_data->web_start = 1;
         }

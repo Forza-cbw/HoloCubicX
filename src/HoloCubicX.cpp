@@ -29,17 +29,17 @@ bool isCheckAction = false;
 ImuAction *act_info;           // 存放mpu6050返回的数据
 AppController *app_controller; // APP控制器
 
-TaskHandle_t handleTaskLvgl;
+TaskHandle_t handleTaskRefresh;
 
-void TaskLvglUpdate(void *parameter)
+void refreshScreen(void *parameter)
 {
-    // ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-    for (;;)
+    while (1)
     {
-        LVGL_OPERATE_TRY_LOCK(lv_timer_handler();)
-        vTaskDelay(5 / portTICK_PERIOD_MS);
+        LVGL_OPERATE_LOCK(lv_task_handler();) // 阻塞
+        vTaskDelay(1000.0 / 60 / portTICK_PERIOD_MS);
     }
 }
+
 
 TimerHandle_t xTimerAction = NULL;
 void actionCheckHandle(TimerHandle_t xTimer)
@@ -97,13 +97,13 @@ void setup()
     tf.init();
     lv_fs_fatfs_init();
 
-    // 某些app可能希望自己控制屏幕刷新（如2048），因此不能用后台刷新
-    // Update display in parallel thread.
-//     BaseType_t taskLvglReturned = xTaskCreate(TaskLvglUpdate,
-//         "LvglThread",8 * 1024,
-//         nullptr,TASK_LVGL_PRIORITY,&handleTaskLvgl);
-//     if (taskLvglReturned != pdPASS) Serial.println("taskLvglReturned != pdPASS");
-//     else Serial.println("taskLvglReturned == pdPASS");
+    // 自动刷新屏幕
+     BaseType_t taskRefreshReturned =
+             xTaskCreate(refreshScreen,
+                         "refreshScreen", 8 * 1024,
+                         nullptr, TASK_LVGL_PRIORITY, &handleTaskRefresh);
+     if (taskRefreshReturned != pdPASS) log_e("taskRefreshReturned != pdPASS");
+     else log_i("taskRefreshReturned == pdPASS");
 
 
 #if LV_USE_LOG
@@ -195,7 +195,7 @@ void setup()
 // ESP32-s3 双核
 void loop()
 {
-    screen.routine(); // 手动刷新屏幕
+//    screen.routine(); // 手动刷新屏幕
 
     if (isCheckAction)
     {
