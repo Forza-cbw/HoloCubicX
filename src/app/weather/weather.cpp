@@ -260,13 +260,13 @@ static void weather_process(AppController *sys,
 
 static int weather_exit_callback(void *param)
 {
-    LVGL_OPERATE_LOCK(weather_gui_del();)
-
-    // 查杀异步任务
+    // 先关闭refresh任务，再删除GUI
     if (pdPASS == run_data->xReturned_task_refresh)
     {
         vTaskDelete(run_data->xHandle_task_refresh);
     }
+
+    LVGL_OPERATE_LOCK(weather_gui_del();)
 
     // 释放运行数据
     if (NULL != run_data)
