@@ -32,7 +32,8 @@ AppController::AppController(const char *name)
     cur_app_index = 0;
     pre_app_index = 0;
     // appList = new APP_OBJ[APP_MAX_NUM];
-    m_saverEnable = false; // 屏保未触发
+    saverDisable = false;  // APP 未屏蔽屏保
+    m_saverActive = false; // 屏保未触发
     m_preWifiReqMillis = GET_SYS_MILLIS();
     m_preActionMillis = GET_SYS_MILLIS();
 
@@ -58,7 +59,7 @@ void AppController::init(void)
     // uint32_t freq = getXtalFrequencyMhz(); // In MHz
     log_i("CpuFrequencyMhz: %d",getCpuFrequencyMhz());
 
-    app_control_gui_init();
+    LVGL_OPERATE_LOCK(app_control_gui_init();)
     appList[0] = new APP_OBJ();
     appList[0]->app_image = &app_loading;
     appList[0]->app_name = "Loading...";
@@ -70,7 +71,7 @@ void AppController::init(void)
 
 AppController::~AppController()
 {
-    rgb_stop();
+    rgb_task_del();
 }
 
 int AppController::app_is_legal(const APP_OBJ *app_obj)
@@ -119,10 +120,11 @@ int AppController::main_process(ImuAction *act_info)
     if (ACTIVE_TYPE::UNKNOWN != act_info->active)
     {
         log_i("[Operate]\tact_info->active:%s ",active_type_info[act_info->active]);
-        if (m_saverEnable) {
+        if (m_saverActive) {
             log_i("Screen saver disable,\t set backLight: [%d]", sys_cfg.back_light);
             screen.setBackLight(sys_cfg.back_light / 100.0);
-            m_saverEnable = false; // 屏保关闭
+            rgb_resume();
+            m_saverActive = false; // 屏保关闭
         }
         m_preActionMillis = GET_SYS_MILLIS();
     }
@@ -135,17 +137,20 @@ int AppController::main_process(ImuAction *act_info)
     }
 
     // wifi自动关闭(在节能模式下)
-    if (0 == sys_cfg.power_mode && WIFI_MODE_NULL != WiFi.getMode() && doDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis, false))
+    if (0 == sys_cfg.power_mode && WIFI_MODE_NULL != WiFi.getMode()
+        && doDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis, false))
     {
         send_to(SELF_SYS_NAME, WIFI_SYS_NAME, APP_MESSAGE_WIFI_DISABLE, 0, NULL);
     }
 
     // 屏保触发
-    if (0 != sys_cfg.screensaver_interval && doDelayMillisTime(sys_cfg.screensaver_interval, &m_preActionMillis, false))
+    if (false == saverDisable &&  0 != sys_cfg.screensaver_interval
+        && doDelayMillisTime(sys_cfg.screensaver_interval, &m_preActionMillis, false))
     {
         log_i("Screen saver enable,\t set backLight: [%d]", sys_cfg.back_light2);
         screen.setBackLight(sys_cfg.back_light2 / 100.0);
-        m_saverEnable = true; // 屏保触发
+        rgb_pause();
+        m_saverActive = true; // 屏保触发
         m_preActionMillis = GET_SYS_MILLIS();
     }
 
@@ -412,14 +417,9 @@ void AppController::app_exit()
                             LV_SCR_LOAD_ANIM_NONE, true);)
 
     // 恢复RGB灯  HSV色彩模式
-    RgbConfig *cfg = &rgb_cfg;
-    RgbParam rgb_setting = {LED_MODE_HSV,
-                            cfg->min_value_0, cfg->min_value_1, cfg->min_value_2,
-                            cfg->max_value_0, cfg->max_value_1, cfg->max_value_2,
-                            cfg->step_0, cfg->step_1, cfg->step_2,
-                            cfg->min_brightness, cfg->max_brightness,
-                            cfg->brightness_step, cfg->time};
-    set_rgb_and_run(&rgb_setting);
+    rgb_task_run(&rgb_cfg);
+    // 恢复屏保
+    setSaverDisable(false);
 
     // 设置CPU主频
     if (1 == this->sys_cfg.power_mode)
@@ -431,4 +431,8 @@ void AppController::app_exit()
         setCpuFrequencyMhz(80);
     }
     log_i("CpuFrequencyMhz: %d",getCpuFrequencyMhz());
+}
+
+void AppController::setSaverDisable(boolean isDisable) {
+    this->saverDisable = isDisable;
 }

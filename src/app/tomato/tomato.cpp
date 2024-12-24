@@ -19,7 +19,6 @@ struct TomatoAppRunData
     RgbConfig rgb_cfg;        // 灯效
     bool rgb_fast;            // 使能
     bool rgb_fast_update;     // 标志位
-    RgbParam rgb_setting;     // rgb参数
     int time_mode;            // 倒计时种类
     uint8_t switch_count;     // 切换次数，用于消抖
     ACTIVE_TYPE lastAct;
@@ -70,12 +69,8 @@ static int tomato_init(AppController *sys)
     run_data->rgb_cfg.brightness_step = 0.003;
     run_data->rgb_cfg.time = 30;
 
-    run_data->rgb_setting = {LED_MODE_HSV,
-                             run_data->rgb_cfg.min_value_0, run_data->rgb_cfg.min_value_1, run_data->rgb_cfg.min_value_2,
-                             run_data->rgb_cfg.max_value_0, run_data->rgb_cfg.max_value_1, run_data->rgb_cfg.max_value_2,
-                             run_data->rgb_cfg.step_0, run_data->rgb_cfg.step_1, run_data->rgb_cfg.step_2,
-                             run_data->rgb_cfg.min_brightness, run_data->rgb_cfg.max_brightness,
-                             run_data->rgb_cfg.brightness_step, run_data->rgb_cfg.time};
+    rgb_task_run(&run_data->rgb_cfg);
+    sys->setSaverDisable(true); // 屏蔽屏保
     return 0;
 }
 static void time_switch()
@@ -180,42 +175,11 @@ static void rgb_ctrl()
             run_data->rgb_cfg.brightness_step = 0.001;
             run_data->rgb_cfg.time = 50;
         }
-        run_data->rgb_setting = {LED_MODE_HSV,
-                                 run_data->rgb_cfg.min_value_0, run_data->rgb_cfg.min_value_1, run_data->rgb_cfg.min_value_2,
-                                 run_data->rgb_cfg.max_value_0, run_data->rgb_cfg.max_value_1, run_data->rgb_cfg.max_value_2,
-                                 run_data->rgb_cfg.step_0, run_data->rgb_cfg.step_1, run_data->rgb_cfg.step_2,
-                                 run_data->rgb_cfg.min_brightness, run_data->rgb_cfg.max_brightness,
-                                 run_data->rgb_cfg.brightness_step, run_data->rgb_cfg.time};
-        set_rgb_and_run(&(run_data->rgb_setting));
+        rgb_task_run(&(run_data->rgb_cfg));
         run_data->rgb_fast_update = 1;
     }
 }
-static void rgb_reset()
-{
 
-    run_data->rgb_cfg.mode = 1;
-    run_data->rgb_cfg.min_value_0 = 1;
-    run_data->rgb_cfg.min_value_1 = 32;
-    run_data->rgb_cfg.min_value_2 = 255;
-    run_data->rgb_cfg.max_value_0 = 255;
-    run_data->rgb_cfg.max_value_1 = 255;
-    run_data->rgb_cfg.max_value_2 = 255;
-    //  Serial.println("set low");
-    run_data->rgb_cfg.step_0 = 1;
-    run_data->rgb_cfg.step_1 = 1;
-    run_data->rgb_cfg.step_2 = 1;
-    run_data->rgb_cfg.min_brightness = 0.15;
-    run_data->rgb_cfg.max_brightness = 0.25;
-    run_data->rgb_cfg.brightness_step = 0.001;
-    run_data->rgb_cfg.time = 50;
-    run_data->rgb_setting = {LED_MODE_HSV,
-                             run_data->rgb_cfg.min_value_0, run_data->rgb_cfg.min_value_1, run_data->rgb_cfg.min_value_2,
-                             run_data->rgb_cfg.max_value_0, run_data->rgb_cfg.max_value_1, run_data->rgb_cfg.max_value_2,
-                             run_data->rgb_cfg.step_0, run_data->rgb_cfg.step_1, run_data->rgb_cfg.step_2,
-                             run_data->rgb_cfg.min_brightness, run_data->rgb_cfg.max_brightness,
-                             run_data->rgb_cfg.brightness_step, run_data->rgb_cfg.time};
-    set_rgb_and_run(&(run_data->rgb_setting));
-}
 static void tomato_process(AppController *sys, const ImuAction *act_info)
 {
     if (!hadOpened)
@@ -325,8 +289,8 @@ static void tomato_process(AppController *sys, const ImuAction *act_info)
 
 static int tomato_exit_callback(void *param)
 {
+//    rgb_task_run(&run_data->sys->rgb_cfg); // 重设rgb // app_controller.app_exit()会恢复rgb和屏保
     LVGL_OPERATE_LOCK(tomato_gui_del();)
-    rgb_reset();
     if (run_data != NULL)
     {
         // 释放资源

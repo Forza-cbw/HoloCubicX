@@ -167,16 +167,8 @@ void setup()
              &app_controller->mpu_cfg); // 初始化比较耗时
 
     /*** 以此作为MPU6050初始化完成的标志 ***/
-    RgbConfig *rgb_cfg = &app_controller->rgb_cfg;
     // 初始化RGB灯 HSV色彩模式
-    RgbParam rgb_setting = {LED_MODE_HSV,
-                            rgb_cfg->min_value_0, rgb_cfg->min_value_1, rgb_cfg->min_value_2,
-                            rgb_cfg->max_value_0, rgb_cfg->max_value_1, rgb_cfg->max_value_2,
-                            rgb_cfg->step_0, rgb_cfg->step_1, rgb_cfg->step_2,
-                            rgb_cfg->min_brightness, rgb_cfg->max_brightness,
-                            rgb_cfg->brightness_step, rgb_cfg->time};
-    // 运行RGB任务
-    set_rgb_and_run(&rgb_setting, RUN_MODE_TASK);
+    rgb_task_run(&app_controller->rgb_cfg);
 
     // 先初始化一次动作数据 防空指针
     act_info = mpu.getAction();

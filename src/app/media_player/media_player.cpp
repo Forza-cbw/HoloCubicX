@@ -146,7 +146,7 @@ static int media_player_init(AppController *sys)
                             255, 255, 32,
                             1, 1, 1,
                             0.15, 0.20, 0.001, 50};
-    set_rgb_and_run(&rgb_setting);
+    rgb_task_run(&rgb_setting);
 
     // 获取配置信息
     read_config(&cfg_data);

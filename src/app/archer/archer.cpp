@@ -75,7 +75,7 @@ void ArcherAppForeverData::callback(char *topic, byte *payload, unsigned int len
     //                     1, 1, 1,
     //                     0.15, 0.25,
     //                     0.001, 8};
-    // set_rgb_and_run(&rgb_setting);
+    // rgb_task_run(&rgb_setting);
     run_data->recv_cnt++;
 }
 
@@ -284,7 +284,7 @@ static void archer_process(AppController *sys,
         //                     60, 60, 60,
         //                     0.15, 0.25,
         //                     0.001, 4};
-        // set_rgb_and_run(&rgb_setting);
+        // rgb_task_run(&rgb_setting);
     }
 
     if (run_data->recv_cnt > 0 && run_data->send_cnt > 0)

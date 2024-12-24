@@ -69,6 +69,8 @@ public:
     void write_config(SysMpuConfig *cfg);
     void read_config(RgbConfig *cfg);
     void write_config(RgbConfig *cfg);
+    // 屏保
+    void setSaverDisable(boolean saverDisable);
 
 private:
     APP_OBJ *getAppByName(const char *name);
@@ -81,7 +83,8 @@ private:
     APP_TYPE appTypeList[APP_MAX_NUM];  // 对应APP的运行类型
     // std::list<const APP_OBJ *> app_list; // APP注册位(为了C语言可移植，放弃使用链表)
     std::list<EVENT_OBJ> eventList;   // 用来储存事件
-    boolean m_saverEnable;            // 表示屏保状态 true开启 false关闭
+    boolean saverDisable;            // APP 屏蔽了屏保
+    boolean m_saverActive;            // 表示屏保状态 true正在生效 false不在生效
     unsigned long m_preWifiReqMillis; // 保存上一回请求的时间戳
     unsigned long m_preActionMillis; // 保存上一回动作的时间戳
     unsigned int app_num;

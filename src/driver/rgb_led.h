@@ -133,9 +133,11 @@ struct RgbRunStatus
     float current_brightness;
 };
 
-bool set_rgb_and_run(RgbParam *rgb_setting,
-                     LED_RUN_MODE mode = RUN_MODE_TASK);
-void rgb_stop(void);
-
+bool rgb_task_run(RgbParam *rgb_setting,
+                  LED_RUN_MODE mode = RUN_MODE_TASK);
+bool rgb_task_run(RgbConfig *rgb_cfg); // 用配置重新设置rgb
+void rgb_task_del(void);
+void rgb_pause(void);
+void rgb_resume(void);
 
 #endif

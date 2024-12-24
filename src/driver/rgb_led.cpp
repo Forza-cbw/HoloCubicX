@@ -63,7 +63,7 @@ static void rgbModeChange(void);
 static void onceChange(void);
 static void count_cur_brightness(void);
 
-bool set_rgb_and_run(RgbParam *rgb_setting, LED_RUN_MODE mode)
+bool rgb_task_run(RgbParam *rgb_setting, LED_RUN_MODE mode)
 {
     if (RUN_MODE_NONE <= mode)
     {
@@ -74,7 +74,7 @@ bool set_rgb_and_run(RgbParam *rgb_setting, LED_RUN_MODE mode)
     if (run_mode != mode)
     {
         // 运行模式发生变化
-        rgb_stop();
+        rgb_task_del();
         run_mode = mode;
     }
 
@@ -129,6 +129,18 @@ bool set_rgb_and_run(RgbParam *rgb_setting, LED_RUN_MODE mode)
         }
     }
     return true;
+}
+
+bool rgb_task_run(RgbConfig *rgb_cfg) {
+    // 初始化RGB灯 HSV色彩模式
+    RgbParam rgb_setting = {LED_MODE_HSV,
+                            rgb_cfg->min_value_0, rgb_cfg->min_value_1, rgb_cfg->min_value_2,
+                            rgb_cfg->max_value_0, rgb_cfg->max_value_1, rgb_cfg->max_value_2,
+                            rgb_cfg->step_0, rgb_cfg->step_1, rgb_cfg->step_2,
+                            rgb_cfg->min_brightness, rgb_cfg->max_brightness,
+                            rgb_cfg->brightness_step, rgb_cfg->time};
+    // 运行RGB任务
+    return rgb_task_run(&rgb_setting, RUN_MODE_TASK);
 }
 
 void led_timerHandler(TimerHandle_t xTimer)
@@ -285,19 +297,47 @@ static void count_cur_brightness(void)
     }
 }
 
-void rgb_stop(void)
+void rgb_task_del(void)
 {
-    if (RUN_MODE_TIMER == run_mode &&
-        NULL != xTimer_rgb)
+    if (RUN_MODE_TIMER == run_mode && NULL != xTimer_rgb)
     {
         xTimerStop(xTimer_rgb, 0);
         xTimer_rgb = NULL;
     }
-
-    if (RUN_MODE_TASK == run_mode &&
-        NULL != handleLed)
+    if (RUN_MODE_TASK == run_mode && NULL != handleLed)
     {
         vTaskDelete(handleLed);
         handleLed = NULL;
+    }
+    rgb.setBrightness(0);
+    run_mode = RUN_MODE_NONE;
+}
+
+void rgb_pause(void)
+{
+    // 暂停定时器
+    if (RUN_MODE_TIMER == run_mode && NULL != xTimer_rgb)
+    {
+        xTimerStop(xTimer_rgb, 0);  // 停止定时器
+    }
+    // 暂停任务
+    if (RUN_MODE_TASK == run_mode && NULL != handleLed)
+    {
+        vTaskSuspend(handleLed);  // 挂起任务
+    }
+    rgb.setBrightness(0);  // 设置背光为 0，暂停操作
+}
+
+void rgb_resume(void)
+{
+    // 恢复定时器
+    if (RUN_MODE_TIMER == run_mode && NULL != xTimer_rgb)
+    {
+        xTimerStart(xTimer_rgb, 0);  // 启动定时器
+    }
+    // 恢复任务
+    if (RUN_MODE_TASK == run_mode && NULL != handleLed)
+    {
+        vTaskResume(handleLed);  // 恢复任务
     }
 }
