@@ -148,7 +148,7 @@ void render_move(int i, lv_anim_exec_xcb_t direction, int dist)
 
     lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)direction);
     lv_anim_set_var(&a, img[i]);
-    lv_anim_set_time(&a, 400);
+    lv_anim_set_time(&a, 500);
     if (direction == (lv_anim_exec_xcb_t)lv_obj_set_x)
     {
         lv_anim_set_values(&a, lv_obj_get_x(img[i]), lv_obj_get_x(img[i]) + dist * 58);

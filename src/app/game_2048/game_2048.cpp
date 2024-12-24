@@ -21,7 +21,7 @@ static Game2048AppRunData *run_data = NULL;
 static int game_2048_init(AppController *sys)
 {
     // 初始化运行时的参数
-    game_2048_gui_init();
+    LVGL_OPERATE_LOCK(game_2048_gui_init();)
 
     randomSeed(analogRead(25));
     // 初始化运行时参数

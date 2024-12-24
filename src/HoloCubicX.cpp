@@ -36,7 +36,7 @@ void refreshScreen(void *parameter)
     while (1)
     {
         LVGL_OPERATE_LOCK(lv_task_handler();) // 阻塞
-        vTaskDelay(1000.0 / 120 / portTICK_PERIOD_MS);
+        vTaskDelay(1000.0 / 60 / portTICK_PERIOD_MS);
     }
 }
 
